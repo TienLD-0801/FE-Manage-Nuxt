@@ -20,6 +20,7 @@ jobs:
           name: Build generate source
           command: yarn generate
       - save_cache:
+          key: caching-source
           paths:
             - dist
   deploy_s3:
