@@ -27,8 +27,6 @@ jobs:
     working_directory: ~/frontend-manage-nuxt
     executor: aws-cli/default
     steps:
-      - attach_workspace:
-          at: .
       - aws-cli/setup:
           profile_name: default
       - run:
