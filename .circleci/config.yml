@@ -1,0 +1,65 @@
+version: 2.1
+orbs:
+  aws-cli: circleci/aws-cli@4.1.2
+jobs:
+  build_project:
+    working_directory: ~/frontend-manage-nuxt
+    docker:
+      - image: node:latest
+    steps:
+      - checkout
+      - run:
+          name: Installing yarn
+          command: yarn
+      - run:
+          name: Config environment variable
+          command: |
+             echo "LOCAL=$LOCAL" >>.env
+             echo "VITE_API_UR=$VITE_API_URL" >>.env
+      - run:
+          name: Build source
+          command: yarn generate
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+  deploy_s3:
+    executor: aws-cli/default
+    steps:
+      - attach_workspace:
+          at: .
+      - aws-cli/setup:
+          profile_name: default
+      - run:
+          name: Upload file to S3
+          command: |
+            aws s3 rm s3://frontend-nuxt --recursive
+            aws s3 sync ./dist/ s3://frontend-nuxt
+workflows:
+  frontend-manage-pipeline:
+    jobs:
+      - build_project:
+          context:
+            - frontend-env
+          filters:
+            branches:
+              only:
+                - deployment-circleci
+      - hold:
+          type: approval
+          requires:
+            - build_project
+          filters:
+              branches:
+                only:
+                  - deployment-circleci
+      - deploy_s3:
+          context: s3-context
+          requires:
+            - build_project
+            - hold
+          filters:
+            branches:
+              only:
+                - deployment-circleci
+
