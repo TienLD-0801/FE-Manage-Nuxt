@@ -17,7 +17,7 @@ jobs:
              echo "LOCAL=$LOCAL" >>.env
              echo "VITE_API_UR=$VITE_API_URL" >>.env
       - run:
-          name: Build source
+          name: Build generate source
           command: yarn generate
       - persist_to_workspace:
           root: .
