@@ -26,7 +26,7 @@ jobs:
   deploy_s3:
     executor: aws-cli/default
     steps:
-     - attach_workspace:
+      - attach_workspace:
           at: /frontend-manage-nuxt
       - aws-cli/setup:
           profile_name: default
