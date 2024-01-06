@@ -19,10 +19,9 @@ jobs:
       - run:
           name: Build generate source
           command: yarn generate
-      - persist_to_workspace:
-          root: .
+      - save_cache:
           paths:
-            - .
+            - dist
   deploy_s3:
     executor: aws-cli/default
     steps:
