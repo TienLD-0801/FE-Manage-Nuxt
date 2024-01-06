@@ -20,21 +20,21 @@ jobs:
           name: Build generate source
           command: yarn generate
       - persist_to_workspace:
-          root: ~/
+          root: .
           paths:
-            - "frontend-manage-nuxt"
+            - .
   deploy_s3:
     executor: aws-cli/default
     steps:
       - attach_workspace:
-          at: ~/
+          at: .
       - aws-cli/setup:
           profile_name: default
-      - run:
-          name: Upload file to S3
-          command: |
-            aws s3 rm s3://frontend-nuxt --recursive
-            aws s3 sync ./dist/ s3://frontend-nuxt
+      # - run:
+      #     name: Upload file to S3
+      #     command: |
+      #       aws s3 rm s3://frontend-nuxt --recursive
+      #       aws s3 sync ./dist/ s3://frontend-nuxt
 workflows:
   frontend-manage-pipeline:
     jobs:
