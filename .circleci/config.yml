@@ -24,6 +24,7 @@ jobs:
           paths:
             - dist
   deploy_s3:
+    working_directory: ~/frontend-manage-nuxt
     executor: aws-cli/default
     steps:
       - attach_workspace:
