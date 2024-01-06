@@ -1,0 +1,16 @@
+{
+  "extends": [
+    "plugin:vue/vue3-recommended",
+    "@vue/standard"
+  ],
+  "rules": {
+      "vue/multi-word-component-names": "off"
+  },
+  "parser": "vue-eslint-parser",
+  "parserOptions": {
+    "vueFeatures": {
+      "filter": true,
+      "interpolationAsNonHTML": false
+    }
+  }
+}
