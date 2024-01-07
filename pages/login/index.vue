@@ -1,9 +1,20 @@
 <template>
   <div class="login-page-container">
-    <LoginForm />
+    <LoginForm @handleLogin="handleLogin" />
   </div>
 </template>
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+const { login } = useFirebaseAuth();
+const userStore = useUserStore();
+
+const handleLogin = async (user: { email: string; password: string }) => {
+  try {
+    await login(user.email, user.password);
+  } catch (error) {
+    console.log(error);
+  }
+};
+</script>
 <style lang="scss" scoped>
 .login-page-container {
   display: flex;

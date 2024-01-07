@@ -2,63 +2,53 @@
   <div class="register-form-container">
     <v-card class="auth-form mx-auto" max-width="344" title="User Registration">
       <v-container>
-        <v-text-field
-          require
-          :rules="[() => !!first || 'This field is required']"
-          v-model="first"
-          color="primary"
-          label="First name"
-          variant="underlined"
-        ></v-text-field>
-
-        <v-text-field
-          require
-          :rules="[() => !!last || 'This field is required']"
-          v-model="last"
-          color="primary"
-          label="Last name"
-          variant="underlined"
-        ></v-text-field>
-
-        <v-text-field
-          require
-          :rules="[() => !!email || 'This field is required']"
-          v-model="email"
-          color="primary"
-          label="Email"
-          variant="underlined"
-        ></v-text-field>
-
-        <v-text-field
-          require
-          :rules="[() => !!password || 'This field is required']"
-          type="password"
-          v-model="password"
-          color="primary"
-          label="Password"
-          placeholder="Enter your password"
-          variant="underlined"
-        ></v-text-field>
-
-        <v-checkbox
-          v-model="terms"
-          color="secondary"
-          label="I agree to site terms and conditions"
-        ></v-checkbox>
+        <v-form>
+          <v-text-field
+            v-model="data.firstName"
+            require
+            color="primary"
+            label="First name"
+            variant="underlined"
+          ></v-text-field>
+          <v-text-field
+            v-model="data.lastName"
+            require
+            color="primary"
+            label="Last name"
+            variant="underlined"
+          ></v-text-field>
+          <v-text-field
+            v-model="data.email"
+            require
+            color="primary"
+            label="Email"
+            variant="underlined"
+          ></v-text-field>
+          <v-text-field
+            v-model="data.password"
+            require
+            autocomplete="on"
+            type="password"
+            color="primary"
+            label="Password"
+            placeholder="Enter your password"
+            variant="underlined"
+          ></v-text-field>
+          <v-checkbox
+            color="secondary"
+            label="I agree to site terms and conditions"
+          ></v-checkbox>
+        </v-form>
       </v-container>
 
       <v-container class="login-frame">
         <a href="#" @click="navigateTo('/login')">Available account? Login now</a>
       </v-container>
-
       <v-divider></v-divider>
-
       <v-card-actions>
         <v-spacer></v-spacer>
-
-        <v-btn @click="navigateTo('/login')" color="success">
+        <v-btn @click="$emit('handleRegister', data)" color="success">
           Complete Registration
-
           <v-icon icon="mdi-chevron-right" end></v-icon>
         </v-btn>
       </v-card-actions>
@@ -66,16 +56,13 @@
   </div>
 </template>
 
-<script>
-export default {
-  data: () => ({
-    first: null,
-    last: null,
-    email: null,
-    password: null,
-    terms: false,
-  }),
-};
+<script lang="ts" setup>
+const data = ref({
+  firstName: "",
+  lastName: "",
+  email: "",
+  password: "",
+});
 </script>
 
 <style lang="scss" scoped>
