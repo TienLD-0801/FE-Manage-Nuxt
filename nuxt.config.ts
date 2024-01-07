@@ -1,5 +1,12 @@
-// https://nuxt.com/docs/api/configuration/nuxt-config
+const path = require('path');
+
 export default defineNuxtConfig({
+  app: {
+    head: {
+      title: 'MyApp',
+    },
+    meta: [{ name: 'description', content: 'My amazing site.' }],
+  },
   components: [
     {
       path: '~/components',
@@ -11,10 +18,10 @@ export default defineNuxtConfig({
   },
   devtools: { enabled: false },
   css: [
-    "vuetify/lib/styles/main.sass",
-    "@mdi/font/css/materialdesignicons.min.css",
+    'vuetify/lib/styles/main.sass',
+    '@mdi/font/css/materialdesignicons.min.css',
   ],
   build: {
-    transpile: ["vuetify"],
-    },
+    transpile: ['vuetify'],
+  },
 });
