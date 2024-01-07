@@ -20,6 +20,7 @@
 <style lang="scss" scoped>
 .message-header-container {
   width: 100%;
+  height: 64px;
   background-color: white;
   border-bottom: 1px solid rgb(208, 208, 208);
 }
