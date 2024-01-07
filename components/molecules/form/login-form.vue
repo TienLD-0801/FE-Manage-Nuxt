@@ -24,7 +24,7 @@
       </v-container>
 
       <v-container class="register-frame">
-        <a href="/register">Not have account? Register now</a>
+        <a href="#" @click="navigateTo('/register')">Not have account? Register now</a>
       </v-container>
 
       <v-divider></v-divider>
@@ -32,7 +32,7 @@
       <v-card-actions>
         <v-spacer></v-spacer>
 
-        <v-btn href="/home" color="success">
+        <v-btn @click="navigateTo('/home')" color="success">
           Ready login
 
           <v-icon icon="mdi-chevron-right" end></v-icon>

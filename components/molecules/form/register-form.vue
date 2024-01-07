@@ -48,7 +48,7 @@
       </v-container>
 
       <v-container class="login-frame">
-        <a href="/login">Available account? Login now</a>
+        <a href="#" @click="navigateTo('/login')">Available account? Login now</a>
       </v-container>
 
       <v-divider></v-divider>
@@ -56,7 +56,7 @@
       <v-card-actions>
         <v-spacer></v-spacer>
 
-        <v-btn color="success">
+        <v-btn @click="navigateTo('/login')" color="success">
           Complete Registration
 
           <v-icon icon="mdi-chevron-right" end></v-icon>
