@@ -32,7 +32,7 @@
       <v-card-actions>
         <v-spacer></v-spacer>
 
-        <v-btn color="success">
+        <v-btn href="/home" color="success">
           Ready login
 
           <v-icon icon="mdi-chevron-right" end></v-icon>
