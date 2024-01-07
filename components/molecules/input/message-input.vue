@@ -1,5 +1,5 @@
 <template>
-  <v-form>
+  <v-form class="message-input-container">
     <v-container>
       <v-row>
         <v-col cols="12">
@@ -67,3 +67,10 @@ export default {
   },
 };
 </script>
+
+<style lang="scss" scoped>
+.message-input-container {
+  width: 100%;
+  border-top: 0.5px solid rgb(191, 191, 191);
+}
+</style>
