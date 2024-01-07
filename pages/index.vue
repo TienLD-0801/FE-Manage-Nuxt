@@ -1,13 +1,30 @@
 <template>
-  <div>
-    <v-btn @click="goToAdmin"> Login cá độ</v-btn>
-    <h1 class="text-3xl font-bold underline">Hello world!</h1>
+  <div class="container">
+    <div>Counter: {{ counter.number }}</div>
+    <button class="cong" @click="increment">+</button>
+    <button class="tru" @click="decrement">-</button>
   </div>
 </template>
 <script lang="ts" setup>
-const goToAdmin = async () => {
-  await navigateTo("/admin-login");
+const counter = useCounterStore();
+const increment = () => {
+  counter.increment();
+};
+const decrement = () => {
+  counter.decrement();
 };
 </script>
 
-<style></style>
+<style lang="scss" scoped>
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.cong {
+  background: red;
+}
+.tru {
+  background: blue;
+}
+</style>

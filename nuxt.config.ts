@@ -24,6 +24,14 @@ export default defineNuxtConfig({
   build: {
     transpile: ['vuetify'],
   },
+  modules: ['@pinia/nuxt', '@pinia-plugin-persistedstate/nuxt'],
+  piniaPersistedstate: {
+    cookieOptions: {
+      sameSite: 'strict',
+    },
+    storage: 'localStorage',
+  },
+  ssr: false,
   nitro: {
     output: {
       publicDir: path.join(__dirname, 'build'),
