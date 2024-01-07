@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@mdi/font": "^7.4.47",
+    "firebase": "^10.7.1",
     "sass": "^1.69.7",
     "vuetify": "^3.y4.9"
   }
