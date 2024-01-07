@@ -1,7 +1,7 @@
 <template>
   <v-card>
     <v-layout>
-      <v-navigation-drawer v-model="drawer" permanent @click="rail = false">
+      <v-navigation-drawer>
         <v-list-item
           prepend-avatar="https://randomuser.me/api/portraits/men/85.jpg"
           title="Dang Duy Bang"
@@ -35,15 +35,10 @@
     </v-layout>
   </v-card>
 </template>
-<script>
-export default {
-  data() {
-    return {
-      drawer: true,
-      rail: true,
-    };
-  },
-};
+<script lang="ts" setup>
+definePageMeta({
+  middleware: "home-guard",
+});
 </script>
 
 <style lang="scss" scoped>
