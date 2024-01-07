@@ -1,11 +1,10 @@
 const path = require('path');
-
 export default defineNuxtConfig({
   app: {
     head: {
       title: 'MyApp',
+      meta: [{ name: 'description', content: 'My amazing site.' }],
     },
-    meta: [{ name: 'description', content: 'My amazing site.' }],
   },
   components: [
     {
@@ -23,5 +22,10 @@ export default defineNuxtConfig({
   ],
   build: {
     transpile: ['vuetify'],
+  },
+  nitro: {
+    output: {
+      publicDir: path.join(__dirname, 'build'),
+    },
   },
 });

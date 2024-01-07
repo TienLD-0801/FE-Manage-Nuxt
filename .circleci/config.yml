@@ -17,7 +17,7 @@ jobs:
              echo "LOCAL=$LOCAL" >>.env
              echo "VITE_API_UR=$VITE_API_URL" >>.env
       - run:
-          name: Build source
+          name: Build generate source
           command: yarn generate
       - persist_to_workspace:
           root: .
@@ -34,7 +34,7 @@ jobs:
           name: Upload file to S3
           command: |
             aws s3 rm s3://frontend-nuxt --recursive
-            aws s3 sync ./dist/ s3://frontend-nuxt
+            aws s3 sync ./build/ s3://frontend-nuxt
 workflows:
   frontend-manage-pipeline:
     jobs:
