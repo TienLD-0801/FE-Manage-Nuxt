@@ -3,15 +3,16 @@ import { getAuth } from 'firebase/auth';
 import { defineNuxtPlugin } from 'nuxt/app';
 
 export default defineNuxtPlugin(() => {
+  const { $config } = useNuxtApp();
   const firebaseConfig = {
-    apiKey: process.env.API_KEY,
-    authDomain: process.env.AUTH_DOMAIN,
-    databaseURL: process.env.DATABASE_URL,
-    projectId: process.env.PROJECT_ID,
-    storageBucket: process.env.STORAGE_BUCKET,
-    messagingSenderId: process.env.MESSAGING_SENDER_ID,
-    appId: process.env.APP_ID,
-    measurementId: process.env.MEASUREMENT_ID,
+    apiKey: $config.public.apiKey,
+    authDomain: $config.public.authDomain,
+    databaseURL: $config.public.databaseURL,
+    projectId: $config.public.projectId,
+    storageBucket: $config.public.storageBucket,
+    messagingSenderId: $config.public.messagingSenderId,
+    appId: $config.public.appId,
+    measurementId: $config.public.measurementId,
   };
 
   const firebaseApp = initializeApp(firebaseConfig);
