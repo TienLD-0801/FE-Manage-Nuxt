@@ -14,11 +14,11 @@
         <template v-slot:extension>
           <div class="tabs-main">
             <v-tabs v-model="tabs" color="primary" grow>
-              <v-tab :value="1">
+              <v-tab :value="chats">
                 <v-icon>mdi-forum-outline</v-icon>
               </v-tab>
 
-              <v-tab :value="2">
+              <v-tab :value="settings">
                 <v-icon>mdi-cog-outline</v-icon>
               </v-tab>
             </v-tabs>
@@ -27,11 +27,10 @@
       </v-toolbar>
 
       <v-window v-model="tabs">
-        <v-window-item :key="1" :value="1">
+        <v-window-item id="1" :value="chats">
           <ChatList />
         </v-window-item>
-
-        <v-window-item :key="2" :value="2">
+        <v-window-item id="2" :value="settings">
           <SettingList />
         </v-window-item>
       </v-window>
@@ -39,14 +38,10 @@
   </v-navigation-drawer>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      tabs: null,
-    };
-  },
-};
+<script lang="ts" setup>
+const tabs = defineModel({ default: "chats" });
+const chats = ref("chats");
+const settings = ref("settings");
 </script>
 
 <style lang="scss" scoped>

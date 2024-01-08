@@ -1,9 +1,10 @@
+import { FirebaseError } from 'firebase/app';
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  type Auth,
+  signOut,
 } from 'firebase/auth';
-import { PATH_ROUTER } from '~/shared/constant/router';
+import { CustomError } from '~/shared/Error/error';
 
 export const useFirebaseAuth = () => {
   const { $auth } = useNuxtApp();
@@ -26,28 +27,41 @@ export const useFirebaseAuth = () => {
 
   const login = async (email: string, password: string) => {
     try {
-      const userCredential = await signInWithEmailAndPassword(
-        $auth,
-        email,
-        password,
-      );
+      const userCredential: UserCredentialCustom =
+        await signInWithEmailAndPassword($auth, email, password);
 
-      const user = userCredential.user;
-      userStore.updateUser({
-        id: user.uid,
-        userName: user.email!,
-        metaData: user.metadata,
-        avatar: user.photoURL,
-      });
-      navigateTo(PATH_ROUTER.home);
-      console.log('firebase', user);
+      userStore.updateUser(userCredential._tokenResponse!);
     } catch (error) {
-      console.log(error);
+      if (error instanceof FirebaseError) {
+        const customError = new CustomError(
+          error.code,
+          error.name,
+          error.message,
+        );
+        throw customError;
+      }
+    }
+  };
+
+  const logout = async () => {
+    try {
+      await signOut($auth);
+      userStore.updateUser(INIT_USER);
+    } catch (error) {
+      if (error instanceof FirebaseError) {
+        const customError = new CustomError(
+          error.code,
+          error.name,
+          error.message,
+        );
+        throw customError;
+      }
     }
   };
 
   return {
     register,
     login,
+    logout,
   };
 };

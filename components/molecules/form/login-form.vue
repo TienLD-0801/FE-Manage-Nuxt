@@ -1,23 +1,23 @@
 <template>
   <div class="login-form-container">
-    <v-card class="auth-form mx-auto" max-width="344" title="User Login">
+    <v-card class="auth-form mx-auto rounded-lg" max-width="380" title="User Login">
       <v-container>
         <v-container>
           <v-form>
             <v-text-field
+              v-model="data.email"
               require
               :rules="[() => !!data.email || 'This field is required']"
-              v-model="data.email"
               color="primary"
               label="Email"
               variant="underlined"
             ></v-text-field>
             <v-text-field
+              v-model="data.password"
               require
               :rules="[() => !!data.password || 'This field is required']"
               type="password"
               autocomplete="on"
-              v-model="data.password"
               color="primary"
               label="Password"
               placeholder="Enter your password"
@@ -32,7 +32,12 @@
       <v-divider></v-divider>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn @click="$emit('handleLogin', data)" color="success">
+        <v-btn
+          variant="tonal"
+          :disabled="data.email && data.password ? false : true"
+          @click="$emit('handleLogin', data)"
+          color="success"
+        >
           Ready login
           <v-icon icon="mdi-chevron-right" end></v-icon>
         </v-btn>

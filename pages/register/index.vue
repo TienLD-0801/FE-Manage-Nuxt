@@ -4,6 +4,10 @@
   </div>
 </template>
 <script lang="ts" setup>
+definePageMeta({
+  middleware: "auth-guard",
+});
+
 const { register } = useFirebaseAuth();
 
 const handleRegister = async (data: any) => {
