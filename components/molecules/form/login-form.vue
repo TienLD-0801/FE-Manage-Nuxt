@@ -27,7 +27,9 @@
         </v-container>
       </v-container>
       <v-container class="register-frame">
-        <a href="#" @click="navigateTo('/register')">Not have account? Register now</a>
+        <a href="#" @click.prevent="navigateTo(PATH_ROUTER.register)"
+          >Not have account? Register now</a
+        >
       </v-container>
       <v-divider></v-divider>
       <v-card-actions>
@@ -47,6 +49,8 @@
 </template>
 
 <script lang="ts" setup>
+import { PATH_ROUTER } from "~/shared/constant/router";
+
 const data = ref({
   email: "",
   password: "",

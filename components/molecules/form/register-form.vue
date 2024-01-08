@@ -42,7 +42,9 @@
       </v-container>
 
       <v-container class="login-frame">
-        <a href="#" @click="navigateTo('/login')">Available account? Login now</a>
+        <a href="#" @click.prevent="navigateTo(PATH_ROUTER.login)"
+          >Available account? Login now</a
+        >
       </v-container>
       <v-divider></v-divider>
       <v-card-actions>
@@ -57,6 +59,8 @@
 </template>
 
 <script lang="ts" setup>
+import { PATH_ROUTER } from "~/shared/constant/router";
+
 const data = ref({
   firstName: "",
   lastName: "",
