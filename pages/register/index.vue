@@ -1,4 +1,6 @@
 <template>
+  <Snackbar :model-value="Boolean(message)" :message="message" />
+  <Loading :is-loading="isLoading" />
   <div class="register-page-container">
     <RegisterForm @handleRegister="handleRegister" />
   </div>
@@ -8,14 +10,26 @@ definePageMeta({
   middleware: "auth-guard",
 });
 
+import { CustomError } from "~/shared/Error/error";
+import { PATH_ROUTER } from "~/shared/constant/router";
+
 const { register } = useFirebaseAuth();
+const isLoading = useState<boolean>("isLoading", () => false);
+const message = useState<string>("message", () => "");
 
 const handleRegister = async (data: any) => {
+  // reset value
+  message.value = "";
+  isLoading.value = true;
   try {
-    const status = await register(data.email, data.password);
-    console.log(status);
+    await register(data.email, data.password);
+    navigateTo(PATH_ROUTER.login);
   } catch (error) {
-    console.log(error);
+    if (error instanceof CustomError) {
+      message.value = error.code;
+    }
+  } finally {
+    isLoading.value = false;
   }
 };
 </script>

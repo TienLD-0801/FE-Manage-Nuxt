@@ -21,7 +21,6 @@ const handleLogin = async (user: { email: string; password: string }) => {
   message.value = "";
   isLoading.value = true;
   try {
-    isLoading.value = true;
     await login(user.email, user.password);
     navigateTo(PATH_ROUTER.home);
   } catch (error) {
