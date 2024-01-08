@@ -15,28 +15,21 @@ export interface UserCredentialCustom extends UserCredential {
   _tokenResponse?: TokenResponse;
 }
 
-export const INIT_USER: TokenResponse = {
-  displayName: '',
-  email: '',
-  expiresIn: '',
-  idToken: '',
-  kind: '',
-  localId: '',
-  refreshToken: '',
-  registered: false,
-};
+export const INIT_USER: TokenResponse | undefined = undefined;
 
 export const useUserStore = defineStore(
   'user',
   () => {
-    const user = ref<TokenResponse>(INIT_USER);
+    const user = ref<TokenResponse | undefined>(INIT_USER);
     const updateUser = (payload: TokenResponse) => {
-      user.value = {
-        ...payload,
-      };
+      user.value = payload;
     };
 
-    return { user, updateUser };
+    const clearUser = () => {
+      user.value = undefined;
+    };
+
+    return { user, updateUser, clearUser };
   },
   {
     persist: {
