@@ -2,10 +2,7 @@
   <v-card>
     <v-layout>
       <NavigatorDrawer />
-      <v-main class="body-chat">
-        <MessageHeader />
-        <MessageInput />
-      </v-main>
+      <BodyTab />
     </v-layout>
   </v-card>
 </template>
@@ -13,15 +10,10 @@
 definePageMeta({
   middleware: "home-guard",
 });
+const { $auth } = useNuxtApp();
+// setTimeout(() => {
+//   console.log(" $auth.currentUser;", $auth.currentUser);
+// }, 2000);
 </script>
 
-<style lang="scss" scoped>
-.body-chat {
-  width: calc(100vw - 360px);
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  margin-left: 100px;
-}
-</style>
+<style lang="scss" scoped></style>

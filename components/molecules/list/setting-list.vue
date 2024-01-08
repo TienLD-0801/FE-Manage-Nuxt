@@ -1,18 +1,21 @@
 <template>
   <v-list class="setting-list-container" density="compact" nav>
     <v-list-item
+      @click="navigatorTab.changeNavigatorTab('security')"
       prepend-icon="mdi-account-lock"
       title="Security"
       value="security"
       color="primary"
     ></v-list-item>
     <v-list-item
+      @click="navigatorTab.changeNavigatorTab('users')"
       prepend-icon="mdi-account-group-outline"
       title="Users"
       value="users"
       color="primary"
     ></v-list-item>
     <v-list-item
+      @click="navigatorTab.changeNavigatorTab('settings')"
       prepend-icon="mdi-cog-outline"
       title="Settings"
       value="settings"
@@ -38,13 +41,26 @@
           <v-card-actions>
             <v-spacer></v-spacer>
 
-            <v-btn text="Confirm" @click="navigateTo('./login')"></v-btn>
+            <v-btn text="Confirm" @click="handleLogout"></v-btn>
           </v-card-actions>
         </v-card>
       </template>
     </v-dialog>
   </v-list>
 </template>
+<script lang="ts" setup>
+import { PATH_ROUTER } from "~/shared/constant/router";
+const navigatorTab = useNavigatorTabStore();
+const { logout } = useFirebaseAuth();
+const handleLogout = async () => {
+  try {
+    await logout();
+    navigateTo(PATH_ROUTER.login);
+  } catch (error) {
+    console.log(error);
+  }
+};
+</script>
 
 <style lang="scss" scoped>
 .setting-list-container {

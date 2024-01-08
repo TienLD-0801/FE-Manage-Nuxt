@@ -1,5 +1,5 @@
-export const ROUTER_PATH = {
-  home: '/',
+export const PATH_ROUTER = {
+  home: '/home',
   login: '/login',
   register: '/register',
 };

@@ -1,9 +1,24 @@
 <template>
   <div class="register-page-container">
-    <RegisterForm />
+    <RegisterForm @handleRegister="handleRegister" />
   </div>
 </template>
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+definePageMeta({
+  middleware: "auth-guard",
+});
+
+const { register } = useFirebaseAuth();
+
+const handleRegister = async (data: any) => {
+  try {
+    const status = await register(data.email, data.password);
+    console.log(status);
+  } catch (error) {
+    console.log(error);
+  }
+};
+</script>
 <style lang="scss" scoped>
 .register-page-container {
   display: flex;
