@@ -41,7 +41,7 @@
           <v-card-actions>
             <v-spacer></v-spacer>
 
-            <v-btn text="Confirm" @click="handleLogout"></v-btn>
+            <v-btn text="Confirm" @click="$emit('handleLogout')"></v-btn>
           </v-card-actions>
         </v-card>
       </template>
@@ -49,17 +49,7 @@
   </v-list>
 </template>
 <script lang="ts" setup>
-import { PATH_ROUTER } from "~/shared/constant/router";
 const navigatorTab = useNavigatorTabStore();
-const { logout } = useFirebaseAuth();
-const handleLogout = async () => {
-  try {
-    await logout();
-    navigateTo(PATH_ROUTER.login);
-  } catch (error) {
-    console.log(error);
-  }
-};
 </script>
 
 <style lang="scss" scoped>

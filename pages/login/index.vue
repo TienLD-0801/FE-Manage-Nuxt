@@ -15,14 +15,18 @@ import { PATH_ROUTER } from "~/shared/constant/router";
 const { login } = useFirebaseAuth();
 const isLoading = useState<boolean>("isLoading", () => false);
 const message = useState<string>("message", () => "");
+const userStore = useUserStore();
 
 const handleLogin = async (user: { email: string; password: string }) => {
   // reset value
   message.value = "";
   isLoading.value = true;
   try {
-    await login(user.email, user.password);
-    navigateTo(PATH_ROUTER.home);
+    const userCredential = await login(user.email, user.password);
+    if (userCredential) {
+      userStore.updateUser(userCredential._tokenResponse!);
+      navigateTo(PATH_ROUTER.home);
+    }
   } catch (error) {
     if (error instanceof CustomError) {
       message.value = error.code;

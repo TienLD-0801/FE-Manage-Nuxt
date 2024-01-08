@@ -8,7 +8,6 @@ import { CustomError } from '~/shared/Error/error';
 
 export const useFirebaseAuth = () => {
   const { $auth } = useNuxtApp();
-  const userStore = useUserStore();
 
   const register = async (email: string, password: string) => {
     try {
@@ -17,20 +16,27 @@ export const useFirebaseAuth = () => {
         email,
         password,
       );
-      const user = userCredential.user;
-
-      console.log(user);
+      return userCredential;
     } catch (error) {
-      console.log(error);
+      if (error instanceof FirebaseError) {
+        const customError = new CustomError(
+          error.code,
+          error.name,
+          error.message,
+        );
+        throw customError;
+      }
     }
   };
 
-  const login = async (email: string, password: string) => {
+  const login = async (
+    email: string,
+    password: string,
+  ): Promise<UserCredentialCustom | undefined> => {
     try {
       const userCredential: UserCredentialCustom =
         await signInWithEmailAndPassword($auth, email, password);
-
-      userStore.updateUser(userCredential._tokenResponse!);
+      return userCredential;
     } catch (error) {
       if (error instanceof FirebaseError) {
         const customError = new CustomError(
@@ -46,7 +52,6 @@ export const useFirebaseAuth = () => {
   const logout = async () => {
     try {
       await signOut($auth);
-      userStore.updateUser(INIT_USER);
     } catch (error) {
       if (error instanceof FirebaseError) {
         const customError = new CustomError(

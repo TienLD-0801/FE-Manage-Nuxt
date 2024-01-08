@@ -31,7 +31,7 @@
           <ChatList />
         </v-window-item>
         <v-window-item id="2" :value="settings">
-          <SettingList />
+          <slot />
         </v-window-item>
       </v-window>
     </v-card>
