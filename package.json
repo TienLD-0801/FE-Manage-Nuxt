@@ -23,6 +23,7 @@
     "@pinia/nuxt": "^0.5.1",
     "firebase": "^10.7.1",
     "sass": "^1.69.7",
+    "vee-validate": "^4.12.4",
     "vuetify": "^3.y4.9"
   }
 }
