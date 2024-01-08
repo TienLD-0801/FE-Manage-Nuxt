@@ -9,3 +9,12 @@ body {
 .bg-grey-lighten-4 {
   height: fit-content !important;
 }
+
+.main-panel-container {
+  width: calc(100vw - 360px);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  margin: 20px 20px 0px 120px;
+}

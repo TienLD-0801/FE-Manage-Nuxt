@@ -5,7 +5,7 @@
       <NavigatorDrawer>
         <SettingList @handleLogout="handleLogout" />
       </NavigatorDrawer>
-      <BodyTab />
+      <MainTab />
     </v-layout>
   </v-card>
 </template>
