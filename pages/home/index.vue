@@ -5,14 +5,12 @@
 definePageMeta({
   middleware: "home-guard",
 });
-const { $db } = useNuxtApp();
-import { collection, addDoc, doc, getDoc } from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore";
 import MainLayout from "~/layouts/home/main-layout.vue";
-
-//const messageList =  $db.collection("messages").doc("users");
 const { $firebaseStore } = useNuxtApp();
 const profileStore = useProfileStore();
 const authStore = useAuthStore();
+const navigatorTabStore = useNavigatorTabStore();
 
 const getUserDatabase = async () => {
   const userList = await getDoc(doc($firebaseStore, "users", "user_system"));
@@ -25,6 +23,7 @@ const getUserDatabase = async () => {
 
 watchEffect(() => {
   getUserDatabase();
+  navigatorTabStore.changeNavigatorTab("default");
 });
 </script>
 

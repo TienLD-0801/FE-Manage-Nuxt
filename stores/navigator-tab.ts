@@ -1,4 +1,4 @@
-const INIT_NAVIGATOR_TAB = 'chat';
+const INIT_NAVIGATOR_TAB = 'default';
 
 export const useNavigatorTabStore = defineStore(
   'navigator-tab',

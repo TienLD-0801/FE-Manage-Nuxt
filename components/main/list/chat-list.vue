@@ -2,23 +2,22 @@
   <v-card class="chat-list-container mx-auto" max-width="450">
     <v-list class="chat-list" item-props lines="three">
       <v-list-item
-        v-for="(item, i) in items"
+        v-for="(item, i) in listChatUsers"
         :key="i"
         :value="item"
         class="chat-item"
         color="primary"
-        @click="handleClickItemUser(item)"
+        @click="handleClickItemUser(item.to)"
       >
         <div class="chat-frame">
-          <v-avatar class="message-avatar" :image="item.prependAvatar"></v-avatar>
+          <v-avatar class="message-avatar" :image="item.to.avatar"></v-avatar>
           <div class="message-content">
             <div class="message-label">
-              <h5 v-text="item.title" />
-              <span v-text="item.time" />
+              {{ `${item.to.firstName} ${item.to.lastName}` }}
+              <span v-text="'time'" />
             </div>
             <p class="message-text">
-              <span class="message-target" v-text="item.last" />
-              <span v-text="item.content" />
+              <span class="message-target" v-text="item.data" />
             </p>
           </div>
         </div>
@@ -27,61 +26,31 @@
   </v-card>
 </template>
 <script lang="ts" setup>
-const navigatorTab = useNavigatorTabStore();
-const profileStore = useProfileStore();
+import { doc, onSnapshot } from "firebase/firestore";
 
-const handleClickItemUser = (item: Object) => {
-  console.log("====================================");
-  console.log(item);
-  console.log("====================================");
+const navigatorTab = useNavigatorTabStore();
+const { $firebaseStore } = useNuxtApp();
+const { $state } = useProfileStore();
+const chatProfileStore = useChatProfileStore();
+const listChatUsers = ref<GroupMessageType[]>([]);
+
+const handleClickItemUser = (item: ProfileType) => {
   navigatorTab.changeNavigatorTab("chat");
-  //profileStore.updateProfile(item);
+  chatProfileStore.updateChatInfo(item);
 };
 
-const items = [
-  {
-    id: "1",
-    prependAvatar: "https://zpsocial-f51-org.zadn.vn/ec3f0d5e57deb980e0cf.jpg",
-    title: "Le Duy Tien",
-    last: "You — ",
-    time: "08:26 am",
-    content: `Cũng hơi lạ là, nó có trả ra acesssToken nhưng anh chấm tới thì ko nhắc`,
-    messageId: "",
-  },
-  {
-    id: "2",
-    prependAvatar:
-      "https://png.pngtree.com/background/20230613/original/pngtree-three-cheetahs-are-looking-at-the-camera-picture-image_3426473.jpg",
-    title: "Vo Tri",
-    last: "to Tien — ",
-    time: "08:30 am",
-    content: `Nằm bên hông coopmart á`,
-  },
-  {
-    id: "3",
-    prependAvatar: "https://appdata.chatwork.com/avatar/RMb5BZxB70.gif",
-    title: "Duong Van Khuong",
-    last: "",
-    time: "09:58 am",
-    content: "Anh có biết gì đâu",
-  },
-  {
-    id: "4",
-    prependAvatar: "https://zpsocial-f52-org.zadn.vn/00c9a7968c3a62643b2b.jpg",
-    title: "Nguyen Tran Phuong Tram",
-    last: "",
-    time: "14:10 am",
-    content: "App nó chỉnh chưa đều thông cảm, sức app có giới hạn",
-  },
-  {
-    id: "5",
-    prependAvatar: "https://appdata.chatwork.com/avatar/R76ZQoNB7r.rsz.jpg",
-    title: "Tran Chi Huu",
-    last: "You — ",
-    time: "17:39 am",
-    content: "Làm sao để mình lấy được accessToken trong store",
-  },
-];
+const getListChat = () => {
+  onSnapshot(doc($firebaseStore, "messages", "message_group"), (doc) => {
+    const { list_group } = doc.data()!;
+    listChatUsers.value = list_group.filter(
+      (group: GroupMessageType) => group.from.id === $state.profile?.id
+    );
+  });
+};
+
+watchEffect(() => {
+  getListChat();
+});
 </script>
 
 <style lang="scss" scoped>

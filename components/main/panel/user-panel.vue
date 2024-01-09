@@ -15,7 +15,11 @@
                 <v-avatar :image="item.avatar" />
               </template>
               <template v-slot:append>
-                <v-icon icon="mdi-account-plus-outline" color="success"></v-icon>
+                <v-icon
+                  @click="handleAddFriend(item)"
+                  icon="mdi-account-plus-outline"
+                  color="success"
+                ></v-icon>
               </template>
             </v-card>
           </v-col>
@@ -26,14 +30,25 @@
 </template>
 
 <script lang="ts" setup>
-import { doc, onSnapshot } from "firebase/firestore";
+import { arrayUnion, doc, onSnapshot, updateDoc } from "firebase/firestore";
 const { $firebaseStore } = useNuxtApp();
 const { $state } = useProfileStore();
 const users = ref<ProfileType[]>([]);
+
 const getUserList = async () => {
   onSnapshot(doc($firebaseStore, "users", "user_system"), (doc) => {
     const { list_user } = doc.data()!;
     users.value = list_user.filter((user: ProfileType) => user.id !== $state.profile?.id);
+  });
+};
+
+const handleAddFriend = async (item: ProfileType) => {
+  await updateDoc(doc($firebaseStore, "messages", "message_group"), {
+    list_group: arrayUnion({
+      from: $state.profile,
+      to: item,
+      data: [],
+    }),
   });
 };
 
