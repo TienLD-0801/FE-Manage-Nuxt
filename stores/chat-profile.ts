@@ -1,8 +1,8 @@
 export const useChatProfileStore = defineStore(
   'chat-profile',
   () => {
-    const chatProfile = ref<ProfileType>();
-    const updateChatInfo = (payload: ProfileType) => {
+    const chatProfile = ref<TProfile>();
+    const updateChatInfo = (payload: TProfile) => {
       chatProfile.value = payload;
     };
 

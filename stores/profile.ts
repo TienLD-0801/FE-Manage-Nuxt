@@ -1,8 +1,8 @@
 export const useProfileStore = defineStore(
   'profile',
   () => {
-    const profile = ref<ProfileType>();
-    const updateProfile = (payload: ProfileType) => {
+    const profile = ref<TProfile>();
+    const updateProfile = (payload: TProfile) => {
       profile.value = payload;
     };
 

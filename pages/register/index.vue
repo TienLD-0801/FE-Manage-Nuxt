@@ -12,22 +12,12 @@ definePageMeta({
 
 import { CustomError } from "~/shared/Error/error";
 import { PATH_ROUTER } from "~/shared/constant/router";
-import {
-  addDoc,
-  arrayUnion,
-  collection,
-  doc,
-  serverTimestamp,
-  setDoc,
-  updateDoc,
-} from "firebase/firestore";
 
 const { register, addUsersFirebaseStore } = useFirebaseAuth();
 const isLoading = useState<boolean>("isLoading", () => false);
 const message = useState<string>("message", () => "");
-const { $firebaseStore } = useNuxtApp();
 
-const handleRegister = async (data: ProfileType) => {
+const handleRegister = async (data: TProfile) => {
   // reset value
   message.value = "";
   isLoading.value = true;

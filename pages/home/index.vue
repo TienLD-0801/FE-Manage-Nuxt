@@ -15,8 +15,8 @@ const navigatorTabStore = useNavigatorTabStore();
 const getUserDatabase = async () => {
   const userList = await getDoc(doc($firebaseStore, "users", "user_system"));
   const { list_user } = userList.data()!;
-  const userDetail: ProfileType = list_user.find(
-    (user: ProfileType) => user.id === authStore.token?.localId
+  const userDetail: TProfile = list_user.find(
+    (user: TProfile) => user.id === authStore.token?.localId
   );
   profileStore.updateProfile(userDetail);
 };
