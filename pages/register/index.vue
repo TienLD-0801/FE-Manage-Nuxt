@@ -12,17 +12,37 @@ definePageMeta({
 
 import { CustomError } from "~/shared/Error/error";
 import { PATH_ROUTER } from "~/shared/constant/router";
+import {
+  addDoc,
+  arrayUnion,
+  collection,
+  doc,
+  serverTimestamp,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
 
-const { register } = useFirebaseAuth();
+const { register, addUsersFirebaseStore } = useFirebaseAuth();
 const isLoading = useState<boolean>("isLoading", () => false);
 const message = useState<string>("message", () => "");
+const { $firebaseStore } = useNuxtApp();
 
-const handleRegister = async (data: any) => {
+const handleRegister = async (data: ProfileType) => {
   // reset value
   message.value = "";
   isLoading.value = true;
   try {
-    await register(data.email, data.password);
+    const user = await register(data.email, data.password!);
+    const dataUser = {
+      id: user?.uid,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      email: data.email,
+      avatar:
+        "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png",
+      created_at: new Date().getTime(),
+    };
+    await addUsersFirebaseStore(dataUser);
     navigateTo(PATH_ROUTER.login);
   } catch (error) {
     if (error instanceof CustomError) {

@@ -1,11 +1,7 @@
 <template>
   <v-card color="grey-lighten-4" flat height="200px" rounded="0">
     <v-toolbar class="message-header-container" density="compact">
-      <v-list-item
-        prepend-avatar="https://zpsocial-f51-org.zadn.vn/ec3f0d5e57deb980e0cf.jpg"
-        title="Le Duy Tien"
-        nav
-      />
+      <v-list-item :prepend-avatar="avatar" :title="name" nav />
       <v-spacer></v-spacer>
       <v-btn icon>
         <v-icon>mdi-magnify</v-icon>
@@ -17,10 +13,18 @@
   </v-card>
 </template>
 
+<script lang="ts" setup>
+defineProps({
+  name: String,
+  avatar: String,
+});
+</script>
+
 <style lang="scss" scoped>
 .message-header-container {
+  position: fixed;
   width: 100%;
-  height: 64px;
+  height: 45px;
   background-color: white;
   border-bottom: 1px solid rgb(208, 208, 208);
 }

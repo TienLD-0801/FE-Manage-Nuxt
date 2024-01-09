@@ -1,34 +1,30 @@
 <template>
-  <Loading :is-loading="isLoading" />
-  <v-card>
-    <v-layout>
-      <NavigatorDrawer>
-        <SettingList @handleLogout="handleLogout" />
-      </NavigatorDrawer>
-      <MainTab />
-    </v-layout>
-  </v-card>
+  <MainLayout />
 </template>
 <script lang="ts" setup>
 definePageMeta({
   middleware: "home-guard",
 });
-import { PATH_ROUTER } from "~/shared/constant/router";
-const userStore = useUserStore();
-const { logout } = useFirebaseAuth();
-const isLoading = useState<boolean>("isLoading", () => false);
-const handleLogout = async () => {
-  isLoading.value = true;
-  try {
-    await logout();
-    userStore.clearUser();
-    navigateTo(PATH_ROUTER.login);
-  } catch (error) {
-    console.log(error);
-  } finally {
-    isLoading.value = false;
-  }
+import { doc, getDoc } from "firebase/firestore";
+import MainLayout from "~/layouts/home/main-layout.vue";
+const { $firebaseStore } = useNuxtApp();
+const profileStore = useProfileStore();
+const authStore = useAuthStore();
+const navigatorTabStore = useNavigatorTabStore();
+
+const getUserDatabase = async () => {
+  const userList = await getDoc(doc($firebaseStore, "users", "user_system"));
+  const { list_user } = userList.data()!;
+  const userDetail: ProfileType = list_user.find(
+    (user: ProfileType) => user.id === authStore.token?.localId
+  );
+  profileStore.updateProfile(userDetail);
 };
+
+watchEffect(() => {
+  getUserDatabase();
+  navigatorTabStore.changeNavigatorTab("default");
+});
 </script>
 
 <style lang="scss" scoped></style>

@@ -4,19 +4,27 @@ import {
   signInWithEmailAndPassword,
   signOut,
 } from 'firebase/auth';
+import {
+  addDoc,
+  arrayUnion,
+  collection,
+  doc,
+  setDoc,
+  updateDoc,
+} from 'firebase/firestore';
 import { CustomError } from '~/shared/Error/error';
 
 export const useFirebaseAuth = () => {
-  const { $auth } = useNuxtApp();
+  const { $firebaseAuth, $firebaseStore } = useNuxtApp();
 
   const register = async (email: string, password: string) => {
     try {
       const userCredential = await createUserWithEmailAndPassword(
-        $auth,
+        $firebaseAuth,
         email,
         password,
       );
-      return userCredential;
+      return userCredential.user;
     } catch (error) {
       if (error instanceof FirebaseError) {
         const customError = new CustomError(
@@ -35,7 +43,7 @@ export const useFirebaseAuth = () => {
   ): Promise<UserCredentialCustom | undefined> => {
     try {
       const userCredential: UserCredentialCustom =
-        await signInWithEmailAndPassword($auth, email, password);
+        await signInWithEmailAndPassword($firebaseAuth, email, password);
       return userCredential;
     } catch (error) {
       if (error instanceof FirebaseError) {
@@ -51,7 +59,25 @@ export const useFirebaseAuth = () => {
 
   const logout = async () => {
     try {
-      await signOut($auth);
+      await signOut($firebaseAuth);
+    } catch (error) {
+      if (error instanceof FirebaseError) {
+        const customError = new CustomError(
+          error.code,
+          error.name,
+          error.message,
+        );
+        throw customError;
+      }
+    }
+  };
+
+  const addUsersFirebaseStore = async (dataUser: any) => {
+    const docUser = doc($firebaseStore, 'users', 'user_system');
+    try {
+      await updateDoc(docUser, {
+        list_user: arrayUnion(dataUser),
+      });
     } catch (error) {
       if (error instanceof FirebaseError) {
         const customError = new CustomError(
@@ -68,5 +94,6 @@ export const useFirebaseAuth = () => {
     register,
     login,
     logout,
+    addUsersFirebaseStore,
   };
 };
