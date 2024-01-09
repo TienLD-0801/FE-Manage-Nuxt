@@ -10,4 +10,9 @@
 const navigatorTab = useNavigatorTabStore();
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.main-panel {
+  background: red;
+  overflow: hidden;
+}
+</style>

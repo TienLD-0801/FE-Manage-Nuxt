@@ -22,8 +22,9 @@ defineProps({
 
 <style lang="scss" scoped>
 .message-header-container {
+  position: fixed;
   width: 100%;
-  height: 64px;
+  height: 45px;
   background-color: white;
   border-bottom: 1px solid rgb(208, 208, 208);
 }

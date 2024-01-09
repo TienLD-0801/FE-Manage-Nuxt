@@ -1,5 +1,5 @@
 <template>
-  <v-layout>
+  <v-layout class="main-layout">
     <MenuLeft />
     <BodyMain />
   </v-layout>
@@ -7,4 +7,9 @@
 
 <script lang="ts" setup></script>
 
-<style></style>
+<style>
+.main-layout {
+  position: fixed;
+  width: 100vw;
+}
+</style>
