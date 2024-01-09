@@ -4,15 +4,7 @@
     <v-container class="user-container">
       <div class="user-box">
         <v-row align="center">
-          <UserBox
-            v-for="user in users"
-            :id="user.id"
-            :key="user.id"
-            :name="`${user.firstName} ${user.lastName}`"
-            :email="user.email"
-            :avatar="user.avatar"
-            @on-click="handleAddFriend(user)"
-          />
+          <UserBox v-for="user in users" :key="user.id" :data-user="user" />
         </v-row>
       </div>
     </v-container>
@@ -20,7 +12,7 @@
 </template>
 
 <script lang="ts" setup>
-import { arrayUnion, doc, onSnapshot, updateDoc } from "firebase/firestore";
+import { doc, onSnapshot } from "firebase/firestore";
 const { $firebaseStore } = useNuxtApp();
 const { $state } = useProfileStore();
 const users = ref<TProfile[]>([]);
@@ -28,20 +20,9 @@ const users = ref<TProfile[]>([]);
 const getUserList = async () => {
   onSnapshot(doc($firebaseStore, "users", "user_system"), (doc) => {
     const { list_user } = doc.data()!;
-    users.value = list_user.filter((user: TProfile) => {
+    users.value = list_user?.filter((user: TProfile) => {
       return user.id !== $state.profile?.id;
     });
-  });
-};
-
-const handleAddFriend = async (item: TProfile) => {
-  await updateDoc(doc($firebaseStore, "messages", "message_group"), {
-    list_group: arrayUnion({
-      from: $state.profile,
-      to: item,
-      is_approved: false,
-      data: [],
-    }),
   });
 };
 
