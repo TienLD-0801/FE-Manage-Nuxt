@@ -15,7 +15,7 @@ import { PATH_ROUTER } from "~/shared/constant/router";
 const { login } = useFirebaseAuth();
 const isLoading = useState<boolean>("isLoading", () => false);
 const message = useState<string>("message", () => "");
-const userStore = useUserStore();
+const authStore = useAuthStore();
 
 const handleLogin = async (user: { email: string; password: string }) => {
   // reset value
@@ -24,7 +24,7 @@ const handleLogin = async (user: { email: string; password: string }) => {
   try {
     const userCredential = await login(user.email, user.password);
     if (userCredential) {
-      userStore.updateUser(userCredential._tokenResponse!);
+      authStore.saveToken(userCredential._tokenResponse!);
       navigateTo(PATH_ROUTER.home);
     }
   } catch (error) {

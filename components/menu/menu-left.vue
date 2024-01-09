@@ -1,4 +1,5 @@
 <template>
+  <Loading :is-loading="isLoading" />
   <v-navigation-drawer class="navigator-drawer-container">
     <v-card width="100%" class="mx-auto">
       <v-toolbar color="#e4e8eb" class="px-0">
@@ -31,7 +32,7 @@
           <ChatList />
         </v-window-item>
         <v-window-item id="2" :value="settings">
-          <slot />
+          <SettingList @handleLogout="handleLogout" />
         </v-window-item>
       </v-window>
     </v-card>
@@ -39,9 +40,28 @@
 </template>
 
 <script lang="ts" setup>
+import { PATH_ROUTER } from "~/shared/constant/router";
+
 const tabs = defineModel({ default: "chats" });
 const chats = ref("chats");
 const settings = ref("settings");
+
+const authStore = useAuthStore();
+const { logout } = useFirebaseAuth();
+const isLoading = useState<boolean>("isLoading", () => false);
+
+const handleLogout = async () => {
+  isLoading.value = true;
+  try {
+    await logout();
+    authStore.clearToken();
+    navigateTo(PATH_ROUTER.login);
+  } catch (error) {
+    console.log(error);
+  } finally {
+    isLoading.value = false;
+  }
+};
 </script>
 
 <style lang="scss" scoped>

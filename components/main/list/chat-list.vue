@@ -7,7 +7,7 @@
         :value="item"
         class="chat-item"
         color="primary"
-        @click="navigatorTab.changeNavigatorTab('chat')"
+        @click="handleClickItemUser(item)"
       >
         <div class="chat-frame">
           <v-avatar class="message-avatar" :image="item.prependAvatar"></v-avatar>
@@ -28,6 +28,15 @@
 </template>
 <script lang="ts" setup>
 const navigatorTab = useNavigatorTabStore();
+const profileStore = useProfileStore();
+
+const handleClickItemUser = (item: Object) => {
+  console.log("====================================");
+  console.log(item);
+  console.log("====================================");
+  navigatorTab.changeNavigatorTab("chat");
+  //profileStore.updateProfile(item);
+};
 
 const items = [
   {
@@ -37,6 +46,7 @@ const items = [
     last: "You — ",
     time: "08:26 am",
     content: `Cũng hơi lạ là, nó có trả ra acesssToken nhưng anh chấm tới thì ko nhắc`,
+    messageId: "",
   },
   {
     id: "2",
