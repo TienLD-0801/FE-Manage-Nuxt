@@ -1,5 +1,6 @@
-type GroupMessageType = {
-  to: ProfileType;
-  from: ProfileType;
+type TMessageGroup = {
+  to: TProfile;
+  from: TProfile;
   data: [];
+  is_approved: boolean;
 };
