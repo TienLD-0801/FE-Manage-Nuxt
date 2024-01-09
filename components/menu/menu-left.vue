@@ -19,6 +19,10 @@
                 <v-icon>mdi-forum-outline</v-icon>
               </v-tab>
 
+              <v-tab :value="friends">
+                <v-icon>mdi-account-multiple-outline</v-icon>
+              </v-tab>
+
               <v-tab :value="settings">
                 <v-icon>mdi-cog-outline</v-icon>
               </v-tab>
@@ -31,7 +35,10 @@
         <v-window-item id="1" :value="chats">
           <ChatList />
         </v-window-item>
-        <v-window-item id="2" :value="settings">
+        <v-window-item id="2" :value="friends">
+          <ChatList />
+        </v-window-item>
+        <v-window-item id="3" :value="settings">
           <SettingList @handleLogout="handleLogout" />
         </v-window-item>
       </v-window>
@@ -44,12 +51,11 @@ import { PATH_ROUTER } from "~/shared/constant/router";
 
 const tabs = defineModel({ default: "chats" });
 const chats = ref("chats");
+const friends = ref("friends");
 const settings = ref("settings");
-
 const authStore = useAuthStore();
 const { logout } = useFirebaseAuth();
 const isLoading = useState<boolean>("isLoading", () => false);
-
 const handleLogout = async () => {
   isLoading.value = true;
   try {

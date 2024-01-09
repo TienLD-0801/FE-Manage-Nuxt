@@ -31,7 +31,7 @@ const handleClickItemUser = (item: TProfile) => {
 const getListChat = () => {
   onSnapshot(doc($firebaseStore, "messages", "message_group"), (doc) => {
     const { list_group } = doc.data()!;
-    listChatUsers.value = list_group.filter((group: TMessageGroup) => {
+    listChatUsers.value = list_group?.filter((group: TMessageGroup) => {
       return (
         $state.profile?.id &&
         [group.from.id, group.to.id].includes($state.profile?.id) &&
