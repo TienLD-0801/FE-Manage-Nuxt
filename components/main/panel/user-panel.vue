@@ -1,13 +1,9 @@
 <template>
-  <v-main class="main-panel-container">
+  <v-main class="user-panel-container main-panel-container">
     <h2>Users</h2>
-    <v-container class="user-container">
-      <div class="user-box">
-        <v-row align="center">
-          <UserBox v-for="user in users" :key="user.id" :data-user="user" />
-        </v-row>
-      </div>
-    </v-container>
+    <div class="user-panel-list">
+      <UserBox v-for="user in users" :key="user.id" :data-user="user" />
+    </div>
   </v-main>
 </template>
 
@@ -32,9 +28,14 @@ watchEffect(() => {
 </script>
 
 <style lang="scss" scoped>
-.user-container {
+.user-panel-container {
   height: 100%;
+}
+
+.user-panel-container .user-panel-list {
+  width: 100%;
   display: flex;
-  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 </style>
