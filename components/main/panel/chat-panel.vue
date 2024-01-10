@@ -15,6 +15,6 @@ const { $state } = useChatProfileStore();
 
 <style lang="scss" scoped>
 .chat-container {
-  padding-bottom: 16px;
+  margin: 0px 0px 0px 100px;
 }
 </style>

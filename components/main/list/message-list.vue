@@ -43,17 +43,16 @@ const data = ref([
 
 <style lang="scss" scoped>
 .message-container {
-  margin-top: 50px;
   overflow: auto;
   height: 100%;
-  padding: 0 16px;
+  padding: 15px 25px;
   max-width: none;
   display: flex;
   flex-direction: column-reverse;
 }
 
 .message {
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 .message-right {

@@ -1,26 +1,21 @@
 <template>
   <v-form class="message-input-container">
-    <v-container>
-      <v-row>
-        <v-col cols="12">
-          <v-text-field
-            v-model="message"
-            :append-icon="message ? 'mdi-send' : 'mdi-microphone'"
-            :append-inner-icon="marker ? 'mdi-map-marker' : 'mdi-map-marker-off'"
-            :prepend-icon="icon"
-            variant="filled"
-            clear-icon="mdi-close-circle"
-            clearable
-            label="Message"
-            type="text"
-            @click:append-inner="toggleMarker"
-            @click:append="sendMessage"
-            @click:prepend="changeIcon"
-            @click:clear="clearMessage"
-          ></v-text-field>
-        </v-col>
-      </v-row>
-    </v-container>
+    <v-col class="input-frame" cols="12">
+      <v-text-field
+        v-model="message"
+        :append-icon="message ? 'mdi-send' : 'mdi-microphone'"
+        :prepend-icon="icon"
+        variant="filled"
+        clear-icon="mdi-close-circle"
+        clearable
+        label="Message"
+        type="text"
+        @click:append-inner="toggleMarker"
+        @click:append="sendMessage"
+        @click:prepend="changeIcon"
+        @click:clear="clearMessage"
+      ></v-text-field>
+    </v-col>
   </v-form>
 </template>
 <script>
@@ -72,5 +67,9 @@ export default {
 .message-input-container {
   width: 100%;
   border-top: 0.5px solid rgb(191, 191, 191);
+}
+
+.message-input-container .input-frame {
+  padding-bottom: unset;
 }
 </style>
