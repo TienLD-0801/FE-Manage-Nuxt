@@ -19,9 +19,9 @@ const requestUserStore = useRequestUserStore();
 const getUserList = async () => {
   onSnapshot(doc($firebaseStore, "messages", "message_group"), (doc) => {
     const { list_group } = doc.data()!;
-    const requestListConvert = list_group?.filter((user: TMessageGroup) => {
-      return user.to?.id === $state.profile?.id && !user.is_approved;
-    });
+    const requestListConvert: TMessageGroup[] = list_group?.filter(
+      (user: TMessageGroup) => user.to?.id === $state.profile?.id && !user.is_approved
+    );
     requestUserStore.updateRequestUser(requestListConvert);
   });
 };
