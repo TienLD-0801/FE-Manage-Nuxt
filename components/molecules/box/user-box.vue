@@ -12,14 +12,8 @@
       <template v-slot:append>
         <v-icon
           @click="handleConnectUser"
-          :icon="iconStatus"
-          :color="
-            iconStatus === 'mdi-cube-send'
-              ? 'grey'
-              : iconStatus === 'mdi-account-plus-outline'
-              ? 'success'
-              : 'primary'
-          "
+          :icon="status.icon"
+          :color="status.color"
         ></v-icon>
       </template>
     </v-card>
@@ -34,7 +28,17 @@ import { arrayUnion, doc, onSnapshot, updateDoc } from "firebase/firestore";
 const { $firebaseStore } = useNuxtApp();
 const { $state } = useProfileStore();
 const { dataUser } = props;
-const iconStatus = ref("mdi-account-plus-outline");
+enum ConnectUserStatus {
+  NewConnect = "mdi-account-plus-outline",
+  SentRequest = "mdi-cube-send",
+  WaitApprove = "mdi-check",
+  ConnectApproved = "mdi-chat-outline",
+}
+
+const status = ref({
+  icon: ConnectUserStatus.NewConnect,
+  color: "success",
+});
 
 const getFriendStatus = () => {
   onSnapshot(doc($firebaseStore, "messages", "message_group"), (doc) => {
@@ -48,11 +52,25 @@ const getFriendStatus = () => {
     );
 
     if (existSelfFrom?.is_approved || existSelfTo?.is_approved) {
-      iconStatus.value = "mdi-chat-outline";
+      status.value = {
+        icon: ConnectUserStatus.ConnectApproved,
+        color: "primary",
+      };
     } else if (existSelfFrom && !existSelfFrom?.is_approved) {
-      iconStatus.value = "mdi-cube-send";
+      status.value = {
+        icon: ConnectUserStatus.SentRequest,
+        color: "grey",
+      };
     } else if (existSelfTo && !existSelfTo?.is_approved) {
-      iconStatus.value = "mdi-check";
+      status.value = {
+        icon: ConnectUserStatus.WaitApprove,
+        color: "primary",
+      };
+    } else {
+      status.value = {
+        icon: ConnectUserStatus.NewConnect,
+        color: "success",
+      };
     }
   });
 };
@@ -65,13 +83,13 @@ const handleConnectUser = async () => {
     data: [],
   };
 
-  switch (iconStatus.value) {
-    case "mdi-account-plus-outline":
+  switch (status.value.icon) {
+    case ConnectUserStatus.NewConnect:
       await updateDoc(doc($firebaseStore, "messages", "message_group"), {
         list_group: arrayUnion(data),
       });
       break;
-    case "mdi-check":
+    case ConnectUserStatus.WaitApprove:
       await updateDoc(doc($firebaseStore, "messages", "message_group"), {
         list_group: arrayUnion({
           ...data,
