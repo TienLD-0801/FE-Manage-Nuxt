@@ -1,5 +1,6 @@
 <template>
   <v-card
+    class="user-box-container"
     width="320"
     :title="`${dataUser.firstName} ${dataUser.lastName}`"
     :subtitle="dataUser.email"
@@ -10,17 +11,37 @@
     <template v-slot:append>
       <div class="icons-frame">
         <v-icon
+          v-if="status.icon === ConnectUserStatus.SentRequest"
+          :icon="status.icon"
+          :color="status.color"
+        ></v-icon>
+        <v-icon
           class="icon"
-          @click="handleConnectUser"
+          v-if="status.icon === ConnectUserStatus.NewConnect"
+          @click="$emit('on-add-user', user)"
           :icon="status.icon"
           :color="status.color"
         ></v-icon>
         <v-icon
           class="icon"
           v-if="status.icon === ConnectUserStatus.WaitApprove"
-          @click="handleDenyUser"
+          @click="$emit('on-approve-user', user)"
+          :icon="status.icon"
+          :color="status.color"
+        ></v-icon>
+        <v-icon
+          class="icon"
+          v-if="status.icon === ConnectUserStatus.WaitApprove"
+          @click="$emit('on-deny-user', user)"
           icon="mdi-close"
           color="error"
+        ></v-icon>
+        <v-icon
+          class="icon"
+          v-if="status.icon === ConnectUserStatus.ConnectApproved"
+          @click="$emit('on-chat-user', user)"
+          :icon="status.icon"
+          :color="status.color"
         ></v-icon>
       </div>
     </template>
@@ -90,57 +111,16 @@ const getFriendStatus = () => {
   });
 };
 
-/**
- * Cần nghiên cứu lại logic chỗ này
- */
-const handleConnectUser = async () => {
-  const data = {
-    group_id: `${$state.profile?.id + dataUser.id}`,
-    from: $state.profile,
-    to: dataUser,
-    is_approved: false,
-    data: [],
-  };
-
-  switch (status.value.icon) {
-    case ConnectUserStatus.NewConnect:
-      await updateDoc(doc($firebaseStore, "messages", "message_group"), {
-        list_group: arrayUnion(data),
-      });
-      break;
-    case ConnectUserStatus.WaitApprove:
-      await updateDoc(doc($firebaseStore, "messages", "message_group"), {
-        list_group: arrayUnion({
-          ...data,
-          is_approved: true,
-        }),
-      });
-      break;
-    default:
-      break;
-  }
-};
-
-const handleDenyUser = async () => {
-  const messageGroupList = await getDoc(doc($firebaseStore, "messages", "message_group"));
-  const listGroupResponses = messageGroupList.data()?.list_group;
-  const groupIdCreated = dataUser.id + $state.profile?.id;
-
-  const newListGroups = listGroupResponses.filter((group: TMessageGroup) => {
-    return group.group_id !== groupIdCreated;
-  });
-
-  await updateDoc(doc($firebaseStore, "messages", "message_group"), {
-    list_group: newListGroups,
-  });
-};
-
 watchEffect(() => {
   getFriendStatus();
 });
 </script>
 
 <style lang="scss" scoped>
+.user-box-container {
+  border: 1px solid rgb(232, 232, 232);
+}
+
 .icons-frame {
   display: flex;
   gap: 5px;
