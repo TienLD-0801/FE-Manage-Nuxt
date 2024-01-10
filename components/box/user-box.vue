@@ -1,23 +1,30 @@
 <template>
-  <v-col cols="auto">
-    <v-card
-      class="mx-auto"
-      width="300"
-      :title="`${dataUser.firstName} ${dataUser.lastName}`"
-      :subtitle="dataUser.email"
-    >
-      <template v-slot:prepend>
-        <v-avatar :image="dataUser.avatar" />
-      </template>
-      <template v-slot:append>
+  <v-card
+    width="320"
+    :title="`${dataUser.firstName} ${dataUser.lastName}`"
+    :subtitle="dataUser.email"
+  >
+    <template v-slot:prepend>
+      <v-avatar :image="dataUser.avatar" />
+    </template>
+    <template v-slot:append>
+      <div class="icons-frame">
         <v-icon
+          class="icon"
           @click="handleConnectUser"
           :icon="status.icon"
           :color="status.color"
         ></v-icon>
-      </template>
-    </v-card>
-  </v-col>
+        <v-icon
+          class="icon"
+          v-if="status.icon === ConnectUserStatus.WaitApprove"
+          @click="handleDenyUser"
+          icon="mdi-close"
+          color="error"
+        ></v-icon>
+      </div>
+    </template>
+  </v-card>
 </template>
 
 <script lang="ts" setup>
@@ -31,6 +38,7 @@ import {
   onSnapshot,
   setDoc,
   updateDoc,
+  getDoc,
 } from "firebase/firestore";
 const { $firebaseStore } = useNuxtApp();
 const { $state } = useProfileStore();
@@ -113,9 +121,38 @@ const handleConnectUser = async () => {
   }
 };
 
+const handleDenyUser = async () => {
+  const messageGroupList = await getDoc(doc($firebaseStore, "messages", "message_group"));
+  const listGroupResponses = messageGroupList.data()?.list_group;
+  const groupIdCreated = dataUser.id + $state.profile?.id;
+
+  const newListGroups = listGroupResponses.filter((group: TMessageGroup) => {
+    return group.group_id !== groupIdCreated;
+  });
+
+  await updateDoc(doc($firebaseStore, "messages", "message_group"), {
+    list_group: newListGroups,
+  });
+};
+
 watchEffect(() => {
   getFriendStatus();
 });
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.icons-frame {
+  display: flex;
+  gap: 5px;
+}
+
+.icons-frame .icon {
+  width: 30px;
+  height: 30px;
+  &:hover {
+    opacity: 0.8;
+    border: 1px solid rgb(193, 193, 193);
+    border-radius: 50px;
+  }
+}
+</style>

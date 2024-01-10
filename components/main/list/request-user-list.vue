@@ -1,12 +1,10 @@
 <template>
-  <v-container class="user-container">
-    <v-row align="center">
-      <UserBox
-        v-for="user in requestUserStore.$state.requestUser"
-        :key="user.from?.id"
-        :data-user="user.from"
-      />
-    </v-row>
+  <v-container class="request-user-list-container">
+    <UserBox
+      v-for="user in requestUserStore.$state.requestUser"
+      :key="user.from?.id"
+      :data-user="user.from"
+    />
   </v-container>
 </template>
 
@@ -32,7 +30,7 @@ watchEffect(() => {
 </script>
 
 <style lang="scss" scoped>
-.user-container {
+.request-user-list-container {
   display: flex;
   justify-content: center;
 }

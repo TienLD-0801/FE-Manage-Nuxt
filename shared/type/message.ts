@@ -1,4 +1,5 @@
 type TMessageGroup = {
+  group_id: String;
   to: TProfile;
   from: TProfile;
   data: [];
