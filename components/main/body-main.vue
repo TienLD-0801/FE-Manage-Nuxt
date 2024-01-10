@@ -7,12 +7,15 @@
 </template>
 
 <script lang="ts" setup>
+import { doc, onSnapshot } from "firebase/firestore";
+
 const navigatorTab = useNavigatorTabStore();
+const { $firebaseStore } = useNuxtApp();
+onSnapshot(doc($firebaseStore, "messages", "message_group"), (doc) => {});
 </script>
 
 <style lang="scss" scoped>
 .main-panel {
-  background: red;
   overflow: hidden;
 }
 </style>

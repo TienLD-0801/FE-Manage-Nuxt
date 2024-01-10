@@ -24,7 +24,14 @@
 const props = defineProps<{
   dataUser: TProfile;
 }>();
-import { arrayUnion, doc, onSnapshot, updateDoc } from "firebase/firestore";
+import {
+  arrayRemove,
+  arrayUnion,
+  doc,
+  onSnapshot,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
 const { $firebaseStore } = useNuxtApp();
 const { $state } = useProfileStore();
 const { dataUser } = props;
@@ -75,8 +82,12 @@ const getFriendStatus = () => {
   });
 };
 
+/**
+ * Cần nghiên cứu lại logic chỗ này
+ */
 const handleConnectUser = async () => {
   const data = {
+    group_id: `${$state.profile?.id + dataUser.id}`,
     from: $state.profile,
     to: dataUser,
     is_approved: false,
