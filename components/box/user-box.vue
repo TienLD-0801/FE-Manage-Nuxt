@@ -10,8 +10,28 @@
     <template v-slot:append>
       <div class="icons-frame">
         <v-icon
+          v-if="status.icon === ConnectUserStatus.SentRequest"
+          :icon="status.icon"
+          :color="status.color"
+        ></v-icon>
+        <v-icon
           class="icon"
-          @click="handleConnectUser"
+          v-if="status.icon === ConnectUserStatus.ConnectApproved"
+          @click="handleChatWithUser"
+          :icon="status.icon"
+          :color="status.color"
+        ></v-icon>
+        <v-icon
+          class="icon"
+          v-if="status.icon === ConnectUserStatus.NewConnect"
+          @click="handleAddUser"
+          :icon="status.icon"
+          :color="status.color"
+        ></v-icon>
+        <v-icon
+          class="icon"
+          v-if="status.icon === ConnectUserStatus.WaitApprove"
+          @click="handleApproveUser"
           :icon="status.icon"
           :color="status.color"
         ></v-icon>
@@ -90,10 +110,11 @@ const getFriendStatus = () => {
   });
 };
 
-/**
- * Cần nghiên cứu lại logic chỗ này
- */
-const handleConnectUser = async () => {
+const handleChatWithUser = () => {
+  // handle later
+};
+
+const handleAddUser = async () => {
   const data = {
     group_id: `${$state.profile?.id + dataUser.id}`,
     from: $state.profile,
@@ -101,38 +122,62 @@ const handleConnectUser = async () => {
     is_approved: false,
     data: [],
   };
+  try {
+    await updateDoc(doc($firebaseStore, "messages", "message_group"), {
+      list_group: arrayUnion(data),
+    });
+    console.log("Send Request Successfully");
+  } catch (err) {
+    console.error("Error approve user: ", err);
+  }
+};
 
-  switch (status.value.icon) {
-    case ConnectUserStatus.NewConnect:
-      await updateDoc(doc($firebaseStore, "messages", "message_group"), {
-        list_group: arrayUnion(data),
-      });
-      break;
-    case ConnectUserStatus.WaitApprove:
-      await updateDoc(doc($firebaseStore, "messages", "message_group"), {
-        list_group: arrayUnion({
-          ...data,
+const handleApprovedUser = async () => {
+  const messageGroupList = await getDoc(doc($firebaseStore, "messages", "message_group"));
+  const listGroupResponses = messageGroupList.data()?.list_group;
+  const groupIdSelected = dataUser.id + $state.profile?.id;
+
+  const groupSelected = listGroupResponses.find((group: TMessageGroup) => {
+    return group.group_id === groupIdSelected;
+  });
+
+  const otherFilterGroups = listGroupResponses.filter((group: TMessageGroup) => {
+    return group.group_id !== groupIdSelected;
+  });
+
+  try {
+    await updateDoc(doc($firebaseStore, "messages", "message_group"), {
+      list_group: [
+        ...otherFilterGroups,
+        {
+          ...groupSelected,
           is_approved: true,
-        }),
-      });
-      break;
-    default:
-      break;
+        },
+      ],
+    });
+    console.log("Approve User Successfully");
+  } catch (err) {
+    console.error("Error approve user: ", err);
   }
 };
 
 const handleDenyUser = async () => {
   const messageGroupList = await getDoc(doc($firebaseStore, "messages", "message_group"));
   const listGroupResponses = messageGroupList.data()?.list_group;
-  const groupIdCreated = dataUser.id + $state.profile?.id;
+  const groupIdSelected = dataUser.id + $state.profile?.id;
 
   const newListGroups = listGroupResponses.filter((group: TMessageGroup) => {
-    return group.group_id !== groupIdCreated;
+    return group.group_id !== groupIdSelected;
   });
 
-  await updateDoc(doc($firebaseStore, "messages", "message_group"), {
-    list_group: newListGroups,
-  });
+  try {
+    await updateDoc(doc($firebaseStore, "messages", "message_group"), {
+      list_group: newListGroups,
+    });
+    console.log("Deny User Successfully");
+  } catch (err) {
+    console.error("Error approve user: ", err);
+  }
 };
 
 watchEffect(() => {
