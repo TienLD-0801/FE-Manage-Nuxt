@@ -4,18 +4,12 @@ import {
   signInWithEmailAndPassword,
   signOut,
 } from 'firebase/auth';
-import {
-  addDoc,
-  arrayUnion,
-  collection,
-  doc,
-  setDoc,
-  updateDoc,
-} from 'firebase/firestore';
+import { set, ref, push, onValue, get, child, update } from 'firebase/database';
+import { arrayUnion, doc, updateDoc } from 'firebase/firestore';
 import { CustomError } from '~/shared/Error/error';
 
 export const useFirebaseAuth = () => {
-  const { $firebaseAuth, $firebaseStore } = useNuxtApp();
+  const { $firebaseAuth, $firebaseStore, $firebaseRealtime } = useNuxtApp();
 
   const register = async (email: string, password: string) => {
     try {
@@ -90,10 +84,20 @@ export const useFirebaseAuth = () => {
     }
   };
 
+  const writeRealtimeDatabase = async (key: string, data: any) => {
+    await update(ref($firebaseRealtime, `chats/${key}`), data);
+  };
+
+  const readRealtimeDatabase = () => {
+    return ref($firebaseRealtime, `chats`);
+  };
+
   return {
     register,
     login,
     logout,
+    writeRealtimeDatabase,
     addUsersFirebaseStore,
+    readRealtimeDatabase,
   };
 };

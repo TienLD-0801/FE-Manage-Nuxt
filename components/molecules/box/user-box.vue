@@ -15,6 +15,12 @@
           :icon="status.icon"
           :color="status.color"
         ></v-icon>
+        <v-icon
+          v-if="status.icon === ConnectUserStatus.WaitApprove"
+          @click="handleDenyUser()"
+          icon="mdi-close"
+          color="error"
+        ></v-icon>
       </template>
     </v-card>
   </v-col>
@@ -24,7 +30,9 @@
 const props = defineProps<{
   dataUser: TProfile;
 }>();
-import { arrayUnion, doc, onSnapshot, updateDoc } from "firebase/firestore";
+import { onValue } from "firebase/database";
+import { arrayUnion, doc, updateDoc } from "firebase/firestore";
+const { writeRealtimeDatabase, readRealtimeDatabase } = useFirebaseAuth();
 const { $firebaseStore } = useNuxtApp();
 const { $state } = useProfileStore();
 const { dataUser } = props;
@@ -39,29 +47,42 @@ const status = ref({
   icon: ConnectUserStatus.NewConnect,
   color: "success",
 });
+const dataRealtime = ref<any>({});
 
 const getFriendStatus = () => {
-  onSnapshot(doc($firebaseStore, "messages", "message_group"), (doc) => {
-    const { list_group } = doc.data()!;
-    const existSelfFrom: TMessageGroup = list_group?.find(
-      (e: TMessageGroup) => e.from.id === $state.profile?.id && e.to.id === dataUser.id
+  const listenValue = readRealtimeDatabase();
+
+  onValue(listenValue, (snapshot) => {
+    const dataFrom = snapshot.child(`/group_${$state.profile?.id}${dataUser.id}`).val();
+    const dataTo = snapshot.child(`/group_${dataUser.id}${$state.profile?.id}`).val();
+
+    if (dataFrom) {
+      dataRealtime.value = dataFrom;
+    } else if (dataTo) {
+      dataRealtime.value = dataTo;
+    } else {
+      return;
+    }
+
+    const isSelfFrom = Object.values(dataRealtime.value.members).find(
+      (member: any) => member.role === "admin" && member.profile.id === $state.profile?.id
+    );
+    const isSelfTo = Object.values(dataRealtime.value.members).find(
+      (member: any) =>
+        member.role === "member" && member.profile.id === $state.profile?.id
     );
 
-    const existSelfTo: TMessageGroup = list_group?.find(
-      (e: TMessageGroup) => e.from.id === dataUser.id && e.to.id === $state.profile?.id
-    );
-
-    if (existSelfFrom?.is_approved || existSelfTo?.is_approved) {
+    if ((isSelfFrom || isSelfTo) && dataRealtime.value.is_approved) {
       status.value = {
-        icon: ConnectUserStatus.ConnectApproved,
-        color: "primary",
+        icon: ConnectUserStatus.NewConnect,
+        color: "success",
       };
-    } else if (existSelfFrom && !existSelfFrom?.is_approved) {
+    } else if (isSelfFrom && !dataRealtime.value.is_approved) {
       status.value = {
         icon: ConnectUserStatus.SentRequest,
         color: "grey",
       };
-    } else if (existSelfTo && !existSelfTo?.is_approved) {
+    } else if (isSelfTo && !dataRealtime.value.is_approved) {
       status.value = {
         icon: ConnectUserStatus.WaitApprove,
         color: "primary",
@@ -75,19 +96,34 @@ const getFriendStatus = () => {
   });
 };
 
+//delete
+const handleDenyUser = async () => {};
 const handleConnectUser = async () => {
   const data = {
-    from: $state.profile,
-    to: dataUser,
+    group_id: `${$state.profile?.id}${dataUser.id}`,
+    members: {
+      [`${$state.profile?.id}`]: {
+        profile: $state.profile,
+        role: "admin",
+      },
+      [`${dataUser.id}`]: {
+        profile: dataUser,
+        role: "member",
+      },
+    },
+    messages: {
+      [`${$state.profile?.id + dataUser.id}`]: {
+        user_id: "",
+        content: "",
+        time: new Date().getTime(),
+      },
+    },
     is_approved: false,
-    data: [],
   };
 
   switch (status.value.icon) {
     case ConnectUserStatus.NewConnect:
-      await updateDoc(doc($firebaseStore, "messages", "message_group"), {
-        list_group: arrayUnion(data),
-      });
+      writeRealtimeDatabase(`group_${$state.profile?.id + dataUser.id}`, data);
       break;
     case ConnectUserStatus.WaitApprove:
       await updateDoc(doc($firebaseStore, "messages", "message_group"), {

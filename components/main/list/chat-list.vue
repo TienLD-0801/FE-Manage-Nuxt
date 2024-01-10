@@ -1,18 +1,16 @@
 <template>
-  <v-card class="chat-list-container mx-auto" max-width="450">
-    <v-list class="chat-list" item-props lines="three">
-      <ChatBox
-        v-for="(item, i) in listChatUsers"
-        :name="`${item.to.firstName} ${item.to.lastName}`"
-        time="20:09"
-        :avatar="item.to.avatar"
-        :last-message="getLastMessage"
-        :key="i"
-        :value="item"
-        @click="handleClickItemUser(item.to)"
-      />
-    </v-list>
-  </v-card>
+  <v-list class="chat-list-container" item-props lines="three">
+    <ChatBox
+      v-for="(item, i) in listChatUsers"
+      :name="`${item.to.firstName} ${item.to.lastName}`"
+      time="20:09"
+      :avatar="item.to.avatar"
+      :last-message="getLastMessage"
+      :key="i"
+      :value="item"
+      @click="handleClickItemUser(item.to)"
+    />
+  </v-list>
 </template>
 <script lang="ts" setup>
 import { doc, onSnapshot } from "firebase/firestore";
@@ -48,8 +46,4 @@ watchEffect(() => {
 });
 </script>
 
-<style lang="scss" scoped>
-.chat-list-container .chat-list {
-  padding-top: 0 !important;
-}
-</style>
+<style lang="scss" scoped></style>
