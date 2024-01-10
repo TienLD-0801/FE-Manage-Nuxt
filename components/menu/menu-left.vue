@@ -17,18 +17,6 @@
             <v-tab :value="chats">
               <v-icon>mdi-forum-outline</v-icon>
             </v-tab>
-
-            <v-tab :value="friends">
-              <v-container class="custom-badge">
-                <v-icon>mdi-account-multiple-outline</v-icon>
-                <v-badge
-                  color="red"
-                  :content="requestUserStore.$state.requestUser?.length"
-                  v-if="requestUserStore.$state.requestUser?.length"
-                />
-              </v-container>
-            </v-tab>
-
             <v-tab :value="settings">
               <v-icon>mdi-cog-outline</v-icon>
             </v-tab>
@@ -40,9 +28,6 @@
     <v-window v-model="tabs">
       <v-window-item id="1" :value="chats">
         <ChatList />
-      </v-window-item>
-      <v-window-item id="2" :value="friends">
-        <RequestUserList />
       </v-window-item>
       <v-window-item id="3" :value="settings">
         <SettingList @handleLogout="handleLogout" />
@@ -61,7 +46,6 @@ const settings = ref("settings");
 const authStore = useAuthStore();
 const { logout } = useFirebaseAuth();
 const isLoading = useState<boolean>("isLoading", () => false);
-const requestUserStore = useRequestUserStore();
 const handleLogout = async () => {
   isLoading.value = true;
   try {
