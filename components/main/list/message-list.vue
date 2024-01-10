@@ -43,7 +43,6 @@ const data = ref([
 
 <style lang="scss" scoped>
 .message-container {
-  margin-top: 50px;
   overflow: auto;
   height: 100%;
   padding: 0 16px;
