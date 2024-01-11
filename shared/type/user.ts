@@ -4,6 +4,5 @@ type TProfile = {
   lastName: string;
   avatar: string;
   firstName: string;
-  password?: string; 
   created_at: string;
 };

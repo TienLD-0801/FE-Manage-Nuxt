@@ -1,19 +1,16 @@
 <template>
   <v-main class="user-panel-container main-panel-container">
-    <di class="user-panel-header">
+    <div class="user-panel-header">
       <h2>Users</h2>
       <v-btn icon>
         <v-icon>mdi-magnify</v-icon>
       </v-btn>
-    </di>
+    </div>
     <v-tabs v-model="tab" color="primary" align-tabs="center">
       <v-tab value="all">All</v-tab>
       <v-tab value="requests"
         >Requests
-        <v-badge
-          color="red"
-          :content="requestUserStore.$state.requestUser?.length"
-          v-if="requestUserStore.$state.requestUser?.length"
+        <v-badge color="red" :content="requestList.length" v-if="requestList.length"
       /></v-tab>
     </v-tabs>
     <v-window class="user-tab-container" v-model="tab">
@@ -22,7 +19,7 @@
           <UserBox
             v-for="user in users"
             :key="user.id"
-            :data-user="user"
+            :user="user"
             @on-add-user="handleAddUser(user)"
             @on-approve-user="handleApproveUser(user)"
             @on-deny-user="handleDenyUser(user)"
@@ -30,23 +27,20 @@
           />
           <v-container class="no-user-style" v-if="!users?.length">
             <p>No users here.</p>
-            <v-img alt="no-user" src="../../../public/imgs/no-user.png" />
+            <div class="no-user-photo" height="300" width="500" alt="no-user" />
           </v-container>
         </div>
       </v-window-item>
       <v-window-item key="requests" value="requests">
         <div class="user-panel-list">
           <UserBox
-            v-for="request in requestUserStore.$state.requestUser"
-            :key="request.from?.id"
-            :data-user="request.from"
-            @on-approve-user="handleApproveUser(request.from)"
-            @on-deny-user="handleDenyUser(request.from)"
+            v-for="request in requestList"
+            :key="request.id"
+            :user="request"
+            @on-approve-user="handleApproveUser(request)"
+            @on-deny-user="handleDenyUser(request)"
           />
-          <v-container
-            class="no-user-style"
-            v-if="!requestUserStore.$state.requestUser?.length"
-          >
+          <v-container class="no-user-style" v-if="!requestList.length">
             <p>No users here.</p>
             <div class="no-user-photo" height="300" width="500" alt="no-user" />
           </v-container>
@@ -57,13 +51,22 @@
 </template>
 
 <script lang="ts" setup>
-import { arrayUnion, doc, getDoc, onSnapshot, updateDoc } from "firebase/firestore";
+import {
+  collection,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  query,
+  setDoc,
+  updateDoc,
+  where,
+} from "firebase/firestore";
+import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
 const { $firebaseStore } = useNuxtApp();
 const { $state } = useProfileStore();
-const requestUserStore = useRequestUserStore();
 const users = ref<TProfile[]>([]);
 const tab = ref(null);
-
+const requestList = ref<TProfile[]>([]);
 const getAllUsers = async () => {
   onSnapshot(doc($firebaseStore, "users", "user_system"), (doc) => {
     const { list_user } = doc.data()!;
@@ -73,76 +76,70 @@ const getAllUsers = async () => {
   });
 };
 
-const getAllRequests = async () => {
-  onSnapshot(doc($firebaseStore, "messages", "message_group"), (doc) => {
-    const { list_group } = doc.data()!;
-    const requestListConvert: TMessageGroup[] = list_group?.filter(
-      (user: TMessageGroup) => user.to?.id === $state.profile?.id && !user.is_approved
-    );
-    requestUserStore.updateRequestUser(requestListConvert);
+const getAllRequests = () => {
+  const q = query(collection($firebaseStore, FIRESTORE_PATH.chat_collection));
+  onSnapshot(q, (snapShot) => {
+    let tempRequest: TProfile[] = [];
+    snapShot.forEach((doc) => {
+      if (
+        doc.id.split("-")[1] === $state.profile?.id &&
+        !doc.data().is_approved &&
+        !doc.data().is_canceled
+      ) {
+        tempRequest.push(doc.data().sender);
+      }
+    });
+    requestList.value = tempRequest;
   });
 };
 
-const handleAddUser = async (dataUser: TProfile) => {
-  const data = {
-    group_id: `${$state.profile?.id + dataUser.id}`,
-    from: $state.profile,
-    to: dataUser,
+/**
+ *  Handle add friend user
+ * @param
+ */
+const handleAddUser = async (userAdded: TProfile) => {
+  const dataAdd: TMessageGroup = {
+    sender: $state.profile!,
+    receiver: userAdded,
     is_approved: false,
-    data: [],
+    messages: [],
+    is_canceled: false,
   };
+  const documentGroupId = `${$state.profile?.id}-${userAdded.id}`;
   try {
-    await updateDoc(doc($firebaseStore, "messages", "message_group"), {
-      list_group: arrayUnion(data),
-    });
+    await setDoc(
+      doc($firebaseStore, FIRESTORE_PATH.chat_collection, documentGroupId),
+      dataAdd
+    );
     console.log("Send Request Successfully");
   } catch (err) {
-    console.error("Error approve user: ", err);
+    console.error("Error add user: ", err);
   }
 };
 
-const handleApproveUser = async (dataUser: TProfile) => {
-  const messageGroupList = await getDoc(doc($firebaseStore, "messages", "message_group"));
-  const listGroupResponses = messageGroupList.data()?.list_group;
-  const groupIdSelected = dataUser.id + $state.profile?.id;
-
-  const groupSelected = listGroupResponses.find((group: TMessageGroup) => {
-    return group.group_id === groupIdSelected;
-  });
-
-  const otherFilterGroups = listGroupResponses.filter((group: TMessageGroup) => {
-    return group.group_id !== groupIdSelected;
-  });
+const handleApproveUser = async (userApproved: TProfile) => {
+  const documentGroupId = `${userApproved.id}-${$state.profile?.id}`;
 
   try {
-    await updateDoc(doc($firebaseStore, "messages", "message_group"), {
-      list_group: [
-        ...otherFilterGroups,
-        {
-          ...groupSelected,
-          is_approved: true,
-        },
-      ],
-    });
+    await updateDoc(
+      doc($firebaseStore, FIRESTORE_PATH.chat_collection, documentGroupId),
+      { is_approved: true }
+    );
     console.log("Approve User Successfully");
   } catch (err) {
     console.error("Error approve user: ", err);
   }
 };
 
-const handleDenyUser = async (dataUser: TProfile) => {
-  const messageGroupList = await getDoc(doc($firebaseStore, "messages", "message_group"));
-  const listGroupResponses = messageGroupList.data()?.list_group;
-  const groupIdSelected = dataUser.id + $state.profile?.id;
-
-  const newListGroups = listGroupResponses.filter((group: TMessageGroup) => {
-    return group.group_id !== groupIdSelected;
-  });
-
+const handleDenyUser = async (userDeleted: TProfile) => {
   try {
-    await updateDoc(doc($firebaseStore, "messages", "message_group"), {
-      list_group: newListGroups,
-    });
+    const documentGroupId = `${userDeleted.id}-${$state.profile?.id}`;
+    await updateDoc(
+      doc($firebaseStore, FIRESTORE_PATH.chat_collection, documentGroupId),
+      {
+        is_canceled: true,
+      }
+    );
     console.log("Deny User Successfully");
   } catch (err) {
     console.error("Error approve user: ", err);
