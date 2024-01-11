@@ -1,25 +1,26 @@
 <template>
   <v-list class="chat-list" item-props lines="three">
     <ChatBox
-      v-for="(item, i) in listChatUsers"
-      :name="`${item.to.firstName} ${item.to.lastName}`"
+      v-for="(item, i) in oppositeUser"
+      :name="`${item.oppositeUser?.firstName} ${item.oppositeUser?.lastName}`"
       time="20:09"
-      :avatar="item.to.avatar"
+      :avatar="item.oppositeUser?.avatar"
       :last-message="getLastMessage"
       :key="i"
       :value="item"
-      @click="handleClickItemUser(item.to)"
+      @click="handleClickItemUser(item.oppositeUser!)"
     />
   </v-list>
 </template>
 <script lang="ts" setup>
-import { doc, onSnapshot } from "firebase/firestore";
+import { collection, onSnapshot, query } from "firebase/firestore";
+import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
 
 const navigatorTab = useNavigatorTabStore();
 const { $firebaseStore } = useNuxtApp();
 const { $state } = useProfileStore();
 const chatProfileStore = useChatProfileStore();
-const listChatUsers = ref<TMessageGroup[]>([]);
+const oppositeUser = ref<TMessageGroup[]>([]);
 
 const handleClickItemUser = (item: TProfile) => {
   navigatorTab.changeNavigatorTab("chat");
@@ -27,14 +28,20 @@ const handleClickItemUser = (item: TProfile) => {
 };
 
 const getListChat = () => {
-  onSnapshot(doc($firebaseStore, "messages", "message_group"), (doc) => {
-    const { list_group } = doc.data()!;
-    listChatUsers.value = list_group?.filter((group: TMessageGroup) => {
-      return (
-        $state.profile?.id &&
-        [group.from.id, group.to.id].includes($state.profile?.id) &&
-        group.is_approved
-      );
+  const q = query(collection($firebaseStore, FIRESTORE_PATH.chat_collection));
+  onSnapshot(q, (snapShot) => {
+    let tempRequest: TMessageGroup[] = [];
+    snapShot.forEach((doc) => {
+      if (doc.id.split("-").includes($state.profile?.id!) && doc.data().is_approved) {
+        tempRequest.push(doc.data() as TMessageGroup);
+      }
+    });
+
+    oppositeUser.value = tempRequest.map((e) => {
+      return {
+        ...e,
+        oppositeUser: e.sender.id === $state.profile?.id ? e.receiver : e.sender,
+      };
     });
   });
 };

@@ -142,7 +142,7 @@ const handleDenyUser = async (userDeleted: TProfile) => {
     );
     console.log("Deny User Successfully");
   } catch (err) {
-    console.error("Error approve user: ", err);
+    console.error("Error deny user: ", err);
   }
 };
 
