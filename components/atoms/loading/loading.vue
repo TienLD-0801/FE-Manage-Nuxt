@@ -5,9 +5,9 @@
 </template>
 
 <script lang="ts" setup>
-defineProps({
-  isLoading: Boolean,
-});
+defineProps<{
+  isLoading: Boolean;
+}>();
 </script>
 
 <style lang="scss" scoped>

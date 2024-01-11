@@ -17,12 +17,12 @@ const { register, addUsersFirebaseStore } = useFirebaseAuth();
 const isLoading = useState<boolean>("isLoading", () => false);
 const message = useState<string>("message", () => "");
 
-const handleRegister = async (data: TProfile) => {
+const handleRegister = async (data: TRegisterInfo) => {
   // reset value
   message.value = "";
   isLoading.value = true;
   try {
-    const user = await register(data.email, data.password!);
+    const user = await register(data.email, data.password);
     const dataUser = {
       id: user?.uid,
       firstName: data.firstName,

@@ -27,7 +27,7 @@
           />
           <v-container class="no-user-style" v-if="!users?.length">
             <p>No users here.</p>
-            <div class="no-user-photo" height="300" width="500" alt="no-user" />
+            <div class="no-user-photo" />
           </v-container>
         </div>
       </v-window-item>
@@ -42,7 +42,7 @@
           />
           <v-container class="no-user-style" v-if="!requestList.length">
             <p>No users here.</p>
-            <div class="no-user-photo" height="300" width="500" alt="no-user" />
+            <div class="no-user-photo" />
           </v-container>
         </div>
       </v-window-item>

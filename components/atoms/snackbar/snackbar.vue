@@ -11,7 +11,9 @@
 
 <script lang="ts" setup>
 const snackbar = defineModel({ type: Boolean, default: false });
-defineProps({ message: String });
+defineProps<{
+  message: string;
+}>();
 </script>
 
 <style lang="scss" scoped>
