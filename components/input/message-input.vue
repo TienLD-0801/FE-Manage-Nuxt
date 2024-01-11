@@ -20,6 +20,7 @@ const message = defineModel({
   type: String,
   default: "",
 });
+defineEmits(["on-clear-message", "on-send-message"]);
 </script>
 
 <style lang="scss" scoped>

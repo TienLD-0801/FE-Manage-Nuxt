@@ -1,6 +1,5 @@
-import { MessageBox } from '../../../.nuxt/components.d';
 <template>
-  <v-container class="message-container overflow-y-auto">
+  <v-infinite-scroll id="message-list-scroll" class="message-scroll" side="end">
     <MessageBox
       v-for="item in messageList"
       :key="item.message_id"
@@ -8,7 +7,8 @@ import { MessageBox } from '../../../.nuxt/components.d';
       :time="item.created_at"
       :isSelf="item.user_id === $state.profile?.id"
     />
-  </v-container>
+    <template v-slot:loading> CustomLoading</template>
+  </v-infinite-scroll>
 </template>
 
 <script setup lang="ts">
@@ -19,12 +19,10 @@ const { $state } = useProfileStore();
 </script>
 
 <style lang="scss" scoped>
-.message-container {
-  height: 100%;
-  max-width: none;
-  display: flex;
+.message-scroll {
   flex-direction: column-reverse;
+  height: 100vh;
   gap: 20px;
-  padding: 15px 25px;
+  padding: 0 25px;
 }
 </style>
