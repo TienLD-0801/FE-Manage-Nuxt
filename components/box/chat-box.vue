@@ -8,7 +8,7 @@
           <span v-text="time" />
         </div>
         <p class="message-text">
-          <span class="message-target" v-text="'You — '" />
+          <span class="message-target" v-text="subMessage" />
           <span v-text="lastMessage" />
         </p>
       </div>
@@ -20,6 +20,7 @@
 defineProps<{
   name: string;
   avatar: string;
+  subMessage: string;
   lastMessage: string;
   time: string;
 }>();

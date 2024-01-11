@@ -1,7 +1,7 @@
 <template>
-  <v-container class="message-container">
+  <v-container id="message-container" class="message-container">
     <div
-      v-for="(item, index) in messageList"
+      v-for="item in messageList"
       :key="item.message_id"
       :class="item.user_id === $state.profile?.id ? 'message-right' : 'message-left'"
       class="message"
@@ -23,13 +23,13 @@ const { $state } = useProfileStore();
 
 <style lang="scss" scoped>
 .message-container {
-  overflow: auto;
   height: 100%;
   padding: 15px 25px;
   max-width: none;
   display: flex;
-  justify-content: flex-end;
   flex-direction: column;
+  overflow-y: auto;
+  justify-content: flex-end;
 }
 
 .message {

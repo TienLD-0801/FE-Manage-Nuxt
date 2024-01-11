@@ -5,11 +5,12 @@
       <div class="intro-chat" />
     </div>
     <ChatBox
+      :subMessage="getLastMessage(item.messages).subMessage"
       v-for="(item, i) in chatListMapping"
       :name="`${item.oppositeUser?.firstName} ${item.oppositeUser?.lastName}`"
       time="20:09"
       :avatar="String(item.oppositeUser?.avatar)"
-      :last-message="getLastMessage"
+      :last-message="getLastMessage(item.messages).lastMessage"
       :key="i"
       :value="item"
       @click="handleClickItemUser(item)"
@@ -28,7 +29,6 @@ const chatListMapping = ref<TMessageGroup[]>([]);
 const handleClickItemUser = (item: TMessageGroup) => {
   if (!item) return;
   navigatorTab.changeNavigatorTab({ tab: "chats", group: item });
-  // chatProfileStore.updateChatInfo(item);
 };
 
 const getListChat = () => {
@@ -50,7 +50,27 @@ const getListChat = () => {
   });
 };
 
-const getLastMessage = `Say ${"Hello"} to start the conservation !`;
+const getLastMessage = (messagesList: TMessage[]) => {
+  let noMessage = {
+    lastMessage: `Say ${"Hello"} to start the conservation !`,
+    subMessage: "",
+  };
+  console.log("messagesList: ", messagesList);
+  if (messagesList.length) {
+    if (messagesList[messagesList.length - 1].user_id === $state.profile?.id) {
+      noMessage = {
+        lastMessage: messagesList[messagesList.length - 1].content,
+        subMessage: "You — ",
+      };
+    } else {
+      noMessage = {
+        lastMessage: messagesList[messagesList.length - 1].content,
+        subMessage: "",
+      };
+    }
+  }
+  return noMessage;
+};
 
 watchEffect(() => {
   getListChat();
