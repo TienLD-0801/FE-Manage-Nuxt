@@ -6,9 +6,9 @@
         <v-list-item>
           <div class="setting-profile">
             <v-avatar class="avatar" :image="$state.profile?.avatar" />
-            <v-list-item-title
-              v-text="`${$state.profile?.firstName} ${$state.profile?.lastName}`"
-            />
+            <v-list-item-title>{{
+              `${$state.profile?.firstName} ${$state.profile?.lastName}`
+            }}</v-list-item-title>
             <v-list-item-subtitle>{{ $state.profile?.email }}</v-list-item-subtitle>
           </div>
         </v-list-item>
