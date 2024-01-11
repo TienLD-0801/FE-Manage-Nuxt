@@ -9,7 +9,7 @@
         <v-btn @click.stop="rail = !rail" icon>
           <v-icon>mdi-dots-vertical</v-icon>
         </v-btn>
-        <v-navigation-drawer location="right" v-if="rail" permanent>
+        <v-navigation-drawer :width="300" location="right" v-if="rail" permanent>
           <div class="left-drawer-chat">
             <v-list>
               <v-list-item>
