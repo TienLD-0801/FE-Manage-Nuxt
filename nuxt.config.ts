@@ -2,7 +2,7 @@ const path = require('path');
 export default defineNuxtConfig({
   app: {
     head: {
-      title: 'MyApp',
+      title: 'Chatty',
       meta: [{ name: 'description', content: 'My amazing site.' }],
     },
   },

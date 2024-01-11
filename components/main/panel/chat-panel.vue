@@ -33,7 +33,7 @@ const sendMessage = async () => {
     message_id: (Math.random() * 123456789).toFixed(0).toString(),
     user_id: $state.profile?.id,
     content: message.value,
-    created_at: new Date().getTime(),
+    created_at: new Date().toString(),
   };
 
   try {
