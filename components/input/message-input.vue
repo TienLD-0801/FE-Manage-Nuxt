@@ -1,66 +1,25 @@
 <template>
-  <v-form class="message-input-container">
-    <v-col class="input-frame" cols="12">
+  <v-form class="message-input-container" @submit.prevent="$emit('on-send-message')">
+    <v-col class="input-frame">
       <v-text-field
         v-model="message"
-        :append-icon="message ? 'mdi-send' : 'mdi-microphone'"
-        :prepend-icon="icon"
+        append-icon="mdi-send"
         variant="filled"
         clear-icon="mdi-close-circle"
         clearable
         label="Message"
         type="text"
-        @click:append-inner="toggleMarker"
-        @click:append="sendMessage"
-        @click:prepend="changeIcon"
-        @click:clear="clearMessage"
+        @click:clear="$emit('on-clear-message')"
+        @click:append="$emit('on-send-message')"
       ></v-text-field>
     </v-col>
   </v-form>
 </template>
-<script>
-export default {
-  data: () => ({
-    message: "Hey!",
-    marker: true,
-    iconIndex: 0,
-    icons: [
-      "mdi-emoticon",
-      "mdi-emoticon-cool",
-      "mdi-emoticon-dead",
-      "mdi-emoticon-excited",
-      "mdi-emoticon-happy",
-      "mdi-emoticon-neutral",
-      "mdi-emoticon-sad",
-      "mdi-emoticon-tongue",
-    ],
-  }),
-
-  computed: {
-    icon() {
-      return this.icons[this.iconIndex];
-    },
-  },
-
-  methods: {
-    toggleMarker() {
-      this.marker = !this.marker;
-    },
-    sendMessage() {
-      this.resetIcon();
-      this.clearMessage();
-    },
-    clearMessage() {
-      this.message = "";
-    },
-    resetIcon() {
-      this.iconIndex = 0;
-    },
-    changeIcon() {
-      this.iconIndex === this.icons.length - 1 ? (this.iconIndex = 0) : this.iconIndex++;
-    },
-  },
-};
+<script lang="ts" setup>
+const message = defineModel({
+  type: String,
+  default: "",
+});
 </script>
 
 <style lang="scss" scoped>

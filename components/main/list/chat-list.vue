@@ -12,7 +12,7 @@
       :last-message="getLastMessage"
       :key="i"
       :value="item"
-      @click="handleClickItemUser(item?.oppositeUser)"
+      @click="handleClickItemUser(item)"
     />
   </v-list>
 </template>
@@ -23,13 +23,12 @@ import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
 const navigatorTab = useNavigatorTabStore();
 const { $firebaseStore } = useNuxtApp();
 const { $state } = useProfileStore();
-const chatProfileStore = useChatProfileStore();
 const chatListMapping = ref<TMessageGroup[]>([]);
 
-const handleClickItemUser = (item?: TProfile) => {
+const handleClickItemUser = (item: TMessageGroup) => {
   if (!item) return;
-  navigatorTab.changeNavigatorTab("chat");
-  chatProfileStore.updateChatInfo(item);
+  navigatorTab.changeNavigatorTab({ tab: "chats", group: item });
+  // chatProfileStore.updateChatInfo(item);
 };
 
 const getListChat = () => {

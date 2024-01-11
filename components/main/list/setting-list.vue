@@ -1,21 +1,33 @@
 <template>
   <v-list class="setting-list-container" density="compact" nav>
     <v-list-item
-      @click="navigatorTab.changeNavigatorTab('security')"
+      @click="
+        navigatorTab.changeNavigatorTab({
+          tab: 'security',
+        })
+      "
       prepend-icon="mdi-account-lock"
       title="Security"
       value="security"
       color="primary"
     ></v-list-item>
     <v-list-item
-      @click="navigatorTab.changeNavigatorTab('users')"
+      @click="
+        navigatorTab.changeNavigatorTab({
+          tab: 'users',
+        })
+      "
       prepend-icon="mdi-account-group-outline"
       title="Users"
       value="users"
       color="primary"
     ></v-list-item>
     <v-list-item
-      @click="navigatorTab.changeNavigatorTab('settings')"
+      @click="
+        navigatorTab.changeNavigatorTab({
+          tab: 'settings',
+        })
+      "
       prepend-icon="mdi-cog-outline"
       title="Settings"
       value="settings"

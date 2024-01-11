@@ -1,10 +1,20 @@
-const INIT_NAVIGATOR_TAB = 'default';
+type TNavigatorTab = {
+  tab: string;
+  group?: TMessageGroup;
+};
+
+const INIT_NAVIGATOR_TAB = {
+  tab: 'default',
+};
 
 export const useNavigatorTabStore = defineStore(
   'navigator-tab',
   () => {
-    const currentTab = ref(INIT_NAVIGATOR_TAB);
-    const changeNavigatorTab = (payload: string) => {
+    const currentTab = ref<TNavigatorTab>(INIT_NAVIGATOR_TAB);
+    const changeNavigatorTab = (payload: {
+      tab: string;
+      group?: TMessageGroup;
+    }) => {
       currentTab.value = payload;
     };
 

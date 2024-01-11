@@ -5,7 +5,7 @@
 definePageMeta({
   middleware: "home-guard",
 });
-import { doc, getDoc, onSnapshot } from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore";
 import MainLayout from "~/layouts/home/main-layout.vue";
 const { $firebaseStore } = useNuxtApp();
 const profileStore = useProfileStore();
@@ -23,7 +23,7 @@ const getUserDatabase = async () => {
 
 watchEffect(() => {
   getUserDatabase();
-  navigatorTabStore.changeNavigatorTab("default");
+  navigatorTabStore.changeNavigatorTab({ tab: "default" });
 });
 </script>
 

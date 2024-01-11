@@ -1,44 +1,24 @@
 <template>
   <v-container class="message-container">
     <div
-      v-for="(message, index) in data"
-      :key="index"
-      :class="message.from === 'nguoiA' ? 'message-right' : 'message-left'"
+      v-for="(item, index) in messageList"
+      :key="item.message_id"
+      :class="item.user_id === $state.profile?.id ? 'message-right' : 'message-left'"
       class="message"
     >
       <div>
-        <v-chip size="large">{{ message.content }}</v-chip>
+        <v-chip size="large">{{ item.content }}</v-chip>
       </div>
     </div>
   </v-container>
 </template>
 
 <script setup lang="ts">
-const data = ref([
-  { from: "nguoiA", content: "Xin chào bạn" },
-  { from: "nguoiA", content: "Toi la tien" },
-  { to: "nguoiA", content: "chao ban nhe" },
-  { to: "nguoiA", content: "chao ban nhe" },
-  { to: "nguoiA", content: "chao ban nhe" },
-  { to: "nguoiA", content: "chao ban nhe" },
-  { to: "nguoiA", content: "chao ban nhe" },
-  { to: "nguoiA", content: "chao ban nhe" },
-  { to: "nguoiA", content: "chao ban nhe" },
-  { to: "nguoiA", content: "chao ban nhe" },
-  { to: "nguoiA", content: "chao ban nhe" },
-  { to: "nguoiA", content: "chao ban nhe" },
-  { to: "nguoiA", content: "chao ban nhe" },
-  { to: "nguoiA", content: "chao ban nhe" },
-  { to: "nguoiA", content: "chao ban nhe" },
-  { to: "nguoiA", content: "chao ban nhe" },
-  { to: "nguoiA", content: "chao ban nhe" },
-  { to: "nguoiA", content: "chao ban nhe" },
-  { to: "nguoiA", content: "chao ban nhe" },
-  { to: "nguoiA", content: "chao ban nhe" },
-  { to: "nguoiA", content: "chao ban nhe" },
-  { to: "nguoiA", content: "chao ban nhe" },
-  { to: "nguoiA", content: "chao ban nhe" },
-]);
+defineProps<{
+  messageList: TMessage[];
+}>();
+
+const { $state } = useProfileStore();
 </script>
 
 <style lang="scss" scoped>
@@ -48,7 +28,8 @@ const data = ref([
   padding: 15px 25px;
   max-width: none;
   display: flex;
-  flex-direction: column-reverse;
+  justify-content: flex-end;
+  flex-direction: column;
 }
 
 .message {
