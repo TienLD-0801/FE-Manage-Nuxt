@@ -23,6 +23,7 @@ const navigatorTab = useNavigatorTabStore();
 const message = ref<string>("");
 const messageList = ref<TMessage[]>([]);
 const { $firebaseStore } = useNuxtApp();
+const { setScroll } = useScroll();
 
 const sendMessage = async () => {
   if (!message.value.trim().length) {
@@ -65,6 +66,10 @@ const getAllMessage = async () => {
     );
   } catch (error) {}
 };
+
+watch(messageList, () => {
+  setScroll("message-list-scroll", 0, "instant");
+});
 
 watchEffect(() => {
   getAllMessage();
