@@ -56,6 +56,7 @@ const props = defineProps<{
   user: TProfile;
 }>();
 const { user } = props;
+const { $state } = useProfileStore();
 const { $firebaseStore } = useNuxtApp();
 const status = ref<ConnectUserStatus>(ConnectUserStatus.NewConnect);
 
@@ -63,6 +64,9 @@ const getFriendStatus = () => {
   const q = query(collection($firebaseStore, FIRESTORE_PATH.chat_collection));
   onSnapshot(q, (snapShot) => {
     snapShot.forEach((doc) => {
+      if ($state.profile?.id && !doc.id.split("-").includes($state.profile.id)) {
+        return;
+      }
       if (doc.id.split("-").includes(user.id) && doc.data().is_canceled) {
         status.value = ConnectUserStatus.NewConnect;
       } else if (doc.id.split("-").includes(user.id) && doc.data().is_approved) {
