@@ -41,7 +41,6 @@ import { PATH_ROUTER } from "~/shared/constant/router";
 
 const tabs = defineModel({ default: "chats" });
 const chats = ref("chats");
-const friends = ref("friends");
 const settings = ref("settings");
 const authStore = useAuthStore();
 const { logout } = useFirebaseAuth();

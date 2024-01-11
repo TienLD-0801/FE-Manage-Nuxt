@@ -1,9 +1,9 @@
 <template>
-  <DefaultPanel v-if="navigatorTab.$state.currentTab === 'default'" />
-  <ChatPanel v-if="navigatorTab.$state.currentTab === 'chat'" />
-  <SecurityPanel v-else-if="navigatorTab.$state.currentTab === 'security'" />
-  <UserPanel v-else-if="navigatorTab.$state.currentTab === 'users'" />
-  <SettingPanel v-else />
+  <DefaultPanel v-if="navigatorTab.$state.currentTab.tab === 'default'" />
+  <ChatPanel v-if="navigatorTab.$state.currentTab.tab === 'chats'" />
+  <SecurityPanel v-else-if="navigatorTab.$state.currentTab.tab === 'security'" />
+  <UserPanel v-else-if="navigatorTab.$state.currentTab.tab === 'users'" />
+  <SettingPanel v-else-if="navigatorTab.$state.currentTab.tab === 'settings'" />
 </template>
 
 <script lang="ts" setup>
