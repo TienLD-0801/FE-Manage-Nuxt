@@ -1,8 +1,8 @@
 type TMessage = {
-  message_id: String;
-  user_id: String;
-  content: String;
-  created_at: String;
+  message_id: string;
+  user_id: string;
+  content: string;
+  created_at: string;
 };
 
 type TMessageGroup = {

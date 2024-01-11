@@ -17,12 +17,12 @@
 </template>
 
 <script lang="ts" setup>
-defineProps({
-  name: String,
-  avatar: String,
-  lastMessage: String,
-  time: String,
-});
+defineProps<{
+  name: string;
+  avatar: string;
+  lastMessage: string;
+  time: string;
+}>();
 </script>
 
 <style lang="scss" scoped>

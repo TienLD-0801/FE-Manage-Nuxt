@@ -15,10 +15,10 @@
 </template>
 
 <script lang="ts" setup>
-defineProps({
-  name: String,
-  avatar: String,
-});
+defineProps<{
+  name: string;
+  avatar: string;
+}>();
 </script>
 
 <style lang="scss" scoped>

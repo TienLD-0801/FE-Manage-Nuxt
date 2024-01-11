@@ -1,14 +1,18 @@
 <template>
-  <v-list class="chat-list" item-props lines="three">
+  <v-list class="chat-list-container" item-props lines="three">
+    <div class="no-chat-list" v-if="!chatListMapping.length">
+      <p>Let's add friend to have happy conservations.</p>
+      <div class="intro-chat" />
+    </div>
     <ChatBox
-      v-for="(item, i) in oppositeUser"
+      v-for="(item, i) in chatListMapping"
       :name="`${item.oppositeUser?.firstName} ${item.oppositeUser?.lastName}`"
       time="20:09"
-      :avatar="item.oppositeUser?.avatar"
+      :avatar="String(item.oppositeUser?.avatar)"
       :last-message="getLastMessage"
       :key="i"
       :value="item"
-      @click="handleClickItemUser(item.oppositeUser!)"
+      @click="handleClickItemUser(item?.oppositeUser)"
     />
   </v-list>
 </template>
@@ -20,9 +24,10 @@ const navigatorTab = useNavigatorTabStore();
 const { $firebaseStore } = useNuxtApp();
 const { $state } = useProfileStore();
 const chatProfileStore = useChatProfileStore();
-const oppositeUser = ref<TMessageGroup[]>([]);
+const chatListMapping = ref<TMessageGroup[]>([]);
 
-const handleClickItemUser = (item: TProfile) => {
+const handleClickItemUser = (item?: TProfile) => {
+  if (!item) return;
   navigatorTab.changeNavigatorTab("chat");
   chatProfileStore.updateChatInfo(item);
 };
@@ -37,7 +42,7 @@ const getListChat = () => {
       }
     });
 
-    oppositeUser.value = tempRequest.map((e) => {
+    chatListMapping.value = tempRequest.map((e) => {
       return {
         ...e,
         oppositeUser: e.sender.id === $state.profile?.id ? e.receiver : e.sender,
@@ -54,7 +59,27 @@ watchEffect(() => {
 </script>
 
 <style lang="scss" scoped>
-.chat-list-container .chat-list {
-  padding-top: 0 !important;
+.chat-list-container {
+  padding-top: 0px !important;
+}
+
+.chat-list-container .no-chat-list {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding-top: 15px !important;
+}
+
+.chat-list-container .intro-chat {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 200px;
+  height: 250px;
+  background-image: url("/imgs/chat-intro.gif");
+  background-size: contain;
+  margin-top: 20px;
 }
 </style>
