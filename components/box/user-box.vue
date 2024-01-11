@@ -2,46 +2,46 @@
   <v-card
     class="user-box-container"
     width="320"
-    :title="`${dataUser.firstName} ${dataUser.lastName}`"
-    :subtitle="dataUser.email"
+    :title="`${user.firstName} ${user.lastName}`"
+    :subtitle="user.email"
   >
     <template v-slot:prepend>
-      <v-avatar :image="dataUser.avatar" />
+      <v-avatar :image="user.avatar" />
     </template>
     <template v-slot:append>
       <div class="icons-frame">
         <v-icon
-          v-if="status.icon === ConnectUserStatus.SentRequest"
-          :icon="status.icon"
-          :color="status.color"
+          v-if="status === ConnectUserStatus.SentRequest"
+          :icon="ConnectUserStatus.SentRequest"
+          color="grey"
         ></v-icon>
         <v-icon
           class="icon"
-          v-if="status.icon === ConnectUserStatus.NewConnect"
+          v-if="status === ConnectUserStatus.NewConnect"
           @click="$emit('on-add-user', user)"
-          :icon="status.icon"
-          :color="status.color"
+          :icon="ConnectUserStatus.NewConnect"
+          color="success"
         ></v-icon>
         <v-icon
           class="icon"
-          v-if="status.icon === ConnectUserStatus.WaitApprove"
+          v-if="status === ConnectUserStatus.WaitApprove"
           @click="$emit('on-approve-user', user)"
-          :icon="status.icon"
-          :color="status.color"
+          :icon="ConnectUserStatus.WaitApprove"
+          color="primary"
         ></v-icon>
         <v-icon
           class="icon"
-          v-if="status.icon === ConnectUserStatus.WaitApprove"
+          v-if="status === ConnectUserStatus.WaitApprove"
           @click="$emit('on-deny-user', user)"
           icon="mdi-close"
           color="error"
         ></v-icon>
         <v-icon
           class="icon"
-          v-if="status.icon === ConnectUserStatus.ConnectApproved"
+          v-if="status === ConnectUserStatus.ConnectApproved"
           @click="$emit('on-chat-user', user)"
-          :icon="status.icon"
-          :color="status.color"
+          :icon="ConnectUserStatus.ConnectApproved"
+          color="primary"
         ></v-icon>
       </div>
     </template>
@@ -49,68 +49,32 @@
 </template>
 
 <script lang="ts" setup>
+import { collection, onSnapshot, query } from "firebase/firestore";
+import { ConnectUserStatus } from "~/shared/constant/constant";
+import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
 const props = defineProps<{
-  dataUser: TProfile;
+  user: TProfile;
 }>();
-import {
-  arrayRemove,
-  arrayUnion,
-  doc,
-  onSnapshot,
-  setDoc,
-  updateDoc,
-  getDoc,
-} from "firebase/firestore";
+const { user } = props;
 const { $firebaseStore } = useNuxtApp();
-const { $state } = useProfileStore();
-const { dataUser } = props;
-enum ConnectUserStatus {
-  NewConnect = "mdi-account-plus-outline",
-  SentRequest = "mdi-cube-send",
-  WaitApprove = "mdi-check",
-  ConnectApproved = "mdi-chat-outline",
-}
-
-const status = ref({
-  icon: ConnectUserStatus.NewConnect,
-  color: "success",
-});
+const status = ref<ConnectUserStatus>(ConnectUserStatus.NewConnect);
 
 const getFriendStatus = () => {
-  onSnapshot(doc($firebaseStore, "messages", "message_group"), (doc) => {
-    const { list_group } = doc.data()!;
-    const existSelfFrom: TMessageGroup = list_group?.find(
-      (e: TMessageGroup) => e.from.id === $state.profile?.id && e.to.id === dataUser.id
-    );
-
-    const existSelfTo: TMessageGroup = list_group?.find(
-      (e: TMessageGroup) => e.from.id === dataUser.id && e.to.id === $state.profile?.id
-    );
-
-    if (existSelfFrom?.is_approved || existSelfTo?.is_approved) {
-      status.value = {
-        icon: ConnectUserStatus.ConnectApproved,
-        color: "primary",
-      };
-    } else if (existSelfFrom && !existSelfFrom?.is_approved) {
-      status.value = {
-        icon: ConnectUserStatus.SentRequest,
-        color: "grey",
-      };
-    } else if (existSelfTo && !existSelfTo?.is_approved) {
-      status.value = {
-        icon: ConnectUserStatus.WaitApprove,
-        color: "primary",
-      };
-    } else {
-      status.value = {
-        icon: ConnectUserStatus.NewConnect,
-        color: "success",
-      };
-    }
+  const q = query(collection($firebaseStore, FIRESTORE_PATH.chat_collection));
+  onSnapshot(q, (snapShot) => {
+    snapShot.forEach((doc) => {
+      if (doc.id.split("-").includes(user.id) && doc.data().is_canceled) {
+        status.value = ConnectUserStatus.NewConnect;
+      } else if (doc.id.split("-").includes(user.id) && doc.data().is_approved) {
+        status.value = ConnectUserStatus.ConnectApproved;
+      } else if (doc.id.split("-")[0] === user.id) {
+        status.value = ConnectUserStatus.WaitApprove;
+      } else if (doc.id.split("-")[1] === user.id && !!doc.data()) {
+        status.value = ConnectUserStatus.SentRequest;
+      }
+    });
   });
 };
-
 watchEffect(() => {
   getFriendStatus();
 });

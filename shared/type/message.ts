@@ -1,7 +1,14 @@
+type TMessage = {
+  message_id: String;
+  user_id: String;
+  content: String;
+  created_at: String;
+};
+
 type TMessageGroup = {
-  group_id: String;
-  to: TProfile;
-  from: TProfile;
-  data: [];
+  sender: TProfile;
+  receiver: TProfile;
+  messages: TMessage[];
+  is_canceled: boolean;
   is_approved: boolean;
 };
