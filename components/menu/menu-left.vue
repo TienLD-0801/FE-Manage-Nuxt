@@ -3,7 +3,7 @@
   <v-navigation-drawer class="navigator-drawer-container">
     <v-toolbar color="#e4e8eb" class="px-0">
       <v-icon class="icon-app" size="large" icon="mdi-snapchat" />
-      <v-toolbar-title>Chat Nuxt</v-toolbar-title>
+      <v-toolbar-title>Chatty</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn icon>
         <v-icon>mdi-magnify</v-icon>

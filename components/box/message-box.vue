@@ -1,0 +1,41 @@
+<template>
+  <v-list-item :class="['message-box-container', isSelf && 'self-background'].join(' ')">
+    {{ content }}
+    <v-list-item-subtitle>
+      {{ formatTime }}
+    </v-list-item-subtitle>
+  </v-list-item>
+</template>
+
+<script lang="ts" setup>
+const props = defineProps<{
+  content: string;
+  time: string;
+  isSelf: boolean;
+}>();
+
+const { time, content } = props;
+
+const hour = new Date(time).getHours();
+const minute = new Date(time).getMinutes();
+const formatTime = `${hour}:${minute < 10 ? `0${minute}` : `${minute}`}`;
+</script>
+
+<style lang="scss" scoped>
+.message-box-container {
+  background-color: rgb(36, 111, 198);
+  color: white;
+  white-space: pre-line;
+  width: fit-content;
+  max-width: 400px;
+  padding: 10px 18px;
+  border-radius: 18px;
+  word-wrap: break-word;
+}
+
+.self-background {
+  background-color: rgb(224, 224, 224) !important;
+  color: black;
+  align-self: flex-end;
+}
+</style>
