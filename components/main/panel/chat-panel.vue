@@ -60,7 +60,7 @@ const getAllMessage = async () => {
     onSnapshot(
       doc($firebaseStore, FIRESTORE_PATH.chat_collection, documentGroupId),
       (doc) => {
-        messageList.value = doc.data()?.messages;
+        messageList.value = doc.data()?.messages.reverse();
       }
     );
   } catch (error) {}

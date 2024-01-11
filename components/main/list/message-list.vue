@@ -1,15 +1,18 @@
 <template>
-  <v-container id="message-container" class="message-container">
-    <div
+  <v-container class="message-container overflow-y-auto">
+    <v-row
       v-for="item in messageList"
       :key="item.message_id"
       :class="item.user_id === $state.profile?.id ? 'message-right' : 'message-left'"
       class="message"
     >
-      <div>
-        <v-chip size="large">{{ item.content }}</v-chip>
-      </div>
-    </div>
+      <v-chip
+        variant="flat"
+        :color="item.user_id === $state.profile?.id ? 'primary' : ''"
+        size="large"
+        >{{ item.content }}</v-chip
+      >
+    </v-row>
   </v-container>
 </template>
 
@@ -17,32 +20,33 @@
 defineProps<{
   messageList: TMessage[];
 }>();
-
 const { $state } = useProfileStore();
 </script>
 
 <style lang="scss" scoped>
 .message-container {
   height: 100%;
-  padding: 15px 25px;
   max-width: none;
   display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-  justify-content: flex-end;
+  flex-direction: column-reverse;
+  gap: 20px;
 }
 
 .message {
-  margin-bottom: 12px;
+  justify-content: center;
+  max-height: 40px;
+  width: auto;
+  display: flex;
+  align-content: flex-end;
+  padding: 0 20px;
+  margin: 0;
 }
 
 .message-right {
-  align-self: flex-end; /* Tin nhắn từ người gửi sẽ căn lề phải */
-  /* Thêm kiểu dáng cho tin nhắn bên phải */
+  align-self: flex-end;
 }
 
 .message-left {
-  align-self: flex-start; /* Tin nhắn từ người nhận sẽ căn lề trái */
-  /* Thêm kiểu dáng cho tin nhắn bên trái */
+  align-self: flex-start;
 }
 </style>
