@@ -11,4 +11,5 @@ type TMessageGroup = {
   messages: TMessage[];
   is_canceled: boolean;
   is_approved: boolean;
+  oppositeUser?: TProfile;
 };
