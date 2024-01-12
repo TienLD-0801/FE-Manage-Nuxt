@@ -5,24 +5,27 @@
       <div class="intro-chat" />
     </div>
     <ChatBox
-      :subMessage="getLastMessage(item.messages).subMessage"
       v-for="(item, i) in chatListMapping"
+      :subMessage="item.last_message?.user_id === $state.profile?.id ? 'You — ' : ''"
       :name="`${item.oppositeUser?.firstName} ${item.oppositeUser?.lastName}`"
-      time="20:09"
+      :time="`${new Date(item.last_message?.created_at!).getHours()}:${new Date(
+        item.last_message?.created_at!
+      ).getMinutes()}`"
       :avatar="String(item.oppositeUser?.avatar)"
-      :last-message="getLastMessage(item.messages).lastMessage"
+      :last-message="
+        item.last_message
+          ? item.last_message?.content
+          : 'Say Hello to start the conservation !'
+      "
       :key="i"
       :value="item"
       @click="handleClickItemUser(item)"
-      :activeItem="
-        `${navigatorTab.$state.currentTab.group?.sender.id}-${navigatorTab.$state.currentTab.group?.receiver.id}` ===
-        `${item.sender.id}-${item.receiver.id}`
-      "
+      :activeItem="true"
     />
   </v-list>
 </template>
 <script lang="ts" setup>
-import { collection, onSnapshot, query } from "firebase/firestore";
+import { collection, onSnapshot, query, where } from "firebase/firestore";
 import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
 
 const navigatorTab = useNavigatorTabStore();
@@ -35,49 +38,34 @@ const handleClickItemUser = (item: TMessageGroup) => {
   navigatorTab.changeNavigatorTab({ tab: "chats", group: item });
 };
 
-const getListChat = () => {
-  const q = query(collection($firebaseStore, FIRESTORE_PATH.chat_collection));
-  onSnapshot(q, (snapShot) => {
-    let tempRequest: TMessageGroup[] = [];
-    snapShot.forEach((doc) => {
-      if (doc.id.split("-").includes($state.profile?.id!) && doc.data().is_approved) {
-        tempRequest.push(doc.data() as TMessageGroup);
-      }
-    });
+const getListUserChat = () => {
+  const qChats = query(collection($firebaseStore, FIRESTORE_PATH.chat_collection));
 
-    chatListMapping.value = tempRequest.map((e) => {
-      return {
-        ...e,
-        oppositeUser: e.sender.id === $state.profile?.id ? e.receiver : e.sender,
-      };
+  onSnapshot(qChats, (doc) => {
+    let tempListUserChat: TMessageGroup[] = [];
+
+    doc.forEach((snapShotChat) => {
+      if (snapShotChat.id.split("-").includes($state.profile?.id!)) {
+        tempListUserChat.push({
+          ...(snapShotChat.data() as TMessageGroup),
+          oppositeUser:
+            snapShotChat.data().sender.id === $state.profile?.id
+              ? snapShotChat.data().receiver
+              : snapShotChat.data().sender,
+          last_message: snapShotChat.get("last_message"),
+        });
+      }
+      chatListMapping.value = tempListUserChat.sort((a, b) => {
+        const date1 = new Date(b.last_message.created_at);
+        const date2 = new Date(a.last_message.created_at);
+        return Number(date1) - Number(date2);
+      });
     });
   });
 };
 
-const getLastMessage = (messagesList: TMessage[]) => {
-  let noMessage = {
-    lastMessage: `Say ${"Hello"} to start the conservation !`,
-    subMessage: "",
-  };
-  console.log("messagesList: ", messagesList);
-  if (messagesList.length) {
-    if (messagesList[messagesList.length - 1].user_id === $state.profile?.id) {
-      noMessage = {
-        lastMessage: messagesList[messagesList.length - 1].content,
-        subMessage: "You — ",
-      };
-    } else {
-      noMessage = {
-        lastMessage: messagesList[messagesList.length - 1].content,
-        subMessage: "",
-      };
-    }
-  }
-  return noMessage;
-};
-
 watchEffect(() => {
-  getListChat();
+  getListUserChat();
 });
 </script>
 

@@ -100,10 +100,16 @@ const getAllRequests = () => {
 const handleAddUser = async (userAdded: TProfile) => {
   const documentGroupId = `${$state.profile?.id}-${userAdded.id}`;
   const dataAdd: TMessageGroup = {
+    group_id: documentGroupId,
     sender: $state.profile!,
     receiver: userAdded,
     is_approved: false,
-    messages: [],
+    last_message: {
+      user_id: "",
+      content: "",
+      created_at: "",
+      message_id: "",
+    },
     is_canceled: false,
   };
   try {
