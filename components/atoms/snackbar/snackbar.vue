@@ -1,6 +1,6 @@
 <template>
   <v-snackbar v-model:model-value="snackbar" location="top" timeout="2000" color="red">
-    <div class="title">{{ message }}</div>
+    <div class="title">{{ alertText }}</div>
     <template v-slot:actions>
       <v-btn class="text-button" color="white" variant="text" @click="snackbar = false">
         Close
@@ -12,7 +12,7 @@
 <script lang="ts" setup>
 const snackbar = defineModel({ type: Boolean, default: false });
 defineProps<{
-  message: string;
+  alertText: string;
 }>();
 </script>
 
