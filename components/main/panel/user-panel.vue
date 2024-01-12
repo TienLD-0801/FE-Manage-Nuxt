@@ -59,6 +59,7 @@ import {
   query,
   setDoc,
   updateDoc,
+  where,
 } from "firebase/firestore";
 import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
 const { $firebaseStore } = useNuxtApp();
@@ -68,11 +69,16 @@ const tab = ref(null);
 const requestList = ref<TProfile[]>([]);
 const navigatorTab = useNavigatorTabStore();
 const getAllUsers = async () => {
-  onSnapshot(doc($firebaseStore, "users", "user_system"), (doc) => {
-    const { list_user } = doc.data()!;
-    users.value = list_user?.filter((user: TProfile) => {
-      return user.id !== $state.profile?.id;
+  const qUsers = query(
+    collection($firebaseStore, FIRESTORE_PATH.user_collection),
+    where("id", "!=", $state.profile?.id)
+  );
+  onSnapshot(qUsers, (onSnapShot) => {
+    let templeAllUser: TProfile[] = [];
+    onSnapShot.forEach((user) => {
+      templeAllUser.push(user.data() as TProfile);
     });
+    users.value = templeAllUser;
   });
 };
 

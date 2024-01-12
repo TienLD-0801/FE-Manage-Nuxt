@@ -7,18 +7,17 @@ definePageMeta({
 });
 import { doc, getDoc } from "firebase/firestore";
 import MainLayout from "~/layouts/home/main-layout.vue";
+import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
 const { $firebaseStore } = useNuxtApp();
 const profileStore = useProfileStore();
 const authStore = useAuthStore();
 const navigatorTabStore = useNavigatorTabStore();
 
 const getUserDatabase = async () => {
-  const userList = await getDoc(doc($firebaseStore, "users", "user_system"));
-  const { list_user } = userList.data()!;
-  const userDetail: TProfile = list_user.find(
-    (user: TProfile) => user.id === authStore.token?.localId
+  const userInfo = await getDoc(
+    doc($firebaseStore, FIRESTORE_PATH.user_collection, authStore.token?.localId!)
   );
-  profileStore.updateProfile(userDetail);
+  profileStore.updateProfile(userInfo.data() as TProfile);
 };
 
 watchEffect(() => {

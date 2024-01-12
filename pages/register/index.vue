@@ -1,5 +1,5 @@
 <template>
-  <Snackbar :model-value="Boolean(message)" :message="message" />
+  <Snackbar :model-value="Boolean(alertText)" :alertText="alertText" />
   <Loading :is-loading="isLoading" />
   <div class="register-page-container">
     <RegisterForm @handleRegister="handleRegister" />
@@ -14,29 +14,29 @@ import { CustomError } from "~/shared/Error/error";
 import { PATH_ROUTER } from "~/shared/constant/router";
 
 const { register, addUsersFirebaseStore } = useFirebaseAuth();
-const isLoading = useState<boolean>("isLoading", () => false);
-const message = useState<string>("message", () => "");
+const isLoading = ref<boolean>(false);
+const alertText = ref("");
 
-const handleRegister = async (data: TRegisterInfo) => {
+const handleRegister = async (dataForm: TRegisterInfo) => {
   // reset value
-  message.value = "";
+  alertText.value = "";
   isLoading.value = true;
   try {
-    const user = await register(data.email, data.password);
-    const dataUser = {
-      id: user?.uid,
-      firstName: data.firstName,
-      lastName: data.lastName,
-      email: data.email,
+    const user = await register(dataForm.email, dataForm.password);
+    const dataUser: TProfile = {
+      id: user?.uid!,
+      firstName: dataForm.firstName,
+      lastName: dataForm.lastName,
+      email: dataForm.email,
       avatar:
         "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png",
-      created_at: new Date().getTime(),
+      created_at: new Date().toString(),
     };
     await addUsersFirebaseStore(dataUser);
     navigateTo(PATH_ROUTER.login);
   } catch (error) {
     if (error instanceof CustomError) {
-      message.value = error.code;
+      alertText.value = error.code;
     }
   } finally {
     isLoading.value = false;

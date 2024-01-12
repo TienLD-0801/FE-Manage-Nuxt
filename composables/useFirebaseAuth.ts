@@ -4,8 +4,15 @@ import {
   signInWithEmailAndPassword,
   signOut,
 } from 'firebase/auth';
-import { arrayUnion, doc, updateDoc } from 'firebase/firestore';
+import {
+  arrayUnion,
+  collection,
+  doc,
+  setDoc,
+  updateDoc,
+} from 'firebase/firestore';
 import { CustomError } from '~/shared/Error/error';
+import { FIRESTORE_PATH } from '~/shared/constant/firebase-store';
 
 export const useFirebaseAuth = () => {
   const { $firebaseAuth, $firebaseStore } = useNuxtApp();
@@ -65,12 +72,14 @@ export const useFirebaseAuth = () => {
     }
   };
 
-  const addUsersFirebaseStore = async (dataUser: any) => {
-    const docUser = doc($firebaseStore, 'users', 'user_system');
+  const addUsersFirebaseStore = async (dataUser: TProfile) => {
+    const docUser = doc(
+      $firebaseStore,
+      FIRESTORE_PATH.user_collection,
+      dataUser.id,
+    );
     try {
-      await updateDoc(docUser, {
-        list_user: arrayUnion(dataUser),
-      });
+      await setDoc(docUser, dataUser);
     } catch (error) {
       if (error instanceof FirebaseError) {
         const customError = new CustomError(
