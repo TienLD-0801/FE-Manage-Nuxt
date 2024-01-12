@@ -4,7 +4,7 @@
       :name="fullName"
       :avatar="navigatorTab.$state.currentTab.group?.oppositeUser?.avatar || ''"
     />
-    <MessageList :message-list="messageList" />
+    <MessageList />
     <MessageInput
       v-model="message"
       @on-clear-message="clearMessage"
@@ -14,24 +14,13 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  collection,
-  doc,
-  limit,
-  onSnapshot,
-  orderBy,
-  query,
-  setDoc,
-  updateDoc,
-} from "firebase/firestore";
+import { collection, doc, setDoc, updateDoc } from "firebase/firestore";
 import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
 
 const { $state } = useProfileStore();
 const navigatorTab = useNavigatorTabStore();
 const message = ref<string>("");
-const messageList = ref<TMessage[]>([]);
 const { $firebaseStore } = useNuxtApp();
-const { setScroll } = useScroll();
 const fullName = computed(() => {
   const firstName = navigatorTab.$state.currentTab.group?.oppositeUser?.firstName;
   const lastName = navigatorTab.$state.currentTab.group?.oppositeUser?.lastName;
@@ -84,36 +73,6 @@ const sendMessage = async () => {
 const clearMessage = () => {
   message.value = "";
 };
-
-const getAllMessage = async () => {
-  const documentGroupId = `${navigatorTab.$state.currentTab.group?.sender.id}-${navigatorTab.$state.currentTab.group?.receiver.id}`;
-  const q = query(
-    collection(
-      $firebaseStore,
-      FIRESTORE_PATH.chat_collection,
-      documentGroupId,
-      FIRESTORE_PATH.message_collection
-    ),
-    orderBy("created_at", "desc"),
-    limit(20)
-  );
-
-  onSnapshot(q, (doc) => {
-    let tempSnapshot: TMessage[] = [];
-    doc.forEach((snapshot) => {
-      tempSnapshot.push(snapshot.data() as TMessage);
-    });
-    messageList.value = tempSnapshot;
-  });
-};
-
-watch(messageList, () => {
-  setScroll("message-list-scroll", 0, "instant");
-});
-
-watchEffect(() => {
-  getAllMessage();
-});
 </script>
 
 <style lang="scss" scoped>
