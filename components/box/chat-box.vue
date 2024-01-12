@@ -1,5 +1,5 @@
 <template>
-  <v-list-item color="primary" class="chat-item">
+  <v-list-item :class="['chat-item', activeItem && 'active-color'].join(' ')">
     <div class="chat-frame">
       <v-avatar class="message-avatar" :image="avatar"></v-avatar>
       <div class="message-content">
@@ -23,12 +23,14 @@ defineProps<{
   subMessage: string;
   lastMessage: string;
   time: string;
+  activeItem: boolean;
 }>();
 </script>
 
 <style lang="scss" scoped>
 .chat-item {
   padding: 0 10px;
+  background-color: white !important;
 }
 
 .chat-item .chat-frame {
@@ -74,5 +76,9 @@ defineProps<{
 
 .message-text .message-target {
   color: rgb(58, 112, 200);
+}
+
+.active-color {
+  background-color: rgba(73, 128, 218, 0.05) !important;
 }
 </style>
