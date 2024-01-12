@@ -6,9 +6,10 @@ type TMessage = {
 };
 
 type TMessageGroup = {
+  group_id: string;
   sender: TProfile;
   receiver: TProfile;
-  messages: TMessage[];
+  last_message: TMessage;
   is_canceled: boolean;
   is_approved: boolean;
   oppositeUser?: TProfile;
