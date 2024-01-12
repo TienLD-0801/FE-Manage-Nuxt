@@ -53,13 +53,12 @@
 <script lang="ts" setup>
 import {
   collection,
-  deleteDoc,
   doc,
+  getDocs,
   onSnapshot,
   query,
   setDoc,
   updateDoc,
-  where,
 } from "firebase/firestore";
 import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
 const { $firebaseStore } = useNuxtApp();
@@ -67,6 +66,7 @@ const { $state } = useProfileStore();
 const users = ref<TProfile[]>([]);
 const tab = ref(null);
 const requestList = ref<TProfile[]>([]);
+const navigatorTab = useNavigatorTabStore();
 const getAllUsers = async () => {
   onSnapshot(doc($firebaseStore, "users", "user_system"), (doc) => {
     const { list_user } = doc.data()!;
@@ -98,6 +98,7 @@ const getAllRequests = () => {
  * @param
  */
 const handleAddUser = async (userAdded: TProfile) => {
+  const documentGroupId = `${$state.profile?.id}-${userAdded.id}`;
   const dataAdd: TMessageGroup = {
     sender: $state.profile!,
     receiver: userAdded,
@@ -105,7 +106,6 @@ const handleAddUser = async (userAdded: TProfile) => {
     messages: [],
     is_canceled: false,
   };
-  const documentGroupId = `${$state.profile?.id}-${userAdded.id}`;
   try {
     await setDoc(
       doc($firebaseStore, FIRESTORE_PATH.chat_collection, documentGroupId),
@@ -146,8 +146,32 @@ const handleDenyUser = async (userDeleted: TProfile) => {
   }
 };
 
-const handleChatUser = (dataUser: TProfile) => {
-  // handle later
+const handleChatUser = async (dataUser: TProfile) => {
+  try {
+    const querySnapshot = await getDocs(collection($firebaseStore, "chats"));
+    querySnapshot.forEach((doc) => {
+      if (
+        $state.profile?.id &&
+        doc.id.split("-").includes(dataUser.id) &&
+        doc.id.split("-").includes($state.profile?.id)
+      ) {
+        const groupDetail = doc.data();
+        const groupOppositeConvert = {
+          ...groupDetail,
+          oppositeUser:
+            groupDetail.sender.id === $state.profile?.id
+              ? groupDetail.receiver
+              : groupDetail.sender,
+        };
+        navigatorTab.changeNavigatorTab({
+          tab: "chats",
+          group: groupOppositeConvert as TMessageGroup,
+        });
+      }
+    });
+  } catch (err) {
+    console.error("Error navigate to Chat: ", err);
+  }
 };
 
 watchEffect(() => {

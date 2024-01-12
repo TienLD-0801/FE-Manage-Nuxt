@@ -14,6 +14,10 @@
       :key="i"
       :value="item"
       @click="handleClickItemUser(item)"
+      :activeItem="
+        `${navigatorTab.$state.currentTab.group?.sender.id}-${navigatorTab.$state.currentTab.group?.receiver.id}` ===
+        `${item.sender.id}-${item.receiver.id}`
+      "
     />
   </v-list>
 </template>
