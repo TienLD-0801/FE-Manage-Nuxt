@@ -10,10 +10,8 @@
       :name="`${item.oppositeUser?.firstName} ${item.oppositeUser?.lastName}`"
       :time="
         item.last_message.content.length
-          ? `${new Date(item.last_message.created_at).getHours()}:${new Date(
-              item.last_message.created_at
-            ).getMinutes()}`
-          : `${new Date().getHours()}:${new Date().getMinutes()}`
+          ? convertTimeMessage(item.last_message.created_at)
+          : convertTimeMessage(new Date().toString())
       "
       :avatar="String(item.oppositeUser?.avatar)"
       :last-message="
@@ -30,6 +28,7 @@
 </template>
 <script lang="ts" setup>
 import { collection, onSnapshot, query, where } from "firebase/firestore";
+import { convertTimeMessage } from "../../../ultils/convert";
 import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
 
 const navigatorTab = useNavigatorTabStore();

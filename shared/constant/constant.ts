@@ -4,3 +4,5 @@ export enum ConnectUserStatus {
   WaitApprove = 'mdi-check',
   ConnectApproved = 'mdi-chat-outline',
 }
+
+export const MESSAGE_LIMIT = 20;
