@@ -8,12 +8,16 @@
       v-for="(item, i) in chatListMapping"
       :subMessage="item.last_message?.user_id === $state.profile?.id ? 'You — ' : ''"
       :name="`${item.oppositeUser?.firstName} ${item.oppositeUser?.lastName}`"
-      :time="`${new Date(item.last_message?.created_at!).getHours()}:${new Date(
-        item.last_message?.created_at!
-      ).getMinutes()}`"
+      :time="
+        item.last_message.content.length
+          ? `${new Date(item.last_message.created_at).getHours()}:${new Date(
+              item.last_message.created_at
+            ).getMinutes()}`
+          : `${new Date().getHours()}:${new Date().getMinutes()}`
+      "
       :avatar="String(item.oppositeUser?.avatar)"
       :last-message="
-        item.last_message
+        item.last_message.content.length
           ? item.last_message?.content
           : 'Say Hello to start the conservation !'
       "
@@ -39,7 +43,11 @@ const handleClickItemUser = (item: TMessageGroup) => {
 };
 
 const getListUserChat = () => {
-  const qChats = query(collection($firebaseStore, FIRESTORE_PATH.chat_collection));
+  const qChats = query(
+    collection($firebaseStore, FIRESTORE_PATH.chat_collection),
+    where("is_approved", "==", true),
+    where("is_canceled", "==", false)
+  );
 
   onSnapshot(qChats, (doc) => {
     let tempListUserChat: TMessageGroup[] = [];
