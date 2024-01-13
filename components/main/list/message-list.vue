@@ -99,10 +99,15 @@ const getAllMessage = async () => {
 
 const load = ({ done }: any) => {
   console.log("Scrolling to load");
-  setTimeout(async () => {
-    await getAllMessage();
+  if (page.value === 0) {
+    getAllMessage();
     done("ok");
-  }, 2000);
+  } else {
+    setTimeout(async () => {
+      await getAllMessage();
+      done("ok");
+    }, 1000);
+  }
 };
 
 const sendMessage = async () => {
