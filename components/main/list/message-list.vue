@@ -37,7 +37,7 @@ import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
 const { $state } = useProfileStore();
 const navigatorTab = useNavigatorTabStore();
 const messageList = ref<TMessage[]>([]);
-const { $firebaseStore } = useNuxtApp();
+const { $firestore } = useNuxtApp();
 const message = ref<string>("");
 const { setScroll } = useScroll();
 
@@ -45,7 +45,7 @@ const getAllMessage = async () => {
   const documentGroupId = navigatorTab.$state.currentTab.group?.group_id!;
   const q = query(
     collection(
-      $firebaseStore,
+      $firestore,
       FIRESTORE_PATH.chat_collection,
       documentGroupId,
       FIRESTORE_PATH.message_collection
@@ -74,7 +74,7 @@ const sendMessage = async () => {
   const documentGroupId = navigatorTab.$state.currentTab.group?.group_id!;
   const messageKey = doc(
     collection(
-      $firebaseStore,
+      $firestore,
       FIRESTORE_PATH.chat_collection,
       documentGroupId,
       FIRESTORE_PATH.message_collection
@@ -92,7 +92,7 @@ const sendMessage = async () => {
     messageList.value = [dataMessage, ...messageList.value];
     await setDoc(
       doc(
-        $firebaseStore,
+        $firestore,
         FIRESTORE_PATH.chat_collection,
         documentGroupId,
         FIRESTORE_PATH.message_collection,
@@ -101,7 +101,7 @@ const sendMessage = async () => {
       dataMessage
     );
     await updateDoc(
-      doc($firebaseStore, FIRESTORE_PATH.chat_collection, documentGroupId),
+      doc($firestore, FIRESTORE_PATH.chat_collection, documentGroupId),
       { last_message: dataMessage }
     );
     console.log("send message success");

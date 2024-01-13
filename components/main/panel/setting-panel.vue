@@ -50,7 +50,7 @@ import { collection, doc, getDocs, updateDoc } from "firebase/firestore";
 import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
 const { $state, updateProfile } = useProfileStore();
 const { updateChatInfo } = useFirebaseAuth();
-const { $firebaseStore } = useNuxtApp();
+const { $firestore } = useNuxtApp();
 const { start, finish } = useLoadingIndicator();
 const typeEdit = ref(false);
 
@@ -92,7 +92,7 @@ const handleUpdateProfile = async () => {
       email: model.value.email,
     };
     await updateDoc(
-      doc($firebaseStore, FIRESTORE_PATH.user_collection, $state.profile.id),
+      doc($firestore, FIRESTORE_PATH.user_collection, $state.profile.id),
       model.value
     );
     updateProfile(model.value);
@@ -109,7 +109,7 @@ const handleUpdateProfile = async () => {
 
 const updateProfileChat = async () => {
   const groupChatQuery = await getDocs(
-    collection($firebaseStore, FIRESTORE_PATH.chat_collection)
+    collection($firestore, FIRESTORE_PATH.chat_collection)
   );
   groupChatQuery.forEach(async (docQuery) => {
     if (docQuery.id.split("-").includes($state.profile.id)) {

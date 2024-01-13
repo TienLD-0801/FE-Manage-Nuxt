@@ -4,10 +4,10 @@
       <v-text-field
         v-model="message"
         append-icon="mdi-send"
-        variant="filled"
+        variant="solo-filled"
         clear-icon="mdi-close-circle"
         clearable
-        label="Message"
+        placeholder="Write a message..."
         type="text"
         @click:clear="$emit('on-clear-message')"
         @click:append="$emit('on-send-message')"

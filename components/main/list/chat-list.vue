@@ -31,7 +31,7 @@ import { collection, onSnapshot, query, where } from "firebase/firestore";
 import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
 
 const navigatorTab = useNavigatorTabStore();
-const { $firebaseStore } = useNuxtApp();
+const { $firestore } = useNuxtApp();
 const { $state } = useProfileStore();
 const chatListMapping = ref<TMessageGroup[]>([]);
 
@@ -42,7 +42,7 @@ const handleClickItemUser = (item: TMessageGroup) => {
 
 const getListUserChat = () => {
   const qChats = query(
-    collection($firebaseStore, FIRESTORE_PATH.chat_collection),
+    collection($firestore, FIRESTORE_PATH.chat_collection),
     where("is_approved", "==", true),
     where("is_canceled", "==", false)
   );
