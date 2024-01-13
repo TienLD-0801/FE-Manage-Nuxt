@@ -13,7 +13,6 @@ defineProps<{
   time: string;
   isSelf: boolean;
 }>();
-import { convertTimeMessage } from "~/ultils/convert";
 </script>
 
 <style lang="scss" scoped>
