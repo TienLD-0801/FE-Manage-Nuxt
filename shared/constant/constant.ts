@@ -5,4 +5,4 @@ export enum ConnectUserStatus {
   ConnectApproved = 'mdi-chat-outline',
 }
 
-export const MESSAGE_LIMIT = 10;
+export const MESSAGE_LIMIT = 20;
