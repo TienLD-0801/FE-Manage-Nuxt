@@ -18,7 +18,6 @@
       <v-text-field
         :disabled="!typeEdit"
         v-model="model.firstName"
-        :counter="10"
         label="First Name"
         variant="outlined"
       ></v-text-field>
@@ -74,7 +73,10 @@ const infoUser = ref({
 const isCheckDuplicateField = computed(() => {
   const currentName = infoUser.value.name;
   const newName = `${model.value.firstName} ${model.value.lastName}`;
-  return currentName === newName && typeEdit.value;
+  return (
+    currentName.replace(/\s+/g, "").trim() === newName.replace(/\s+/g, "").trim() &&
+    typeEdit.value
+  );
 });
 
 const handleUpdateProfile = async () => {
