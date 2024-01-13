@@ -11,7 +11,7 @@
       :key="item.message_id"
       :content="item.content"
       :time="item.created_at"
-      :isSelf="item.user_id === $state.profile?.id"
+      :isSelf="item.user_id === $state.profile.id"
     />
   </v-infinite-scroll>
   <MessageInput
@@ -24,13 +24,11 @@
 import {
   collection,
   doc,
-  getDocs,
   limit,
   onSnapshot,
   orderBy,
   query,
   setDoc,
-  startAfter,
   updateDoc,
 } from "firebase/firestore";
 import { MESSAGE_LIMIT } from "~/shared/constant/constant";
@@ -42,79 +40,37 @@ const messageList = ref<TMessage[]>([]);
 const { $firebaseStore } = useNuxtApp();
 const message = ref<string>("");
 const { setScroll } = useScroll();
-const detectNewMessage = ref(false);
-const page = ref(0);
 
 const getAllMessage = async () => {
-  const documentGroupId = `${navigatorTab.$state.currentTab.group?.sender.id}-${navigatorTab.$state.currentTab.group?.receiver.id}`;
-  const messageCollection = collection(
-    $firebaseStore,
-    FIRESTORE_PATH.chat_collection,
-    documentGroupId,
-    FIRESTORE_PATH.message_collection
+  const documentGroupId = navigatorTab.$state.currentTab.group?.group_id!;
+  const q = query(
+    collection(
+      $firebaseStore,
+      FIRESTORE_PATH.chat_collection,
+      documentGroupId,
+      FIRESTORE_PATH.message_collection
+    ),
+    orderBy("created_at", "desc"),
+    limit(MESSAGE_LIMIT)
   );
-
-  console.log("page.value: ", page.value);
-
-  if (page.value > 0) {
-    const first = query(
-      messageCollection,
-      orderBy("created_at", "desc"),
-      limit(MESSAGE_LIMIT * page.value)
-    );
-    const documentSnapshots = await getDocs(first);
-    const lastVisible = documentSnapshots.docs[documentSnapshots.docs.length - 1];
-
-    const q = query(
-      messageCollection,
-      orderBy("created_at", "desc"),
-      startAfter(lastVisible),
-      limit(MESSAGE_LIMIT)
-    );
-
-    onSnapshot(q, (doc) => {
-      let tempSnapshot: TMessage[] = [];
-      doc.forEach((snapshot) => {
-        tempSnapshot.push(snapshot.data() as TMessage);
-      });
-      messageList.value = [...messageList.value, ...tempSnapshot];
+  onSnapshot(q, (doc) => {
+    let tempSnapshot: TMessage[] = [];
+    doc.forEach((snapshot) => {
+      tempSnapshot.push(snapshot.data() as TMessage);
     });
-  } else {
-    const q = query(
-      messageCollection,
-      orderBy("created_at", "desc"),
-      limit(MESSAGE_LIMIT)
-    );
-
-    onSnapshot(q, (doc) => {
-      let tempSnapshot: TMessage[] = [];
-      doc.forEach((snapshot) => {
-        tempSnapshot.push(snapshot.data() as TMessage);
-      });
-      messageList.value = [...messageList.value, ...tempSnapshot];
-    });
-  }
-  page.value = page.value + 1;
+    messageList.value = tempSnapshot;
+  });
 };
 
-const load = ({ done }: any) => {
+const load = async ({ done }: any) => {
   console.log("Scrolling to load");
-  if (page.value === 0) {
-    getAllMessage();
-    done("ok");
-  } else {
-    setTimeout(async () => {
-      await getAllMessage();
-      done("ok");
-    }, 1000);
-  }
+  done("ok");
 };
 
 const sendMessage = async () => {
   if (!message.value.trim().length) {
     return;
   }
-  detectNewMessage.value = true;
   const documentGroupId = navigatorTab.$state.currentTab.group?.group_id!;
   const messageKey = doc(
     collection(
@@ -127,7 +83,7 @@ const sendMessage = async () => {
 
   const dataMessage = {
     message_id: messageKey,
-    user_id: $state.profile?.id || "",
+    user_id: $state.profile.id,
     content: message.value,
     created_at: new Date().toString(),
   };
@@ -152,7 +108,6 @@ const sendMessage = async () => {
   } catch (error) {
     console.log("send message Error: ", error);
   } finally {
-    detectNewMessage.value = false;
     clearMessage();
   }
 };
@@ -161,8 +116,12 @@ const clearMessage = () => {
   message.value = "";
 };
 
-watch(detectNewMessage, () => {
+watch(messageList, () => {
   setScroll("message-list-scroll", 0, "instant");
+});
+
+watchEffect(() => {
+  getAllMessage();
 });
 </script>
 
