@@ -22,7 +22,7 @@
       :key="i"
       :value="item"
       @click="handleClickItemUser(item)"
-      :activeItem="true"
+      :activeItem="navigatorTab.$state.currentTab.group?.group_id === item.group_id"
     />
   </v-list>
 </template>

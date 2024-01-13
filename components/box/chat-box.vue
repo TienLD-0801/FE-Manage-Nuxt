@@ -79,6 +79,6 @@ defineProps<{
 }
 
 .active-color {
-  background-color: rgba(73, 128, 218, 0.05) !important;
+  background-color: rgba(73, 128, 218, 0.1) !important;
 }
 </style>

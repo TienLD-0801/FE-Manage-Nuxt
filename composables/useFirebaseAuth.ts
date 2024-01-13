@@ -4,7 +4,7 @@ import {
   signInWithEmailAndPassword,
   signOut,
 } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, updateDoc } from 'firebase/firestore';
 import { CustomError } from '~/shared/Error/error';
 import { FIRESTORE_PATH } from '~/shared/constant/firebase-store';
 
@@ -87,7 +87,32 @@ export const useFirebaseAuth = () => {
     }
   };
 
+  const updateChatInfo = async (
+    senderId: string,
+    receiverId: string,
+    profile: TProfile,
+  ) => {
+    const isSender = senderId === profile.id;
+    const isReceiver = receiverId === profile.id;
+    if (isSender || isReceiver) {
+      const fieldToUpdate = isSender ? 'sender' : 'receiver';
+      const groupId = `${senderId}-${receiverId}`;
+      try {
+        await updateDoc(
+          doc($firebaseStore, FIRESTORE_PATH.chat_collection, groupId),
+          {
+            [fieldToUpdate]: profile,
+          },
+        );
+        console.log('Update chat info successfully');
+      } catch (error) {
+        console.error('Error update chat info ', error);
+      }
+    }
+  };
+
   return {
+    updateChatInfo,
     register,
     login,
     logout,
