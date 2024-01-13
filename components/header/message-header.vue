@@ -13,7 +13,7 @@
           <div class="left-drawer-chat">
             <v-list>
               <v-list-item>
-                <div class="setting-profile">
+                <div class="header-profile">
                   <v-avatar class="avatar" :image="avatar" />
                   <v-list-item-title>{{ name }}</v-list-item-title>
                 </div>
@@ -99,6 +99,13 @@ const rail = ref(false);
   height: 100%;
   display: flex;
   flex-direction: column;
+  align-items: center;
+}
+
+.header-profile {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   align-items: center;
 }
 </style>
