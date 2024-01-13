@@ -23,19 +23,19 @@ const formatTime = `${hour}:${minute < 10 ? `0${minute}` : `${minute}`}`;
 
 <style lang="scss" scoped>
 .message-box-container {
-  background-color: rgb(36, 111, 198);
-  color: white;
   white-space: pre-line;
   width: fit-content;
   max-width: 400px;
   padding: 10px 18px;
   border-radius: 18px;
   word-wrap: break-word;
+  background-color: rgb(224, 224, 224);
+  color: black;
 }
 
 .self-background {
-  background-color: rgb(224, 224, 224) !important;
-  color: black;
+  background-color: rgb(36, 111, 198) !important;
+  color: white;
   align-self: flex-end;
 }
 </style>

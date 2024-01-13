@@ -1,55 +1,96 @@
 <template>
   <v-main class="main-panel-container">
-    <h2>Settings</h2>
+    <NuxtLoadingIndicator />
+    <h2>Profile</h2>
     <v-container class="setting-container">
       <v-list>
         <v-list-item>
           <div class="setting-profile">
-            <v-avatar class="avatar" :image="$state.profile?.avatar" />
-            <v-list-item-title>{{
-              `${$state.profile?.firstName} ${$state.profile?.lastName}`
-            }}</v-list-item-title>
-            <v-list-item-subtitle>{{ $state.profile?.email }}</v-list-item-subtitle>
+            <v-avatar class="avatar" :image="infoUser.avatar" />
+            <v-list-item-title>{{ infoUser.name }}</v-list-item-title>
+            <v-list-item-subtitle>{{ infoUser.email }}</v-list-item-subtitle>
           </div>
         </v-list-item>
       </v-list>
     </v-container>
 
-    <form class="form-profile">
+    <v-form class="form-profile" @submit.prevent="handleUpdateProfile">
       <v-text-field
-        v-model="fistName.value.value"
+        :disabled="!typeEdit"
+        v-model="model.firstName"
         :counter="10"
-        :error-messages="fistName.errorMessage.value"
         label="First Name"
+        variant="outlined"
       ></v-text-field>
-
       <v-text-field
-        v-model="lastName.value.value"
-        :counter="7"
-        :error-messages="lastName.errorMessage.value"
-        label="User"
+        :disabled="!typeEdit"
+        v-model="model.lastName"
+        label="Last Name"
+        variant="outlined"
       ></v-text-field>
-
       <v-text-field
-        v-model="email.value.value"
-        :error-messages="email.errorMessage.value"
-        label="E-mail"
+        :disabled="!typeEdit"
+        v-model="model.email"
+        label="Email"
+        variant="outlined"
       ></v-text-field>
-
-      <v-btn class="me-4" type="submit"> submit </v-btn>
-
-      <v-btn> clear </v-btn>
-    </form>
+      <v-btn
+        class="button-save"
+        type="submit"
+        variant="elevated"
+        color="blue"
+        :text="typeEdit ? 'Save' : 'Edit'"
+      />
+    </v-form>
   </v-main>
 </template>
 
 <script lang="ts" setup>
-import { useField, useForm } from "vee-validate";
-const { $state } = useProfileStore();
+import { doc, updateDoc } from "firebase/firestore";
+import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
+const { $state, updateProfile } = useProfileStore();
+const { $firebaseStore } = useNuxtApp();
+const { start, finish } = useLoadingIndicator();
+const typeEdit = ref(false);
 
-const fistName = useField("name");
-const lastName = useField("phone");
-const email = useField("email");
+const model = ref<TProfile>({
+  id: $state.profile.id,
+  firstName: $state.profile.firstName,
+  lastName: $state.profile.lastName!,
+  email: $state.profile.email,
+  updated_at: new Date().toString(),
+  created_at: $state.profile.created_at,
+  avatar: $state.profile.avatar,
+});
+
+const infoUser = ref({
+  name: `${$state.profile.firstName} ${$state.profile.lastName}`,
+  avatar: $state.profile.avatar,
+  email: $state.profile.email,
+});
+
+const handleUpdateProfile = async () => {
+  typeEdit.value = !typeEdit.value;
+  if (typeEdit.value) return;
+  start();
+  try {
+    infoUser.value = {
+      name: `${model.value.firstName} ${model.value.lastName}`,
+      avatar: model.value.avatar,
+      email: model.value.email,
+    };
+    await updateDoc(
+      doc($firebaseStore, FIRESTORE_PATH.user_collection, $state.profile.id),
+      model.value
+    );
+    updateProfile(model.value);
+    console.log("up date profile successfully");
+  } catch (error) {
+    console.log("Update profile Error :", error);
+  } finally {
+    finish();
+  }
+};
 </script>
 
 <style lang="scss" scoped>
@@ -72,5 +113,9 @@ const email = useField("email");
 .setting-container .avatar {
   width: 100px;
   height: 100px;
+}
+.button-save {
+  float: right;
+  margin: 0;
 }
 </style>
