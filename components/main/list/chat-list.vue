@@ -28,7 +28,6 @@
 </template>
 <script lang="ts" setup>
 import { collection, onSnapshot, query, where } from "firebase/firestore";
-import { convertTimeMessage } from "../../../ultils/convert";
 import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
 
 const navigatorTab = useNavigatorTabStore();
