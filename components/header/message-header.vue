@@ -21,49 +21,65 @@
               <v-divider></v-divider>
             </v-list>
 
-            <v-card class="mx-auto" width="300">
-              <v-list>
-                <v-list-item
-                  prepend-icon="mdi-text-box-edit-outline"
+            <v-list class="options-info-chat mx-auto" width="300">
+              <v-expansion-panels variant="accordion">
+                <v-expansion-panel
+                  class="description-text"
                   title="Description"
-                ></v-list-item>
+                  :text="description"
+                />
+                <v-icon class="description-icon" icon="mdi-text-box-edit-outline" />
+              </v-expansion-panels>
 
-                <v-list-group value="Users">
-                  <template v-slot:activator="{ props }">
-                    <v-list-item
-                      v-bind="props"
-                      prepend-icon="mdi-plus-circle-multiple-outline"
-                      title="Options"
-                    ></v-list-item>
-                  </template>
+              <v-dialog v-model="dialog" scrollable width="auto">
+                <template v-slot:activator="{ props }">
+                  <v-list-item
+                    v-bind="props"
+                    href="#"
+                    prepend-icon="mdi-account-group-outline"
+                    :title="`Create group chat with ${name}`"
+                  ></v-list-item>
+                </template>
 
-                  <v-list-group value="Admin">
-                    <template v-slot:activator="{ props }">
-                      <v-list-item
-                        prepend-icon="mdi-account-group-outline"
-                        v-bind="props"
-                        title="Create group chat"
-                      ></v-list-item>
-                    </template>
-                  </v-list-group>
+                <v-card>
+                  <v-card-title>Select Members</v-card-title>
+                  <v-divider></v-divider>
+                  <v-card-text style="height: 300px">
+                    <v-radio-group v-model="dialogm1" column>
+                      <v-radio label="Le Duy Tien" value="bahamas"></v-radio>
+                      <v-radio label="Nguyen Tran Phuong Tram" value="bahrain"></v-radio>
+                      <v-radio label="Trieu Tan Vinh" value="bangladesh"></v-radio>
+                      <v-radio label="Tran Chi Huu" value="barbados"></v-radio>
+                      <v-radio label="Nguyen Anh Duy" value="belarus"></v-radio>
+                      <v-radio label="Duong Van Khuong" value="belgium"></v-radio>
+                      <v-radio label="Nguyen Thanh Phong" value="belize"></v-radio>
+                      <v-radio label="Dinh Gia Kiet" value="benin"></v-radio>
+                      <v-radio label="Pham Gia Bao" value="bhutan"></v-radio>
+                      <v-radio label="Nguyen An Nhien" value="bolivia"></v-radio>
+                      <v-radio label="Bui Binh Trung" value="bosnia"></v-radio>
+                      <v-radio label="Nguyen Nhut Tan" value="botswana"></v-radio>
+                      <v-radio label="Hoang Tan Vinh" value="brazil"></v-radio>
+                      <v-radio label="Le Duy Khanh" value="brunei"></v-radio>
+                      <v-radio label="Nguyen Yen Nhi" value="bulgaria"></v-radio>
+                    </v-radio-group>
+                  </v-card-text>
+                  <v-divider></v-divider>
+                  <v-card-actions>
+                    <v-btn color="blue-darken-1" variant="text" @click="dialog = false">
+                      Close
+                    </v-btn>
+                    <v-btn color="blue-darken-1" variant="text" @click="dialog = false">
+                      Create
+                    </v-btn>
+                  </v-card-actions>
+                </v-card>
+              </v-dialog>
 
-                  <v-list-group value="Actions">
-                    <template v-slot:activator="{ props }">
-                      <v-list-item
-                        prepend-icon="mdi-bell-outline"
-                        v-bind="props"
-                        title="Notifications"
-                      ></v-list-item>
-                    </template>
-                  </v-list-group>
-                </v-list-group>
-
-                <v-list-item
-                  prepend-icon="mdi-folder-multiple-image"
-                  title="Media, files and links"
-                ></v-list-item>
-              </v-list>
-            </v-card>
+              <v-list-item
+                prepend-icon="mdi-folder-multiple-image"
+                title="Media, files and links"
+              ></v-list-item>
+            </v-list>
           </div>
         </v-navigation-drawer>
       </div>
@@ -76,6 +92,11 @@ defineProps<{
   name: string;
   avatar: string;
 }>();
+
+const dialogm1 = ref("");
+const dialog = ref(false);
+
+const description = `Meet: https://meet.google.com/ezf-soqu-ozx  \n DEV: https://alb-dev-apne1-cd022-01.zero-events.com \n Follow deploy : https://app.circleci.com/pipelines/bitbucket/hi817develop/bp-webapp_functiontest`;
 
 const rail = ref(false);
 </script>
@@ -107,5 +128,16 @@ const rail = ref(false);
   flex-direction: column;
   justify-content: center;
   align-items: center;
+}
+
+.description-text {
+  font-size: 0.8rem;
+  white-space: pre-line;
+}
+
+.description-icon {
+  position: absolute;
+  left: 13px;
+  top: 13px;
 }
 </style>

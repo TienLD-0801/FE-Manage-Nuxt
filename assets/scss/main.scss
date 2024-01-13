@@ -18,3 +18,21 @@ body {
   justify-content: space-between;
   margin: 20px 20px 0px 120px;
 }
+
+.description-text .v-expansion-panel__shadow {
+  box-shadow: unset !important;
+  height: 10px;
+  width: 10px;
+}
+
+.description-text .v-expansion-panel-title {
+  padding-left: 55px;
+}
+
+.options-info-chat .v-list-item__prepend {
+  width: 40px;
+}
+
+.options-info-chat .v-expansion-panel-title--active {
+  min-height: unset !important;
+}
