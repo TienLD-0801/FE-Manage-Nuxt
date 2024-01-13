@@ -13,7 +13,7 @@ export default defineNuxtPlugin(async () => {
     provide: {
       firebaseApp: app,
       firebaseAuth: auth,
-      firebaseStore: database,
+      firestore: database,
     },
   };
 });

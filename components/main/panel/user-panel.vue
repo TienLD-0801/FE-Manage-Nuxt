@@ -62,7 +62,7 @@ import {
   where,
 } from "firebase/firestore";
 import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
-const { $firebaseStore } = useNuxtApp();
+const { $firestore } = useNuxtApp();
 const { $state } = useProfileStore();
 const users = ref<TProfile[]>([]);
 const tab = ref(null);
@@ -70,7 +70,7 @@ const requestList = ref<TProfile[]>([]);
 const navigatorTab = useNavigatorTabStore();
 const getAllUsers = async () => {
   const qUsers = query(
-    collection($firebaseStore, FIRESTORE_PATH.user_collection),
+    collection($firestore, FIRESTORE_PATH.user_collection),
     where("id", "!=", $state.profile?.id)
   );
   onSnapshot(qUsers, (onSnapShot) => {
@@ -83,7 +83,7 @@ const getAllUsers = async () => {
 };
 
 const getAllRequests = () => {
-  const q = query(collection($firebaseStore, FIRESTORE_PATH.chat_collection));
+  const q = query(collection($firestore, FIRESTORE_PATH.chat_collection));
   onSnapshot(q, (snapShot) => {
     let tempRequest: TProfile[] = [];
     snapShot.forEach((doc) => {
@@ -120,7 +120,7 @@ const handleAddUser = async (userAdded: TProfile) => {
   };
   try {
     await setDoc(
-      doc($firebaseStore, FIRESTORE_PATH.chat_collection, documentGroupId),
+      doc($firestore, FIRESTORE_PATH.chat_collection, documentGroupId),
       dataAdd
     );
     console.log("Send Request Successfully");
@@ -133,10 +133,9 @@ const handleApproveUser = async (userApproved: TProfile) => {
   const documentGroupId = `${userApproved.id}-${$state.profile?.id}`;
 
   try {
-    await updateDoc(
-      doc($firebaseStore, FIRESTORE_PATH.chat_collection, documentGroupId),
-      { is_approved: true }
-    );
+    await updateDoc(doc($firestore, FIRESTORE_PATH.chat_collection, documentGroupId), {
+      is_approved: true,
+    });
     console.log("Approve User Successfully");
   } catch (err) {
     console.error("Error approve user: ", err);
@@ -146,12 +145,9 @@ const handleApproveUser = async (userApproved: TProfile) => {
 const handleDenyUser = async (userDeleted: TProfile) => {
   try {
     const documentGroupId = `${userDeleted.id}-${$state.profile?.id}`;
-    await updateDoc(
-      doc($firebaseStore, FIRESTORE_PATH.chat_collection, documentGroupId),
-      {
-        is_canceled: true,
-      }
-    );
+    await updateDoc(doc($firestore, FIRESTORE_PATH.chat_collection, documentGroupId), {
+      is_canceled: true,
+    });
     console.log("Deny User Successfully");
   } catch (err) {
     console.error("Error deny user: ", err);
@@ -160,18 +156,20 @@ const handleDenyUser = async (userDeleted: TProfile) => {
 
 const handleChatUser = async (dataUser: TProfile) => {
   try {
-    const querySnapshot = await getDocs(collection($firebaseStore, "chats"));
+    const querySnapshot = await getDocs(
+      collection($firestore, FIRESTORE_PATH.chat_collection)
+    );
     querySnapshot.forEach((doc) => {
       if (
         $state.profile?.id &&
         doc.id.split("-").includes(dataUser.id) &&
-        doc.id.split("-").includes($state.profile?.id)
+        doc.id.split("-").includes($state.profile.id)
       ) {
         const groupDetail = doc.data();
         const groupOppositeConvert = {
           ...groupDetail,
           oppositeUser:
-            groupDetail.sender.id === $state.profile?.id
+            groupDetail.sender.id === $state.profile.id
               ? groupDetail.receiver
               : groupDetail.sender,
         };

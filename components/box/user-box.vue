@@ -57,11 +57,11 @@ const props = defineProps<{
 }>();
 const { user } = props;
 const { $state } = useProfileStore();
-const { $firebaseStore } = useNuxtApp();
+const { $firestore } = useNuxtApp();
 const status = ref<ConnectUserStatus>(ConnectUserStatus.NewConnect);
 
 const getFriendStatus = () => {
-  const q = query(collection($firebaseStore, FIRESTORE_PATH.chat_collection));
+  const q = query(collection($firestore, FIRESTORE_PATH.chat_collection));
   onSnapshot(q, (snapShot) => {
     snapShot.forEach((doc) => {
       if ($state.profile?.id && !doc.id.split("-").includes($state.profile.id)) {

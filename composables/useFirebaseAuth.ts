@@ -9,7 +9,7 @@ import { CustomError } from '~/shared/Error/error';
 import { FIRESTORE_PATH } from '~/shared/constant/firebase-store';
 
 export const useFirebaseAuth = () => {
-  const { $firebaseAuth, $firebaseStore } = useNuxtApp();
+  const { $firebaseAuth, $firestore } = useNuxtApp();
 
   const register = async (email: string, password: string) => {
     try {
@@ -69,7 +69,7 @@ export const useFirebaseAuth = () => {
 
   const addUsersFirebaseStore = async (dataUser: TProfile) => {
     const docUser = doc(
-      $firebaseStore,
+      $firestore,
       FIRESTORE_PATH.user_collection,
       dataUser.id,
     );
@@ -99,7 +99,7 @@ export const useFirebaseAuth = () => {
       const groupId = `${senderId}-${receiverId}`;
       try {
         await updateDoc(
-          doc($firebaseStore, FIRESTORE_PATH.chat_collection, groupId),
+          doc($firestore, FIRESTORE_PATH.chat_collection, groupId),
           {
             [fieldToUpdate]: profile,
           },
