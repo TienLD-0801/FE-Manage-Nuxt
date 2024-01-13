@@ -18,8 +18,6 @@ import { convertTimeMessage } from "~/ultils/convert";
 
 <style lang="scss" scoped>
 .message-box-container {
-  background-color: rgb(36, 111, 198);
-  color: white;
   white-space: pre-line;
   width: fit-content;
   max-width: 400px;

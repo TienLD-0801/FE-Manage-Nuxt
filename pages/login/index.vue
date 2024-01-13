@@ -1,5 +1,5 @@
 <template>
-  <Snackbar :model-value="Boolean(message)" :message="message" />
+  <Snackbar :model-value="Boolean(message)" :alert-text="message" />
   <Loading :is-loading="isLoading" />
   <div class="login-page-container">
     <LoginForm @handleLogin="handleLogin" />

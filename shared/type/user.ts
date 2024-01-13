@@ -5,6 +5,7 @@ type TProfile = {
   avatar: string;
   firstName: string;
   created_at: string;
+  updated_at: string;
 };
 
 type TRegisterInfo = {

@@ -1,7 +1,15 @@
 export const useProfileStore = defineStore(
   'profile',
   () => {
-    const profile = ref<TProfile>();
+    const profile = ref<TProfile>({
+      id: '',
+      email: '',
+      lastName: '',
+      avatar: '',
+      firstName: '',
+      created_at: '',
+      updated_at: '',
+    });
     const updateProfile = (payload: TProfile) => {
       profile.value = payload;
     };

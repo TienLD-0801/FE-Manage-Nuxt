@@ -1,5 +1,5 @@
 <template>
-  <Snackbar :model-value="Boolean(alertText)" :alertText="alertText" />
+  <Snackbar :model-value="Boolean(alertText)" :alert-text="alertText" />
   <Loading :is-loading="isLoading" />
   <div class="register-page-container">
     <RegisterForm @handleRegister="handleRegister" />
@@ -31,6 +31,7 @@ const handleRegister = async (dataForm: TRegisterInfo) => {
       avatar:
         "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png",
       created_at: new Date().toString(),
+      updated_at: new Date().toString(),
     };
     await addUsersFirebaseStore(dataUser);
     navigateTo(PATH_ROUTER.login);

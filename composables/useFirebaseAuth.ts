@@ -4,13 +4,7 @@ import {
   signInWithEmailAndPassword,
   signOut,
 } from 'firebase/auth';
-import {
-  arrayUnion,
-  collection,
-  doc,
-  setDoc,
-  updateDoc,
-} from 'firebase/firestore';
+import { doc, setDoc } from 'firebase/firestore';
 import { CustomError } from '~/shared/Error/error';
 import { FIRESTORE_PATH } from '~/shared/constant/firebase-store';
 
@@ -60,6 +54,7 @@ export const useFirebaseAuth = () => {
   const logout = async () => {
     try {
       await signOut($firebaseAuth);
+      console.log('Logout successfully');
     } catch (error) {
       if (error instanceof FirebaseError) {
         const customError = new CustomError(
