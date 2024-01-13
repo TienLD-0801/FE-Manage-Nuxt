@@ -49,8 +49,8 @@ const handleLogout = async () => {
   isLoading.value = true;
   try {
     await logout();
-    authStore.clearToken();
-    navigateTo(PATH_ROUTER.login);
+    navigateTo(PATH_ROUTER.login, { external: true });
+    localStorage.clear();
   } catch (error) {
     console.log(error);
   } finally {

@@ -1,6 +1,6 @@
 <template>
   <v-main class="main-panel-container">
-    <NuxtLoadingIndicator />
+    <NuxtLoadingIndicator :height="3" />
     <h2>Profile</h2>
     <v-container class="setting-container">
       <v-list>
@@ -29,7 +29,7 @@
         variant="outlined"
       ></v-text-field>
       <v-text-field
-        :disabled="!typeEdit"
+        disabled
         v-model="model.email"
         label="Email"
         variant="outlined"
@@ -39,6 +39,7 @@
         type="submit"
         variant="elevated"
         color="blue"
+        :disabled="isCheckDuplicateField"
         :text="typeEdit ? 'Save' : 'Edit'"
       />
     </v-form>
@@ -46,9 +47,10 @@
 </template>
 
 <script lang="ts" setup>
-import { doc, updateDoc } from "firebase/firestore";
+import { collection, doc, getDocs, updateDoc } from "firebase/firestore";
 import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
 const { $state, updateProfile } = useProfileStore();
+const { updateChatInfo } = useFirebaseAuth();
 const { $firebaseStore } = useNuxtApp();
 const { start, finish } = useLoadingIndicator();
 const typeEdit = ref(false);
@@ -69,9 +71,17 @@ const infoUser = ref({
   email: $state.profile.email,
 });
 
+const isCheckDuplicateField = computed(() => {
+  const currentName = infoUser.value.name;
+  const newName = `${model.value.firstName} ${model.value.lastName}`;
+  return currentName === newName && typeEdit.value;
+});
+
 const handleUpdateProfile = async () => {
   typeEdit.value = !typeEdit.value;
+
   if (typeEdit.value) return;
+
   start();
   try {
     infoUser.value = {
@@ -84,12 +94,30 @@ const handleUpdateProfile = async () => {
       model.value
     );
     updateProfile(model.value);
+    updateProfileChat();
     console.log("up date profile successfully");
   } catch (error) {
     console.log("Update profile Error :", error);
   } finally {
-    finish();
+    setTimeout(() => {
+      finish();
+    }, 2000);
   }
+};
+
+const updateProfileChat = async () => {
+  const groupChatQuery = await getDocs(
+    collection($firebaseStore, FIRESTORE_PATH.chat_collection)
+  );
+  groupChatQuery.forEach(async (docQuery) => {
+    if (docQuery.id.split("-").includes($state.profile.id)) {
+      await updateChatInfo(
+        docQuery.get("sender").id,
+        docQuery.get("receiver").id,
+        $state.profile
+      );
+    }
+  });
 };
 </script>
 
