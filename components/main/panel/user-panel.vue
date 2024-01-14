@@ -52,9 +52,9 @@
 
 <script lang="ts" setup>
 import {
-  Transaction,
   collection,
   doc,
+  getDoc,
   getDocs,
   onSnapshot,
   query,
@@ -69,11 +69,13 @@ const users = ref<TProfile[]>([]);
 const tab = ref(null);
 const requestList = ref<TProfile[]>([]);
 const navigatorTab = useNavigatorTabStore();
+
 const getAllUsers = async () => {
   const qUsers = query(
     collection($firestore, FIRESTORE_PATH.user_collection),
     where("id", "!=", $state.profile?.id)
   );
+
   onSnapshot(qUsers, (onSnapShot) => {
     let templeAllUser: TProfile[] = [];
     onSnapShot.forEach((user) => {
@@ -85,18 +87,30 @@ const getAllUsers = async () => {
 
 const getAllRequests = () => {
   const q = query(collection($firestore, FIRESTORE_PATH.chat_collection));
-  onSnapshot(q, (snapShot) => {
-    let tempRequest: TProfile[] = [];
-    snapShot.forEach((doc) => {
+  onSnapshot(q, (chatList) => {
+    chatList.forEach(async (chatItem) => {
       if (
-        doc.id.split("-")[1] === $state.profile?.id &&
-        !doc.data().is_approved &&
-        !doc.data().is_canceled
+        chatItem.data().group_id.split("-")[1] === $state.profile?.id &&
+        !chatItem.data().is_approved &&
+        !chatItem.data().is_canceled
       ) {
-        tempRequest.push(doc.data().sender);
+        const adminCollectionData = await getDocs(
+          collection(
+            $firestore,
+            FIRESTORE_PATH.chat_collection,
+            chatItem.id,
+            FIRESTORE_PATH.admin_collection
+          )
+        );
+
+        const senderUser: TProfile[] = [];
+        adminCollectionData.forEach((admin) => {
+          senderUser.push(admin.data() as TProfile);
+        });
+
+        requestList.value = [...requestList.value, senderUser[0]];
       }
     });
-    requestList.value = tempRequest;
   });
 };
 
@@ -129,6 +143,7 @@ const handleAddUser = async (userAdded: TProfile) => {
     FIRESTORE_PATH.admin_collection,
     adminInfo.id
   );
+
   const memberDocument = doc(
     $firestore,
     FIRESTORE_PATH.chat_collection,
@@ -143,7 +158,6 @@ const handleAddUser = async (userAdded: TProfile) => {
       setDoc(adminDocument, adminInfo),
       setDoc(memberDocument, memberInfo),
     ]);
-
     console.log("Send Request Successfully");
   } catch (err) {
     console.error("Error add user: ", err);
@@ -190,9 +204,9 @@ const handleChatUser = async (dataUser: TProfile) => {
         const groupOppositeConvert = {
           ...groupDetail,
           oppositeUser:
-            groupDetail.sender.id === $state.profile.id
+            groupDetail.admins[0].id === $state.profile.id
               ? groupDetail.receiver
-              : groupDetail.sender,
+              : groupDetail.admins[0],
         };
         navigatorTab.changeNavigatorTab({
           tab: "chats",
