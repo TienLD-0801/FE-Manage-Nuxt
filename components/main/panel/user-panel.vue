@@ -113,7 +113,7 @@ const handleAddUser = async (userAdded: TProfile) => {
     last_message: {
       user_id: "",
       content: "",
-      created_at: "",
+      created_at: new Date().toString(),
       message_id: "",
     },
     is_canceled: false,
