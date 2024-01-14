@@ -8,11 +8,7 @@
       v-for="(item, i) in chatListMapping"
       :subMessage="item.last_message?.user_id === $state.profile?.id ? 'You — ' : ''"
       :name="`${item.oppositeUser?.firstName} ${item.oppositeUser?.lastName}`"
-      :time="
-        item.last_message.content.length
-          ? convertTimeMessage(item.last_message.created_at)
-          : convertTimeMessage(new Date().toString())
-      "
+      :time="convertTimeMessage(item.last_message.created_at)"
       :avatar="String(item.oppositeUser?.avatar)"
       :last-message="
         item.last_message.content.length
@@ -27,7 +23,7 @@
   </v-list>
 </template>
 <script lang="ts" setup>
-import { collection, onSnapshot, query, where } from "firebase/firestore";
+import { collection, onSnapshot, orderBy, query, where } from "firebase/firestore";
 import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
 
 const navigatorTab = useNavigatorTabStore();

@@ -5,6 +5,7 @@
     @load="load"
     :id="scrollElementId"
     class="message-scroll"
+    :v-slot:empty="true"
   >
     <MessageBox
       v-for="item in messageList"
@@ -13,6 +14,9 @@
       :time="item.created_at"
       :isSelf="item.user_id === $state.profile.id"
     />
+    <template v-slot:empty>
+      <v-alert type="warning">No more messages!</v-alert>
+    </template>
   </v-infinite-scroll>
   <MessageInput
     v-model="message"
@@ -65,7 +69,9 @@ const getAllMessage = async () => {
 
 const load = async ({ done }: any) => {
   console.log("Scrolling to load");
-  done("ok");
+  setTimeout(() => {
+    done("empty");
+  }, 1000);
 };
 
 const sendMessage = async () => {
