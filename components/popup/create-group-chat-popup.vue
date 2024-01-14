@@ -97,7 +97,8 @@ const handleGetAllConnectedUsers = async () => {
 
 const handleCreateGroupChat = () => {
   const userSelectedList = JSON.parse(JSON.stringify(selected.value));
-  console.log("User created in group: ", [$state.profile, ...userSelectedList]);
+  const selfProfile = JSON.parse(JSON.stringify($state.profile));
+  console.log("User created in group: ", [selfProfile, ...userSelectedList]);
   // Handle logic create group here
 };
 </script>
