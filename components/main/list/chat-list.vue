@@ -23,7 +23,7 @@
   </v-list>
 </template>
 <script lang="ts" setup>
-import { collection, onSnapshot, orderBy, query, where } from "firebase/firestore";
+import { collection, onSnapshot, query, where } from "firebase/firestore";
 import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
 
 const navigatorTab = useNavigatorTabStore();

@@ -52,6 +52,7 @@
 
 <script lang="ts" setup>
 import {
+  Transaction,
   collection,
   doc,
   getDocs,
@@ -105,24 +106,44 @@ const getAllRequests = () => {
  */
 const handleAddUser = async (userAdded: TProfile) => {
   const documentGroupId = `${$state.profile?.id}-${userAdded.id}`;
-  const dataAdd: TMessageGroup = {
+  const groupInfo: TMessageGroup = {
     group_id: documentGroupId,
-    sender: $state.profile!,
-    receiver: userAdded,
-    is_approved: false,
     last_message: {
       user_id: "",
       content: "",
       created_at: new Date().toString(),
       message_id: "",
     },
+    is_approved: false,
     is_canceled: false,
   };
+  const adminInfo = $state.profile;
+  const memberInfo = userAdded;
+
+  const chatDocument = doc($firestore, FIRESTORE_PATH.chat_collection, documentGroupId);
+
+  const adminDocument = doc(
+    $firestore,
+    FIRESTORE_PATH.chat_collection,
+    documentGroupId,
+    FIRESTORE_PATH.admin_collection,
+    adminInfo.id
+  );
+  const memberDocument = doc(
+    $firestore,
+    FIRESTORE_PATH.chat_collection,
+    documentGroupId,
+    FIRESTORE_PATH.member_collection,
+    userAdded.id
+  );
+
   try {
-    await setDoc(
-      doc($firestore, FIRESTORE_PATH.chat_collection, documentGroupId),
-      dataAdd
-    );
+    await Promise.all([
+      setDoc(chatDocument, groupInfo),
+      setDoc(adminDocument, adminInfo),
+      setDoc(memberDocument, memberInfo),
+    ]);
+
     console.log("Send Request Successfully");
   } catch (err) {
     console.error("Error add user: ", err);
