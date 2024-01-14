@@ -52,3 +52,7 @@ body {
 .create-group-chat-popup-container .v-field__append-inner {
   display: none !important;
 }
+
+.drawer-create-new-group .v-list-item__spacer {
+  width: 0px !important;
+}

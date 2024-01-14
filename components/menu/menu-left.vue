@@ -8,9 +8,11 @@
       <v-btn icon>
         <v-icon>mdi-magnify</v-icon>
       </v-btn>
-      <v-btn icon>
-        <v-icon>mdi-dots-vertical</v-icon>
-      </v-btn>
+
+      <div class="drawer-create-new-group">
+        <CreateGroupChatPopup isNewGroup />
+      </div>
+
       <template v-slot:extension>
         <div class="tabs-main">
           <v-tabs v-model="tabs" color="primary" grow>

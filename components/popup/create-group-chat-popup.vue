@@ -9,13 +9,15 @@
       <v-list-item
         v-bind="props"
         @click="handleGetAllConnectedUsers"
-        prepend-icon="mdi-account-group-outline"
-        :title="`Create group chat with ${name}`"
+        prepend-icon="mdi-account-multiple-plus-outline"
+        :title="title || ''"
       ></v-list-item>
     </template>
 
     <v-card class="user-selection-card" width="500px">
-      <v-card-title>{{ `Create group chat with ${name}` }}</v-card-title>
+      <v-card-title>{{
+        `Create Group Chat  ${name ? `with ${name}` : ""}`
+      }}</v-card-title>
       <v-divider></v-divider>
       <v-text-field
         class="group-name"
@@ -38,7 +40,10 @@
           v-model="selected"
           :value="user"
           :label="`${user.firstName} ${user.lastName}`"
-          :disabled="user.id === navigatorTab.$state.currentTab.group?.oppositeUser.id"
+          :disabled="
+            !isNewGroup &&
+            user.id === navigatorTab.$state.currentTab.group?.oppositeUser.id
+          "
         />
       </v-card-text>
 
@@ -65,9 +70,12 @@
 </template>
 
 <script lang="ts" setup>
-defineProps<{
-  name: string;
+const props = defineProps<{
+  title?: string;
+  name?: string;
+  isNewGroup?: boolean;
 }>();
+const { isNewGroup } = props;
 import { getDocs, query, collection, where } from "firebase/firestore";
 import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
 
@@ -92,7 +100,9 @@ const handleClosePopupCreateGroupChat = () => {
 };
 
 const handleGetAllConnectedUsers = async () => {
-  selected.value = [oppositeUser.value];
+  if (!isNewGroup && oppositeUser.value) {
+    selected.value = [oppositeUser.value];
+  }
   try {
     const q = query(
       collection($firestore, FIRESTORE_PATH.chat_collection),
@@ -100,18 +110,33 @@ const handleGetAllConnectedUsers = async () => {
       where("is_canceled", "==", false)
     );
     const userList = await getDocs(q);
-    const tempConnectedUsers: TProfile[] = [oppositeUser.value];
-    userList.forEach((doc) => {
-      if (doc.id.split("-").includes($state.profile.id)) {
-        const neededUsers =
-          doc.data().sender.id === $state.profile.id
-            ? doc.data().receiver
-            : doc.data().sender;
-        if (neededUsers.id !== oppositeUser.value.id) {
+
+    // Refactor sau
+    const tempConnectedUsers: TProfile[] = [];
+    if (isNewGroup) {
+      userList.forEach((doc) => {
+        if (doc.id.split("-").includes($state.profile.id)) {
+          const neededUsers =
+            doc.data().sender.id === $state.profile.id
+              ? doc.data().receiver
+              : doc.data().sender;
           tempConnectedUsers.push(neededUsers);
         }
-      }
-    });
+      });
+    } else {
+      userList.forEach((doc) => {
+        if (doc.id.split("-").includes($state.profile.id)) {
+          const neededUsers =
+            doc.data().sender.id === $state.profile.id
+              ? doc.data().receiver
+              : doc.data().sender;
+          if (neededUsers.id !== oppositeUser.value.id) {
+            tempConnectedUsers.push(neededUsers);
+          }
+        }
+      });
+    }
+
     connectedUsers.value = tempConnectedUsers;
   } catch (error) {
     console.error("Error get all connected users: ", error);
@@ -121,10 +146,10 @@ const handleGetAllConnectedUsers = async () => {
 const handleCreateGroupChat = () => {
   const userSelectedList = JSON.parse(JSON.stringify(selected.value));
   const selfProfile = JSON.parse(JSON.stringify($state.profile));
-  console.log("Group info created: ", groupName.value, [
-    selfProfile,
-    ...userSelectedList,
-  ]);
+  console.log("A new group created!");
+  console.log("Group Name ", groupName.value);
+  console.log("Group admins: ", [selfProfile]);
+  console.log("Group members: ", userSelectedList);
 
   // Handle logic create group here
 
