@@ -3,7 +3,7 @@
     height="100%"
     side="end"
     @load="load"
-    id="message-list-scroll"
+    :id="scrollElementId"
     class="message-scroll"
   >
     <MessageBox
@@ -38,8 +38,9 @@ const { $state } = useProfileStore();
 const navigatorTab = useNavigatorTabStore();
 const messageList = ref<TMessage[]>([]);
 const { $firestore } = useNuxtApp();
+
 const message = ref<string>("");
-const { setScroll } = useScroll();
+const { scrollElementId, onSetScroll } = useElement();
 
 const getAllMessage = async () => {
   const documentGroupId = navigatorTab.$state.currentTab.group?.group_id!;
@@ -100,10 +101,9 @@ const sendMessage = async () => {
       ),
       dataMessage
     );
-    await updateDoc(
-      doc($firestore, FIRESTORE_PATH.chat_collection, documentGroupId),
-      { last_message: dataMessage }
-    );
+    await updateDoc(doc($firestore, FIRESTORE_PATH.chat_collection, documentGroupId), {
+      last_message: dataMessage,
+    });
     console.log("send message success");
   } catch (error) {
     console.log("send message Error: ", error);
@@ -117,7 +117,7 @@ const clearMessage = () => {
 };
 
 watch(messageList, () => {
-  setScroll("message-list-scroll", 0, "instant");
+  onSetScroll(0, "instant");
 });
 
 watchEffect(() => {

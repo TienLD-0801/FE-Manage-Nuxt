@@ -6,15 +6,27 @@
       <v-list>
         <v-list-item>
           <div class="setting-profile">
-            <v-avatar class="avatar" :image="infoUser.avatar" />
-            <v-list-item-title>{{ infoUser.name }}</v-list-item-title>
-            <v-list-item-subtitle>{{ infoUser.email }}</v-list-item-subtitle>
+            <v-skeleton-loader :loading="isSkeleton" class="mx-auto" type="avatar">
+              <v-avatar :image="model.avatar" class="avatar" :size="140" />
+            </v-skeleton-loader>
+            <v-file-input
+              v-model="files"
+              accept="image/*"
+              style="display: none"
+              :id="inputElementId"
+              @change="handleChangeAvatar"
+            />
+            <v-btn @click="onOpenFile()" text="Upload" v-if="typeEdit" />
+          </div>
+          <div class="setting-info">
+            <v-list-item-title class="title">{{ infoUser.name }}</v-list-item-title>
+            <v-label>{{ infoUser.email }}</v-label>
           </div>
         </v-list-item>
       </v-list>
     </v-container>
 
-    <v-form class="form-profile" @submit.prevent="handleUpdateProfile">
+    <v-form class="form-profile" @submit.prevent="handleSaveProfile">
       <v-text-field
         :disabled="!typeEdit"
         v-model="model.firstName"
@@ -38,7 +50,7 @@
         type="submit"
         variant="elevated"
         color="blue"
-        :disabled="isCheckDuplicateField"
+        :disabled="isCheckDuplicateField || isSkeleton"
         :text="typeEdit ? 'Save' : 'Edit'"
       />
     </v-form>
@@ -49,10 +61,14 @@
 import { collection, doc, getDocs, updateDoc } from "firebase/firestore";
 import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
 const { $state, updateProfile } = useProfileStore();
+const { inputElementId, onOpenFile } = useElement();
+const { uploadCloudinary } = useCloudinary();
 const { updateChatInfo } = useFirebaseAuth();
 const { $firestore } = useNuxtApp();
 const { start, finish } = useLoadingIndicator();
 const typeEdit = ref(false);
+const files = ref<File[]>([]);
+const isSkeleton = ref<boolean>(false);
 
 const model = ref<TProfile>({
   id: $state.profile.id,
@@ -75,15 +91,14 @@ const isCheckDuplicateField = computed(() => {
   const newName = `${model.value.firstName} ${model.value.lastName}`;
   return (
     currentName.replace(/\s+/g, "").trim() === newName.replace(/\s+/g, "").trim() &&
-    typeEdit.value
+    typeEdit.value &&
+    infoUser.value.avatar === model.value.avatar
   );
 });
 
-const handleUpdateProfile = async () => {
+const handleSaveProfile = async () => {
   typeEdit.value = !typeEdit.value;
-
   if (typeEdit.value) return;
-
   start();
   try {
     infoUser.value = {
@@ -91,6 +106,7 @@ const handleUpdateProfile = async () => {
       avatar: model.value.avatar,
       email: model.value.email,
     };
+
     await updateDoc(
       doc($firestore, FIRESTORE_PATH.user_collection, $state.profile.id),
       model.value
@@ -121,6 +137,21 @@ const updateProfileChat = async () => {
     }
   });
 };
+
+const handleChangeAvatar = async () => {
+  if (!files) return;
+  isSkeleton.value = true;
+  try {
+    const secure_url = await uploadCloudinary(files.value[0]);
+    if (secure_url) {
+      model.value.avatar = secure_url;
+    }
+  } catch (error) {
+    console.log(error);
+  } finally {
+    isSkeleton.value = false;
+  }
+};
 </script>
 
 <style lang="scss" scoped>
@@ -133,7 +164,16 @@ const updateProfileChat = async () => {
   justify-content: center;
 }
 
+.setting-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
 .setting-container .setting-profile {
+  gap: 15px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -141,11 +181,17 @@ const updateProfileChat = async () => {
 }
 
 .setting-container .avatar {
-  width: 100px;
-  height: 100px;
+  width: 100%;
+  height: 100%;
 }
 .button-save {
   float: right;
   margin: 0;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 600;
+  color: blueviolet;
 }
 </style>

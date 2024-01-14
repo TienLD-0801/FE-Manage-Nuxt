@@ -4,5 +4,6 @@ export enum ConnectUserStatus {
   WaitApprove = 'mdi-check',
   ConnectApproved = 'mdi-chat-outline',
 }
-
+export const DEFAULT_AVATAR =
+  'https://res.cloudinary.com/managecloud/image/upload/v1705221209/default_avatar.png';
 export const MESSAGE_LIMIT = 10;
