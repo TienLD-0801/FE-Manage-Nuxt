@@ -31,49 +31,7 @@
                 <v-icon class="description-icon" icon="mdi-text-box-edit-outline" />
               </v-expansion-panels>
 
-              <v-dialog v-model="dialog" scrollable width="auto">
-                <template v-slot:activator="{ props }">
-                  <v-list-item
-                    v-bind="props"
-                    href="#"
-                    prepend-icon="mdi-account-group-outline"
-                    :title="`Create group chat with ${name}`"
-                  ></v-list-item>
-                </template>
-
-                <v-card>
-                  <v-card-title>Select Members</v-card-title>
-                  <v-divider></v-divider>
-                  <v-card-text style="height: 300px">
-                    <v-radio-group v-model="dialogm1" column>
-                      <v-radio label="Le Duy Tien" value="bahamas"></v-radio>
-                      <v-radio label="Nguyen Tran Phuong Tram" value="bahrain"></v-radio>
-                      <v-radio label="Trieu Tan Vinh" value="bangladesh"></v-radio>
-                      <v-radio label="Tran Chi Huu" value="barbados"></v-radio>
-                      <v-radio label="Nguyen Anh Duy" value="belarus"></v-radio>
-                      <v-radio label="Duong Van Khuong" value="belgium"></v-radio>
-                      <v-radio label="Nguyen Thanh Phong" value="belize"></v-radio>
-                      <v-radio label="Dinh Gia Kiet" value="benin"></v-radio>
-                      <v-radio label="Pham Gia Bao" value="bhutan"></v-radio>
-                      <v-radio label="Nguyen An Nhien" value="bolivia"></v-radio>
-                      <v-radio label="Bui Binh Trung" value="bosnia"></v-radio>
-                      <v-radio label="Nguyen Nhut Tan" value="botswana"></v-radio>
-                      <v-radio label="Hoang Tan Vinh" value="brazil"></v-radio>
-                      <v-radio label="Le Duy Khanh" value="brunei"></v-radio>
-                      <v-radio label="Nguyen Yen Nhi" value="bulgaria"></v-radio>
-                    </v-radio-group>
-                  </v-card-text>
-                  <v-divider></v-divider>
-                  <v-card-actions>
-                    <v-btn color="blue-darken-1" variant="text" @click="dialog = false">
-                      Close
-                    </v-btn>
-                    <v-btn color="blue-darken-1" variant="text" @click="dialog = false">
-                      Create
-                    </v-btn>
-                  </v-card-actions>
-                </v-card>
-              </v-dialog>
+              <CreateGroupChatPopup :name="name" />
 
               <v-list-item
                 prepend-icon="mdi-folder-multiple-image"
@@ -92,9 +50,6 @@ defineProps<{
   name: string;
   avatar: string;
 }>();
-
-const dialogm1 = ref("");
-const dialog = ref(false);
 
 const description = `Meet: https://meet.google.com/ezf-soqu-ozx  \n DEV: https://alb-dev-apne1-cd022-01.zero-events.com \n Follow deploy : https://app.circleci.com/pipelines/bitbucket/hi817develop/bp-webapp_functiontest`;
 

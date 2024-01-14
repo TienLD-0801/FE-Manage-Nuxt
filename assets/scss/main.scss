@@ -36,3 +36,11 @@ body {
 .options-info-chat .v-expansion-panel-title--active {
   min-height: unset !important;
 }
+
+.user-selection-item .v-label {
+  opacity: unset;
+}
+
+.create-group-chat-popup-container .v-field__append-inner {
+  display: none !important;
+}
