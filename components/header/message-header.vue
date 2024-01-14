@@ -88,6 +88,7 @@ const rail = ref(false);
 .description-text {
   font-size: 0.8rem;
   white-space: pre-line;
+  word-wrap: break-word;
 }
 
 .description-icon {
