@@ -21,49 +21,23 @@
               <v-divider></v-divider>
             </v-list>
 
-            <v-card class="mx-auto" width="300">
-              <v-list>
-                <v-list-item
-                  prepend-icon="mdi-text-box-edit-outline"
+            <v-list class="options-info-chat mx-auto" width="300">
+              <v-expansion-panels variant="accordion">
+                <v-expansion-panel
+                  class="description-text"
                   title="Description"
-                ></v-list-item>
+                  :text="description"
+                />
+                <v-icon class="description-icon" icon="mdi-text-box-edit-outline" />
+              </v-expansion-panels>
 
-                <v-list-group value="Users">
-                  <template v-slot:activator="{ props }">
-                    <v-list-item
-                      v-bind="props"
-                      prepend-icon="mdi-plus-circle-multiple-outline"
-                      title="Options"
-                    ></v-list-item>
-                  </template>
+              <CreateGroupChatPopup :name="name" />
 
-                  <v-list-group value="Admin">
-                    <template v-slot:activator="{ props }">
-                      <v-list-item
-                        prepend-icon="mdi-account-group-outline"
-                        v-bind="props"
-                        title="Create group chat"
-                      ></v-list-item>
-                    </template>
-                  </v-list-group>
-
-                  <v-list-group value="Actions">
-                    <template v-slot:activator="{ props }">
-                      <v-list-item
-                        prepend-icon="mdi-bell-outline"
-                        v-bind="props"
-                        title="Notifications"
-                      ></v-list-item>
-                    </template>
-                  </v-list-group>
-                </v-list-group>
-
-                <v-list-item
-                  prepend-icon="mdi-folder-multiple-image"
-                  title="Media, files and links"
-                ></v-list-item>
-              </v-list>
-            </v-card>
+              <v-list-item
+                prepend-icon="mdi-folder-multiple-image"
+                title="Media, files and links"
+              ></v-list-item>
+            </v-list>
           </div>
         </v-navigation-drawer>
       </div>
@@ -76,6 +50,8 @@ defineProps<{
   name: string;
   avatar: string;
 }>();
+
+const description = `Meet: https://meet.google.com/ezf-soqu-ozx  \n DEV: https://alb-dev-apne1-cd022-01.zero-events.com \n Follow deploy : https://app.circleci.com/pipelines/bitbucket/hi817develop/bp-webapp_functiontest`;
 
 const rail = ref(false);
 </script>
@@ -107,5 +83,16 @@ const rail = ref(false);
   flex-direction: column;
   justify-content: center;
   align-items: center;
+}
+
+.description-text {
+  font-size: 0.8rem;
+  white-space: pre-line;
+}
+
+.description-icon {
+  position: absolute;
+  left: 13px;
+  top: 13px;
 }
 </style>
