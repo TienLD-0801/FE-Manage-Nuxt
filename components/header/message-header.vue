@@ -31,7 +31,10 @@
                 <v-icon class="description-icon" icon="mdi-text-box-edit-outline" />
               </v-expansion-panels>
 
-              <CreateGroupChatPopup :name="name" />
+              <CreateGroupChatPopup
+                :title="`Create group chat with ${name}`"
+                :name="name"
+              />
 
               <v-list-item
                 prepend-icon="mdi-folder-multiple-image"
