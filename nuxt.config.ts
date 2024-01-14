@@ -49,6 +49,11 @@ export default defineNuxtConfig({
         appId: process.env.APP_ID,
         measurementId: process.env.MEASUREMENT_ID,
       },
+      cloudinaryConfig: {
+        apiKey: process.env.CLOUD_API_KEY,
+        cloudName: process.env.CLOUD_NAME,
+        uploadPreset: process.env.UPLOAD_PRESET,
+      },
     },
   },
 });

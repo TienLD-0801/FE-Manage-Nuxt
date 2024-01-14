@@ -3,7 +3,7 @@
     height="100%"
     side="end"
     @load="load"
-    id="message-list-scroll"
+    :id="scrollElementId"
     class="message-scroll"
     :v-slot:empty="true"
   >
@@ -42,8 +42,9 @@ const { $state } = useProfileStore();
 const navigatorTab = useNavigatorTabStore();
 const messageList = ref<TMessage[]>([]);
 const { $firestore } = useNuxtApp();
+
 const message = ref<string>("");
-const { setScroll } = useScroll();
+const { scrollElementId, onSetScroll } = useElement();
 
 const getAllMessage = async () => {
   const documentGroupId = navigatorTab.$state.currentTab.group?.group_id!;
@@ -122,7 +123,7 @@ const clearMessage = () => {
 };
 
 watch(messageList, () => {
-  setScroll("message-list-scroll", 0, "instant");
+  onSetScroll(0, "instant");
 });
 
 watchEffect(() => {

@@ -19,6 +19,14 @@ body {
   margin: 20px 20px 0px 120px;
 }
 
+.setting-profile .v-skeleton-loader__avatar {
+  width: 120px !important;
+  height: 120px !important;
+  min-width: unset !important;
+  min-height: unset !important;
+  max-width: unset !important;
+  max-height: unset !important;
+}
 .description-text .v-expansion-panel__shadow {
   box-shadow: unset !important;
   height: 10px;

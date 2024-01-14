@@ -11,6 +11,7 @@ definePageMeta({
 });
 
 import { CustomError } from "~/shared/Error/error";
+import { DEFAULT_AVATAR } from "~/shared/constant/constant";
 import { PATH_ROUTER } from "~/shared/constant/router";
 
 const { register, addUsersFirebaseStore } = useFirebaseAuth();
@@ -28,8 +29,7 @@ const handleRegister = async (dataForm: TRegisterInfo) => {
       firstName: dataForm.firstName,
       lastName: dataForm.lastName,
       email: dataForm.email,
-      avatar:
-        "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png",
+      avatar: DEFAULT_AVATAR,
       created_at: new Date().toString(),
       updated_at: new Date().toString(),
     };

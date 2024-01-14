@@ -1,3 +1,5 @@
+import { DEFAULT_AVATAR } from '~/shared/constant/constant';
+
 export const useProfileStore = defineStore(
   'profile',
   () => {
@@ -5,7 +7,7 @@ export const useProfileStore = defineStore(
       id: '',
       email: '',
       lastName: '',
-      avatar: '',
+      avatar: DEFAULT_AVATAR,
       firstName: '',
       created_at: '',
       updated_at: '',
