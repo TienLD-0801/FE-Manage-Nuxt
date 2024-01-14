@@ -17,6 +17,14 @@
     <v-card class="user-selection-card" width="500px">
       <v-card-title>{{ `Create group chat with ${name}` }}</v-card-title>
       <v-divider></v-divider>
+      <v-text-field
+        class="group-name"
+        variant="underlined"
+        hide-details="auto"
+        label="Group Name"
+        v-model="groupName"
+      ></v-text-field>
+
       <v-select
         v-model="userMappingSelectListByName"
         label="Selected members"
@@ -36,7 +44,11 @@
 
       <v-divider></v-divider>
       <v-card-actions>
-        <v-btn color="blue-darken-1" variant="text" @click="dialog = false">
+        <v-btn
+          color="blue-darken-1"
+          variant="text"
+          @click="handleClosePopupCreateGroupChat"
+        >
           Close
         </v-btn>
         <v-btn
@@ -62,16 +74,25 @@ import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
 const navigatorTab = useNavigatorTabStore();
 const { $firestore } = useNuxtApp();
 const { $state } = useProfileStore();
-const dialog = ref(false);
+const groupName = ref<string>("");
+const dialog = ref<boolean>(false);
 const connectedUsers = ref<TProfile[]>([]);
-const selected = ref<TProfile[]>([navigatorTab.$state.currentTab.group?.oppositeUser!]);
+const oppositeUser = computed(() => navigatorTab.$state.currentTab.group?.oppositeUser!);
+const selected = ref<TProfile[]>([]);
 const userMappingSelectListByName = computed(() => {
   return JSON.parse(JSON.stringify(selected.value)).map(
     (e: TProfile) => `${e.firstName} ${e.lastName}`
   );
 });
 
+const handleClosePopupCreateGroupChat = () => {
+  selected.value = [];
+  groupName.value = "";
+  dialog.value = false;
+};
+
 const handleGetAllConnectedUsers = async () => {
+  selected.value = [oppositeUser.value];
   try {
     const q = query(
       collection($firestore, FIRESTORE_PATH.chat_collection),
@@ -79,14 +100,16 @@ const handleGetAllConnectedUsers = async () => {
       where("is_canceled", "==", false)
     );
     const userList = await getDocs(q);
-    const tempConnectedUsers: TProfile[] = [];
+    const tempConnectedUsers: TProfile[] = [oppositeUser.value];
     userList.forEach((doc) => {
       if (doc.id.split("-").includes($state.profile.id)) {
         const neededUsers =
           doc.data().sender.id === $state.profile.id
             ? doc.data().receiver
             : doc.data().sender;
-        tempConnectedUsers.push(neededUsers);
+        if (neededUsers.id !== oppositeUser.value.id) {
+          tempConnectedUsers.push(neededUsers);
+        }
       }
     });
     connectedUsers.value = tempConnectedUsers;
@@ -98,13 +121,23 @@ const handleGetAllConnectedUsers = async () => {
 const handleCreateGroupChat = () => {
   const userSelectedList = JSON.parse(JSON.stringify(selected.value));
   const selfProfile = JSON.parse(JSON.stringify($state.profile));
-  console.log("User created in group: ", [selfProfile, ...userSelectedList]);
+  console.log("Group info created: ", groupName.value, [
+    selfProfile,
+    ...userSelectedList,
+  ]);
+
   // Handle logic create group here
+
+  handleClosePopupCreateGroupChat();
 };
 </script>
 
 <style lang="scss" scoped>
 .create-group-chat-popup-container .user-selection-list {
   height: 400px;
+}
+
+.create-group-chat-popup-container .group-name {
+  margin: 15px 10px;
 }
 </style>
