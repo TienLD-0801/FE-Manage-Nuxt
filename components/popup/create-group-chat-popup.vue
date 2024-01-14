@@ -52,7 +52,7 @@
           Close
         </v-btn>
         <v-btn
-          :disabled="userMappingSelectListByName.length < 2"
+          :disabled="userMappingSelectListByName.length < 2 || groupName.length === 0"
           color="blue-darken-1"
           variant="text"
           @click="handleCreateGroupChat"
@@ -134,7 +134,8 @@ const handleCreateGroupChat = () => {
 
 <style lang="scss" scoped>
 .create-group-chat-popup-container .user-selection-list {
-  height: 400px;
+  height: 320px;
+  margin-top: -25px;
 }
 
 .create-group-chat-popup-container .group-name {
