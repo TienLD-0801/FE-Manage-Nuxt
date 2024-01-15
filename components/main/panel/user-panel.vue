@@ -179,19 +179,24 @@ const handleChatUser = async (dataUser: TProfile) => {
     const querySnapshot = await getDocs(
       collection($firestore, FIRESTORE_PATH.chat_collection)
     );
-    querySnapshot.forEach((doc) => {
+    querySnapshot.forEach(async (chatItem) => {
+      const adminRef = chatItem.data().admin_refs[0];
+      const memberRef = chatItem.data().member_refs[0];
+      const [adminProfile, memberProfile] = await Promise.all([
+        getDoc(adminRef),
+        getDoc(memberRef),
+      ]);
       if (
-        $state.profile?.id &&
-        doc.id.split("-").includes(dataUser.id) &&
-        doc.id.split("-").includes($state.profile.id)
+        [adminProfile.id, memberProfile.id].includes(dataUser.id) &&
+        [adminProfile.id, memberProfile.id].includes($state.profile.id)
       ) {
-        const groupDetail = doc.data();
+        const groupDetail = chatItem.data();
         const groupOppositeConvert = {
           ...groupDetail,
           oppositeUser:
-            groupDetail.sender.id === $state.profile.id
-              ? groupDetail.receiver
-              : groupDetail.sender,
+            $state.profile.id === adminProfile.id
+              ? (memberProfile.data() as TProfile)
+              : (adminProfile.data() as TProfile),
         };
         navigatorTab.changeNavigatorTab({
           tab: "chats",
