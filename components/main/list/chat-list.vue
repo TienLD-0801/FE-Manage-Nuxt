@@ -23,14 +23,7 @@
   </v-list>
 </template>
 <script lang="ts" setup>
-import {
-  collection,
-  getDoc,
-  onSnapshot,
-  orderBy,
-  query,
-  where,
-} from "firebase/firestore";
+import { collection, getDoc, onSnapshot, query, where } from "firebase/firestore";
 import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
 
 const navigatorTab = useNavigatorTabStore();
@@ -47,7 +40,8 @@ const getListUserChat = () => {
   const qChats = query(
     collection($firestore, FIRESTORE_PATH.chat_collection),
     where("is_approved", "==", true),
-    where("is_canceled", "==", false)
+    where("is_canceled", "==", false),
+    where("group_type", "==", "private")
   );
 
   onSnapshot(qChats, (chatList) => {
@@ -69,12 +63,14 @@ const getListUserChat = () => {
           last_message: chatItem.get("last_message"),
         });
       }
+    });
+    setTimeout(() => {
       chatListMapping.value = tempListUserChat.sort((a, b) => {
         const date1 = new Date(b.last_message.created_at);
         const date2 = new Date(a.last_message.created_at);
         return Number(date1) - Number(date2);
       });
-    });
+    }, 500);
   });
 };
 
