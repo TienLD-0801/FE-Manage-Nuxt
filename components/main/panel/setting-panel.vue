@@ -58,12 +58,11 @@
 </template>
 
 <script lang="ts" setup>
-import { collection, doc, getDocs, updateDoc } from "firebase/firestore";
+import { doc, updateDoc } from "firebase/firestore";
 import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
 const { $state, updateProfile } = useProfileStore();
 const { inputElementId, onOpenFile } = useElement();
 const { uploadCloudinary } = useCloudinary();
-const { updateChatInfo } = useFirebaseAuth();
 const { $firestore } = useNuxtApp();
 const { start, finish } = useLoadingIndicator();
 const typeEdit = ref(false);

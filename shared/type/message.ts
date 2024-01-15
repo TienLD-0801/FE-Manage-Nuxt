@@ -8,6 +8,7 @@ type TMessage = {
 type TMessageGroup = {
   group_id: string;
   group_name?: string;
+  avatar?: string;
   group_type: 'private' | 'group';
   admin_refs: any;
   member_refs: any;

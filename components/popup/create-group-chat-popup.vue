@@ -86,6 +86,7 @@ import {
   setDoc,
 } from "firebase/firestore";
 import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
+import { DEFAULT_AVATAR_GROUP } from "~/shared/constant/constant";
 
 const navigatorTab = useNavigatorTabStore();
 const { $firestore } = useNuxtApp();
@@ -173,7 +174,7 @@ const handleCreateGroupChat = async () => {
   console.log("Group members: ", userSelectedList);
 
   const selectionRefs = userSelectedList.map((value: TProfile) => {
-    return `${FIRESTORE_PATH.user_collection}/${value.id}`;
+    return doc($firestore, `${FIRESTORE_PATH.user_collection}/${value.id}`);
   });
 
   const documentGroupId = doc(collection($firestore, FIRESTORE_PATH.chat_collection)).id;
@@ -181,7 +182,8 @@ const handleCreateGroupChat = async () => {
     group_id: documentGroupId,
     group_name: groupName.value,
     group_type: "group",
-    is_approved: false,
+    avatar: DEFAULT_AVATAR_GROUP,
+    is_approved: true,
     is_canceled: false,
     last_message: {
       user_id: "",
