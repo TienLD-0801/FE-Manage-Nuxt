@@ -72,7 +72,7 @@ const { $firestore } = useNuxtApp();
 const { $state } = useProfileStore();
 const users = ref<TProfile[]>([]);
 const tab = ref(null);
-const requestList = ref<TProfile[]>([]);
+const requestList = useState<TProfile[]>("requestList", () => []);
 const navigatorTab = useNavigatorTabStore();
 const isLoading = ref<boolean>(false);
 const getAllUsers = async () => {
@@ -94,25 +94,26 @@ const getAllUsers = async () => {
 
 const getAllRequests = () => {
   const q = query(collection($firestore, FIRESTORE_PATH.chat_collection));
-  onSnapshot(q, async (chatList) => {
-    const promise: Promise<TProfile> = new Promise((resolve, _) => {
-      chatList.docs.forEach(async (chatItem) => {
-        const adminRef = chatItem.data().admin_refs[0];
-        const memberRef = chatItem.data().member_refs[0];
-        const [adminProfile, memberProfile] = await Promise.all([
-          getDoc(adminRef),
-          getDoc(memberRef),
-        ]);
-        if (
-          memberProfile.id === $state.profile.id &&
-          !chatItem.data().is_approved &&
-          !chatItem.data().is_canceled
-        ) {
-          resolve(adminProfile.data() as TProfile);
-        }
-      });
+  onSnapshot(q, (chatList) => {
+    let templeChat: TProfile[] = [];
+    chatList.docs.forEach(async (chatItem) => {
+      const adminRef = chatItem.data().admin_refs[0];
+      const memberRef = chatItem.data().member_refs[0];
+      const [adminProfile, memberProfile] = await Promise.all([
+        getDoc(adminRef),
+        getDoc(memberRef),
+      ]);
+      if (
+        memberProfile.id === $state.profile.id &&
+        !chatItem.data().is_approved &&
+        !chatItem.data().is_canceled
+      ) {
+        templeChat.push(adminProfile.data() as TProfile);
+      }
     });
-    requestList.value.push(await promise);
+    setTimeout(() => {
+      requestList.value = templeChat;
+    }, 500);
   });
 };
 
