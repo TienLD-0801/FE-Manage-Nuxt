@@ -23,7 +23,8 @@
   </v-list>
 </template>
 <script lang="ts" setup>
-import { collection, onSnapshot, orderBy, query, where } from "firebase/firestore";
+import { collection, getDoc, onSnapshot, query, where } from "firebase/firestore";
+import { DEFAULT_AVATAR, DEFAULT_AVATAR_GROUP } from "~/shared/constant/constant";
 import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
 
 const navigatorTab = useNavigatorTabStore();
@@ -43,26 +44,68 @@ const getListUserChat = () => {
     where("is_canceled", "==", false)
   );
 
-  onSnapshot(qChats, (doc) => {
+  onSnapshot(qChats, (chatList) => {
     let tempListUserChat: TMessageGroup[] = [];
-
-    doc.forEach((snapShotChat) => {
-      if (snapShotChat.id.split("-").includes($state.profile?.id!)) {
-        tempListUserChat.push({
-          ...(snapShotChat.data() as TMessageGroup),
-          oppositeUser:
-            snapShotChat.data().sender.id === $state.profile?.id
-              ? snapShotChat.data().receiver
-              : snapShotChat.data().sender,
-          last_message: snapShotChat.get("last_message"),
+    chatList.forEach(async (chatItem) => {
+      if (chatItem.data().group_type === "private") {
+        const adminRef = chatItem.data().admin_refs[0];
+        const memberRef = chatItem.data().member_refs[0];
+        const [adminProfile, memberProfile] = await Promise.all([
+          getDoc(adminRef),
+          getDoc(memberRef),
+        ]);
+        if ([adminProfile.id, memberProfile.id].includes($state.profile.id)) {
+          tempListUserChat.push({
+            ...(chatItem.data() as TMessageGroup),
+            oppositeUser:
+              $state.profile.id === adminProfile.id
+                ? (memberProfile.data() as TProfile)
+                : (adminProfile.data() as TProfile),
+            last_message: chatItem.get("last_message"),
+          });
+        }
+      } else {
+        const adminList: TProfile[] = [];
+        chatItem.data().admin_refs.forEach(async (e: any) => {
+          const adminItem = await getDoc(e);
+          adminList.push(adminItem.data() as TProfile);
         });
+        const memberList: TProfile[] = [];
+        chatItem.data().member_refs.forEach(async (e: any) => {
+          const memberItem = await getDoc(e);
+          memberList.push(memberItem.data() as TProfile);
+        });
+        setTimeout(() => {
+          if (
+            [...adminList.map((e) => e.id), ...memberList.map((e) => e.id)].includes(
+              $state.profile.id
+            )
+          ) {
+            tempListUserChat.push({
+              ...(chatItem.data() as TMessageGroup),
+              oppositeUser: {
+                id: chatItem.id,
+                avatar: DEFAULT_AVATAR_GROUP,
+                firstName: chatItem.data().group_name,
+                lastName: "",
+                created_at: "",
+                email: "",
+                updated_at: "",
+              },
+              last_message: chatItem.get("last_message"),
+            });
+          }
+        }, 500);
       }
+    });
+
+    setTimeout(() => {
       chatListMapping.value = tempListUserChat.sort((a, b) => {
         const date1 = new Date(b.last_message.created_at);
         const date2 = new Date(a.last_message.created_at);
         return Number(date1) - Number(date2);
       });
-    });
+    }, 500);
   });
 };
 

@@ -42,7 +42,7 @@
           :label="`${user.firstName} ${user.lastName}`"
           :disabled="
             !isNewGroup &&
-            user.id === navigatorTab.$state.currentTab.group?.oppositeUser.id
+            user.id === navigatorTab.$state.currentTab.group?.oppositeUser?.id
           "
         />
       </v-card-text>
@@ -76,8 +76,17 @@ const props = defineProps<{
   isNewGroup?: boolean;
 }>();
 const { isNewGroup } = props;
-import { getDocs, query, collection, where } from "firebase/firestore";
+import {
+  getDocs,
+  query,
+  collection,
+  where,
+  getDoc,
+  doc,
+  setDoc,
+} from "firebase/firestore";
 import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
+import { DEFAULT_AVATAR_GROUP } from "~/shared/constant/constant";
 
 const navigatorTab = useNavigatorTabStore();
 const { $firestore } = useNuxtApp();
@@ -114,36 +123,49 @@ const handleGetAllConnectedUsers = async () => {
     // Refactor sau
     const tempConnectedUsers: TProfile[] = [];
     if (isNewGroup) {
-      userList.forEach((doc) => {
-        if (doc.id.split("-").includes($state.profile.id)) {
+      userList.forEach(async (chatItem) => {
+        const adminRef = chatItem.data().admin_refs[0];
+        const memberRef = chatItem.data().member_refs[0];
+        const [adminProfile, memberProfile] = await Promise.all([
+          getDoc(adminRef),
+          getDoc(memberRef),
+        ]);
+        if ([adminProfile.id, memberProfile.id].includes($state.profile.id)) {
           const neededUsers =
-            doc.data().sender.id === $state.profile.id
-              ? doc.data().receiver
-              : doc.data().sender;
-          tempConnectedUsers.push(neededUsers);
+            adminProfile.id === $state.profile.id
+              ? memberProfile.data()
+              : adminProfile.data();
+          tempConnectedUsers.push(neededUsers as TProfile);
         }
       });
     } else {
-      userList.forEach((doc) => {
-        if (doc.id.split("-").includes($state.profile.id)) {
+      userList.forEach(async (chatItem) => {
+        const adminRef = chatItem.data().admin_refs[0];
+        const memberRef = chatItem.data().member_refs[0];
+        const [adminProfile, memberProfile] = await Promise.all([
+          getDoc(adminRef),
+          getDoc(memberRef),
+        ]);
+        if ([adminProfile.id, memberProfile.id].includes($state.profile.id)) {
           const neededUsers =
-            doc.data().sender.id === $state.profile.id
-              ? doc.data().receiver
-              : doc.data().sender;
+            adminProfile.id === $state.profile.id
+              ? (memberProfile.data() as TProfile)
+              : (adminProfile.data() as TProfile);
           if (neededUsers.id !== oppositeUser.value.id) {
             tempConnectedUsers.push(neededUsers);
           }
         }
       });
     }
-
-    connectedUsers.value = tempConnectedUsers;
+    setTimeout(() => {
+      connectedUsers.value = tempConnectedUsers;
+    }, 500);
   } catch (error) {
     console.error("Error get all connected users: ", error);
   }
 };
 
-const handleCreateGroupChat = () => {
+const handleCreateGroupChat = async () => {
   const userSelectedList = JSON.parse(JSON.stringify(selected.value));
   const selfProfile = JSON.parse(JSON.stringify($state.profile));
   console.log("A new group created!");
@@ -151,8 +173,40 @@ const handleCreateGroupChat = () => {
   console.log("Group admins: ", [selfProfile]);
   console.log("Group members: ", userSelectedList);
 
-  // Handle logic create group here
+  const selectionRefs = userSelectedList.map((value: TProfile) => {
+    return doc($firestore, `${FIRESTORE_PATH.user_collection}/${value.id}`);
+  });
 
+  const documentGroupId = doc(collection($firestore, FIRESTORE_PATH.chat_collection)).id;
+  const dataAdd: TMessageGroup = {
+    group_id: documentGroupId,
+    group_name: groupName.value,
+    group_type: "group",
+    avatar: DEFAULT_AVATAR_GROUP,
+    is_approved: true,
+    is_canceled: false,
+    last_message: {
+      user_id: "",
+      content: "",
+      created_at: new Date().toString(),
+      message_id: "",
+    },
+    admin_refs: [
+      doc($firestore, `${FIRESTORE_PATH.user_collection}/${$state.profile.id}`),
+    ],
+    member_refs: selectionRefs,
+  };
+  try {
+    await setDoc(
+      doc($firestore, FIRESTORE_PATH.chat_collection, documentGroupId),
+      dataAdd
+    );
+    console.log("Create group successfully");
+  } catch (err) {
+    console.error("Error create group: ", err);
+  }
+
+  // Handle logic create group here
   handleClosePopupCreateGroupChat();
 };
 </script>

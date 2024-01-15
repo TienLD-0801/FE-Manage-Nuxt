@@ -58,12 +58,11 @@
 </template>
 
 <script lang="ts" setup>
-import { collection, doc, getDocs, updateDoc } from "firebase/firestore";
+import { doc, updateDoc } from "firebase/firestore";
 import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
 const { $state, updateProfile } = useProfileStore();
 const { inputElementId, onOpenFile } = useElement();
 const { uploadCloudinary } = useCloudinary();
-const { updateChatInfo } = useFirebaseAuth();
 const { $firestore } = useNuxtApp();
 const { start, finish } = useLoadingIndicator();
 const typeEdit = ref(false);
@@ -112,7 +111,6 @@ const handleSaveProfile = async () => {
       model.value
     );
     updateProfile(model.value);
-    updateProfileChat();
     console.log("up date profile successfully");
   } catch (error) {
     console.log("Update profile Error :", error);
@@ -121,21 +119,6 @@ const handleSaveProfile = async () => {
       finish();
     }, 2000);
   }
-};
-
-const updateProfileChat = async () => {
-  const groupChatQuery = await getDocs(
-    collection($firestore, FIRESTORE_PATH.chat_collection)
-  );
-  groupChatQuery.forEach(async (docQuery) => {
-    if (docQuery.id.split("-").includes($state.profile.id)) {
-      await updateChatInfo(
-        docQuery.get("sender").id,
-        docQuery.get("receiver").id,
-        $state.profile
-      );
-    }
-  });
 };
 
 const handleChangeAvatar = async () => {

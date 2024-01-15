@@ -1,10 +1,5 @@
 <template>
-  <v-checkbox
-    :disabled="disabled"
-    v-model="checkbox"
-    class="user-selection-item"
-    :value="value"
-  >
+  <v-checkbox :disabled="disabled" class="user-selection-item" :value="value">
     <template v-slot:label>
       <div>
         <v-tooltip location="bottom">
@@ -23,7 +18,7 @@
 
 <script lang="ts" setup>
 defineProps<{
-  value: string;
+  value: TProfile;
   label: string;
   disabled?: boolean;
 }>();

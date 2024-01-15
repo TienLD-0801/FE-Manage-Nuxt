@@ -17,6 +17,7 @@
       <v-window-item key="all" value="all">
         <div class="user-panel-list">
           <UserBox
+            :is-skeleton="isLoading"
             v-for="user in users"
             :key="user.id"
             :user="user"
@@ -34,6 +35,7 @@
       <v-window-item key="requests" value="requests">
         <div class="user-panel-list">
           <UserBox
+            :is-skeleton="isLoading"
             v-for="request in requestList"
             :key="request.id"
             :user="request"
@@ -52,8 +54,11 @@
 
 <script lang="ts" setup>
 import {
+  DocumentSnapshot,
+  FirestoreError,
   collection,
   doc,
+  getDoc,
   getDocs,
   onSnapshot,
   query,
@@ -62,40 +67,53 @@ import {
   where,
 } from "firebase/firestore";
 import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
+import { PATH_ROUTER } from "~/shared/constant/router";
 const { $firestore } = useNuxtApp();
 const { $state } = useProfileStore();
 const users = ref<TProfile[]>([]);
 const tab = ref(null);
-const requestList = ref<TProfile[]>([]);
+const requestList = useState<TProfile[]>("requestList", () => []);
 const navigatorTab = useNavigatorTabStore();
+const isLoading = ref<boolean>(false);
 const getAllUsers = async () => {
-  const qUsers = query(
-    collection($firestore, FIRESTORE_PATH.user_collection),
-    where("id", "!=", $state.profile?.id)
-  );
-  onSnapshot(qUsers, (onSnapShot) => {
-    let templeAllUser: TProfile[] = [];
-    onSnapShot.forEach((user) => {
-      templeAllUser.push(user.data() as TProfile);
+  try {
+    isLoading.value = true;
+    const qUsers = query(
+      collection($firestore, FIRESTORE_PATH.user_collection),
+      where("id", "!=", $state.profile?.id)
+    );
+    const user = await getDocs(qUsers);
+    user.forEach((userItem) => {
+      users.value.push(userItem.data() as TProfile);
     });
-    users.value = templeAllUser;
-  });
+  } catch (error) {
+  } finally {
+    isLoading.value = false;
+  }
 };
 
 const getAllRequests = () => {
   const q = query(collection($firestore, FIRESTORE_PATH.chat_collection));
-  onSnapshot(q, (snapShot) => {
-    let tempRequest: TProfile[] = [];
-    snapShot.forEach((doc) => {
+  onSnapshot(q, (chatList) => {
+    let templeChat: TProfile[] = [];
+    chatList.docs.forEach(async (chatItem) => {
+      const adminRef = chatItem.data().admin_refs[0];
+      const memberRef = chatItem.data().member_refs[0];
+      const [adminProfile, memberProfile] = await Promise.all([
+        getDoc(adminRef),
+        getDoc(memberRef),
+      ]);
       if (
-        doc.id.split("-")[1] === $state.profile?.id &&
-        !doc.data().is_approved &&
-        !doc.data().is_canceled
+        memberProfile.id === $state.profile.id &&
+        !chatItem.data().is_approved &&
+        !chatItem.data().is_canceled
       ) {
-        tempRequest.push(doc.data().sender);
+        templeChat.push(adminProfile.data() as TProfile);
       }
     });
-    requestList.value = tempRequest;
+    setTimeout(() => {
+      requestList.value = templeChat;
+    }, 500);
   });
 };
 
@@ -107,8 +125,7 @@ const handleAddUser = async (userAdded: TProfile) => {
   const documentGroupId = `${$state.profile?.id}-${userAdded.id}`;
   const dataAdd: TMessageGroup = {
     group_id: documentGroupId,
-    sender: $state.profile!,
-    receiver: userAdded,
+    group_type: "private",
     is_approved: false,
     last_message: {
       user_id: "",
@@ -116,6 +133,10 @@ const handleAddUser = async (userAdded: TProfile) => {
       created_at: new Date().toString(),
       message_id: "",
     },
+    admin_refs: [
+      doc($firestore, `${FIRESTORE_PATH.user_collection}/${$state.profile.id}`),
+    ],
+    member_refs: [doc($firestore, `${FIRESTORE_PATH.user_collection}/${userAdded.id}`)],
     is_canceled: false,
   };
   try {
@@ -159,19 +180,24 @@ const handleChatUser = async (dataUser: TProfile) => {
     const querySnapshot = await getDocs(
       collection($firestore, FIRESTORE_PATH.chat_collection)
     );
-    querySnapshot.forEach((doc) => {
+    querySnapshot.forEach(async (chatItem) => {
+      const adminRef = chatItem.data().admin_refs[0];
+      const memberRef = chatItem.data().member_refs[0];
+      const [adminProfile, memberProfile] = await Promise.all([
+        getDoc(adminRef),
+        getDoc(memberRef),
+      ]);
       if (
-        $state.profile?.id &&
-        doc.id.split("-").includes(dataUser.id) &&
-        doc.id.split("-").includes($state.profile.id)
+        [adminProfile.id, memberProfile.id].includes(dataUser.id) &&
+        [adminProfile.id, memberProfile.id].includes($state.profile.id)
       ) {
-        const groupDetail = doc.data();
+        const groupDetail = chatItem.data();
         const groupOppositeConvert = {
           ...groupDetail,
           oppositeUser:
-            groupDetail.sender.id === $state.profile.id
-              ? groupDetail.receiver
-              : groupDetail.sender,
+            $state.profile.id === adminProfile.id
+              ? (memberProfile.data() as TProfile)
+              : (adminProfile.data() as TProfile),
         };
         navigatorTab.changeNavigatorTab({
           tab: "chats",
