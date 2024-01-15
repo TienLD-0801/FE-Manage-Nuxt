@@ -1,51 +1,59 @@
 <template>
-  <v-card
+  <v-skeleton-loader
+    width="350"
+    height="80"
     class="user-box-container"
-    width="320"
-    :title="`${user.firstName} ${user.lastName}`"
-    :subtitle="user.email"
+    :loading="isSkeleton"
+    type="list-item-avatar"
   >
-    <template v-slot:prepend>
-      <v-avatar :image="user.avatar" />
-    </template>
-    <template v-slot:append>
-      <div class="icons-frame">
-        <v-icon
-          v-if="status === ConnectUserStatus.SentRequest"
-          :icon="ConnectUserStatus.SentRequest"
-          color="grey"
-        ></v-icon>
-        <v-icon
-          class="icon"
-          v-if="status === ConnectUserStatus.NewConnect"
-          @click="$emit('on-add-user', user)"
-          :icon="ConnectUserStatus.NewConnect"
-          color="success"
-        ></v-icon>
-        <v-icon
-          class="icon"
-          v-if="status === ConnectUserStatus.WaitApprove"
-          @click="$emit('on-approve-user', user)"
-          :icon="ConnectUserStatus.WaitApprove"
-          color="primary"
-        ></v-icon>
-        <v-icon
-          class="icon"
-          v-if="status === ConnectUserStatus.WaitApprove"
-          @click="$emit('on-deny-user', user)"
-          icon="mdi-close"
-          color="error"
-        ></v-icon>
-        <v-icon
-          class="icon"
-          v-if="status === ConnectUserStatus.ConnectApproved"
-          @click="$emit('on-chat-user', user)"
-          :icon="ConnectUserStatus.ConnectApproved"
-          color="primary"
-        ></v-icon>
-      </div>
-    </template>
-  </v-card>
+    <v-card
+      width="350"
+      height="80"
+      :title="`${user.firstName} ${user.lastName}`"
+      :subtitle="user.email"
+    >
+      <template v-slot:prepend>
+        <v-avatar :image="user.avatar" />
+      </template>
+      <template v-slot:append>
+        <div class="icons-frame">
+          <v-icon
+            v-if="status === ConnectUserStatus.SentRequest"
+            :icon="ConnectUserStatus.SentRequest"
+            color="grey"
+          ></v-icon>
+          <v-icon
+            class="icon"
+            v-if="status === ConnectUserStatus.NewConnect"
+            @click="$emit('on-add-user', user)"
+            :icon="ConnectUserStatus.NewConnect"
+            color="success"
+          ></v-icon>
+          <v-icon
+            class="icon"
+            v-if="status === ConnectUserStatus.WaitApprove"
+            @click="$emit('on-approve-user', user)"
+            :icon="ConnectUserStatus.WaitApprove"
+            color="primary"
+          ></v-icon>
+          <v-icon
+            class="icon"
+            v-if="status === ConnectUserStatus.WaitApprove"
+            @click="$emit('on-deny-user', user)"
+            icon="mdi-close"
+            color="error"
+          ></v-icon>
+          <v-icon
+            class="icon"
+            v-if="status === ConnectUserStatus.ConnectApproved"
+            @click="$emit('on-chat-user', user)"
+            :icon="ConnectUserStatus.ConnectApproved"
+            color="primary"
+          ></v-icon>
+        </div>
+      </template>
+    </v-card>
+  </v-skeleton-loader>
 </template>
 
 <script lang="ts" setup>
@@ -54,6 +62,7 @@ import { ConnectUserStatus } from "~/shared/constant/constant";
 import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
 const props = defineProps<{
   user: TProfile;
+  isSkeleton: boolean;
 }>();
 const { user } = props;
 const { $state } = useProfileStore();

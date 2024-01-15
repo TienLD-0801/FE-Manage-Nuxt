@@ -7,8 +7,9 @@ type TMessage = {
 
 type TMessageGroup = {
   group_id: string;
-  sender: TProfile;
-  receiver: TProfile;
+  group_type: 'private' | 'group';
+  admin_refs: any;
+  member_refs: any;
   last_message: TMessage;
   is_canceled: boolean;
   is_approved: boolean;

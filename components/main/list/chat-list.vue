@@ -23,7 +23,14 @@
   </v-list>
 </template>
 <script lang="ts" setup>
-import { collection, onSnapshot, orderBy, query, where } from "firebase/firestore";
+import {
+  collection,
+  getDoc,
+  onSnapshot,
+  orderBy,
+  query,
+  where,
+} from "firebase/firestore";
 import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
 
 const navigatorTab = useNavigatorTabStore();
@@ -43,18 +50,23 @@ const getListUserChat = () => {
     where("is_canceled", "==", false)
   );
 
-  onSnapshot(qChats, (doc) => {
+  onSnapshot(qChats, (chatList) => {
     let tempListUserChat: TMessageGroup[] = [];
-
-    doc.forEach((snapShotChat) => {
-      if (snapShotChat.id.split("-").includes($state.profile?.id!)) {
+    chatList.forEach(async (chatItem) => {
+      const adminRef = chatItem.data().admin_refs[0];
+      const memberRef = chatItem.data().member_refs[0];
+      const [adminProfile, memberProfile] = await Promise.all([
+        getDoc(adminRef),
+        getDoc(memberRef),
+      ]);
+      if ([adminProfile.id, memberProfile.id].includes($state.profile.id)) {
         tempListUserChat.push({
-          ...(snapShotChat.data() as TMessageGroup),
+          ...(chatItem.data() as TMessageGroup),
           oppositeUser:
-            snapShotChat.data().sender.id === $state.profile?.id
-              ? snapShotChat.data().receiver
-              : snapShotChat.data().sender,
-          last_message: snapShotChat.get("last_message"),
+            $state.profile.id === adminProfile.id
+              ? (memberProfile.data() as TProfile)
+              : (adminProfile.data() as TProfile),
+          last_message: chatItem.get("last_message"),
         });
       }
       chatListMapping.value = tempListUserChat.sort((a, b) => {

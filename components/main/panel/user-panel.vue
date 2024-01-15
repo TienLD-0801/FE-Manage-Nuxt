@@ -17,6 +17,7 @@
       <v-window-item key="all" value="all">
         <div class="user-panel-list">
           <UserBox
+            :is-skeleton="isLoading"
             v-for="user in users"
             :key="user.id"
             :user="user"
@@ -34,6 +35,7 @@
       <v-window-item key="requests" value="requests">
         <div class="user-panel-list">
           <UserBox
+            :is-skeleton="isLoading"
             v-for="request in requestList"
             :key="request.id"
             :user="request"
@@ -52,8 +54,11 @@
 
 <script lang="ts" setup>
 import {
+  DocumentSnapshot,
+  FirestoreError,
   collection,
   doc,
+  getDoc,
   getDocs,
   onSnapshot,
   query,
@@ -62,40 +67,52 @@ import {
   where,
 } from "firebase/firestore";
 import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
+import { PATH_ROUTER } from "~/shared/constant/router";
 const { $firestore } = useNuxtApp();
 const { $state } = useProfileStore();
 const users = ref<TProfile[]>([]);
 const tab = ref(null);
 const requestList = ref<TProfile[]>([]);
 const navigatorTab = useNavigatorTabStore();
+const isLoading = ref<boolean>(false);
 const getAllUsers = async () => {
-  const qUsers = query(
-    collection($firestore, FIRESTORE_PATH.user_collection),
-    where("id", "!=", $state.profile?.id)
-  );
-  onSnapshot(qUsers, (onSnapShot) => {
-    let templeAllUser: TProfile[] = [];
-    onSnapShot.forEach((user) => {
-      templeAllUser.push(user.data() as TProfile);
+  try {
+    isLoading.value = true;
+    const qUsers = query(
+      collection($firestore, FIRESTORE_PATH.user_collection),
+      where("id", "!=", $state.profile?.id)
+    );
+    const user = await getDocs(qUsers);
+    user.forEach((userItem) => {
+      users.value.push(userItem.data() as TProfile);
     });
-    users.value = templeAllUser;
-  });
+  } catch (error) {
+  } finally {
+    isLoading.value = false;
+  }
 };
 
 const getAllRequests = () => {
   const q = query(collection($firestore, FIRESTORE_PATH.chat_collection));
-  onSnapshot(q, (snapShot) => {
-    let tempRequest: TProfile[] = [];
-    snapShot.forEach((doc) => {
-      if (
-        doc.id.split("-")[1] === $state.profile?.id &&
-        !doc.data().is_approved &&
-        !doc.data().is_canceled
-      ) {
-        tempRequest.push(doc.data().sender);
-      }
+  onSnapshot(q, async (chatList) => {
+    const promise: Promise<TProfile> = new Promise((resolve, _) => {
+      chatList.docs.forEach(async (chatItem) => {
+        const adminRef = chatItem.data().admin_refs[0];
+        const memberRef = chatItem.data().member_refs[0];
+        const [adminProfile, memberProfile] = await Promise.all([
+          getDoc(adminRef),
+          getDoc(memberRef),
+        ]);
+        if (
+          memberProfile.id === $state.profile.id &&
+          !chatItem.data().is_approved &&
+          !chatItem.data().is_canceled
+        ) {
+          resolve(adminProfile.data() as TProfile);
+        }
+      });
     });
-    requestList.value = tempRequest;
+    requestList.value.push(await promise);
   });
 };
 
@@ -107,8 +124,7 @@ const handleAddUser = async (userAdded: TProfile) => {
   const documentGroupId = `${$state.profile?.id}-${userAdded.id}`;
   const dataAdd: TMessageGroup = {
     group_id: documentGroupId,
-    sender: $state.profile!,
-    receiver: userAdded,
+    group_type: "private",
     is_approved: false,
     last_message: {
       user_id: "",
@@ -116,6 +132,10 @@ const handleAddUser = async (userAdded: TProfile) => {
       created_at: new Date().toString(),
       message_id: "",
     },
+    admin_refs: [
+      doc($firestore, `${FIRESTORE_PATH.user_collection}/${$state.profile.id}`),
+    ],
+    member_refs: [doc($firestore, `${FIRESTORE_PATH.user_collection}/${userAdded.id}`)],
     is_canceled: false,
   };
   try {
