@@ -65,6 +65,7 @@ const rail = ref(false);
   border-bottom: 1px solid rgb(208, 208, 208);
   display: flex;
   justify-content: center;
+  padding: 0px 20px;
 }
 .message-toolbar .message-header-bar {
   display: flex;

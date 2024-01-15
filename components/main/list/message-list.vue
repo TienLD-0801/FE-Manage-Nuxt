@@ -8,11 +8,15 @@
     :v-slot:empty="true"
   >
     <MessageBox
-      v-for="item in messageList"
+      v-for="(item, i) in messageList"
       :key="item.message_id"
       :content="item.content"
       :time="item.created_at"
       :isSelf="item.user_id === $state.profile.id"
+      :notShowAvatarAndName="
+        i < messageList.length - 1 && item.user_id === messageList[i + 1].user_id
+      "
+      :notShowTime="i > 0 && item.user_id === messageList[i - 1].user_id"
     />
     <template v-slot:empty>
       <v-alert type="warning">No more messages!</v-alert>
@@ -135,7 +139,7 @@ watchEffect(() => {
 .message-scroll {
   flex-direction: column-reverse;
   height: 100vh;
-  gap: 20px;
+  // gap: 20px;
   padding: 0 25px;
 }
 </style>
