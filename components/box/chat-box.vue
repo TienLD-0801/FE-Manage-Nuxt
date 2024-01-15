@@ -1,11 +1,42 @@
 <template>
-  <v-list-item :class="['chat-item', activeItem && 'active-color'].join(' ')">
+  <v-list-item
+    :ripple="false"
+    :class="['chat-item', activeItem && 'active-color'].join(' ')"
+  >
     <div class="chat-frame">
       <v-avatar class="message-avatar" :image="avatar"></v-avatar>
       <div class="message-content">
         <div class="message-label">
           {{ name }}
-          <span v-text="time" />
+          <span class="latest-time" v-text="time" />
+
+          <v-menu transition="slide-y-transition">
+            <template v-slot:activator="{ props }">
+              <v-icon
+                v-bind="props"
+                class="options-icon"
+                icon="mdi-dots-horizontal"
+                size="18"
+              />
+            </template>
+            <v-list class="chat-item-options">
+              <v-list-item class="option-item" @click="console.log('delete chat item')">
+                <v-list-item-title :style="{ color: 'red' }" class="option-label"
+                  >Delete conservation</v-list-item-title
+                >
+              </v-list-item>
+              <v-list-item class="option-item" @click="console.log('delete chat item')">
+                <v-list-item-title class="option-label"
+                  >Pin Conservation</v-list-item-title
+                >
+              </v-list-item>
+              <v-list-item class="option-item" @click="console.log('delete chat item')">
+                <v-list-item-title class="option-label"
+                  >Hide conservation</v-list-item-title
+                >
+              </v-list-item>
+            </v-list>
+          </v-menu>
         </div>
         <p class="message-text">
           <span class="message-target" v-text="subMessage" />
@@ -31,6 +62,35 @@ defineProps<{
 .chat-item {
   padding: 0 10px;
   background-color: white !important;
+
+  &:hover {
+    .latest-time {
+      display: none;
+    }
+
+    .options-icon {
+      visibility: visible;
+    }
+  }
+}
+
+.chat-item-options {
+  .v-list-item--density-default.v-list-item--one-line {
+    min-height: 5px;
+
+    .option-label {
+      font-size: 0.9rem;
+    }
+  }
+}
+
+.chat-item .latest-time {
+  position: absolute;
+  right: 15px;
+}
+
+.chat-item .options-icon {
+  visibility: hidden;
 }
 
 .chat-item .chat-frame {
