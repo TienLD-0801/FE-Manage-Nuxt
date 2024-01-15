@@ -112,7 +112,6 @@ const handleSaveProfile = async () => {
       model.value
     );
     updateProfile(model.value);
-    updateProfileChat();
     console.log("up date profile successfully");
   } catch (error) {
     console.log("Update profile Error :", error);
@@ -121,21 +120,6 @@ const handleSaveProfile = async () => {
       finish();
     }, 2000);
   }
-};
-
-const updateProfileChat = async () => {
-  const groupChatQuery = await getDocs(
-    collection($firestore, FIRESTORE_PATH.chat_collection)
-  );
-  groupChatQuery.forEach(async (docQuery) => {
-    if (docQuery.id.split("-").includes($state.profile.id)) {
-      await updateChatInfo(
-        docQuery.get("sender").id,
-        docQuery.get("receiver").id,
-        $state.profile
-      );
-    }
-  });
 };
 
 const handleChangeAvatar = async () => {
