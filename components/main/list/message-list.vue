@@ -11,6 +11,7 @@
       v-for="(item, i) in messageList"
       :key="item.message_id"
       :content="item.content"
+      :profile="getProfileDetail(item.user_id)"
       :time="item.created_at"
       :isSelf="item.user_id === $state.profile.id"
       :notShowAvatarAndName="
@@ -32,6 +33,7 @@
 import {
   collection,
   doc,
+  getDoc,
   limit,
   onSnapshot,
   orderBy,
@@ -39,16 +41,60 @@ import {
   setDoc,
   updateDoc,
 } from "firebase/firestore";
-import { MESSAGE_LIMIT } from "~/shared/constant/constant";
+import { DEFAULT_AVATAR, MESSAGE_LIMIT } from "~/shared/constant/constant";
 import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
 
 const { $state } = useProfileStore();
 const navigatorTab = useNavigatorTabStore();
 const messageList = ref<TMessage[]>([]);
 const { $firestore } = useNuxtApp();
+const adminsAndMembersProfiles = ref<TProfile[]>([]);
 
 const message = ref<string>("");
 const { scrollElementId, onSetScroll } = useElement();
+
+const getProfileDetail = (userId: string) => {
+  const tempProfile: TProfile[] = [];
+
+  adminsAndMembersProfiles.value.some((e: TProfile) => {
+    if (e.id === userId) {
+      tempProfile.push(e);
+    }
+  });
+
+  if (!tempProfile[0]) {
+    return {
+      id: "",
+      email: "",
+      lastName: "",
+      avatar: DEFAULT_AVATAR,
+      firstName: "",
+      created_at: "",
+      updated_at: "",
+    };
+  }
+
+  return JSON.parse(JSON.stringify(tempProfile[0]));
+};
+
+const getAllProfileOfAdminsAndMembers = async () => {
+  const tempProfiles: TProfile[] = [];
+  const documentGroupId = navigatorTab.$state.currentTab.group?.group_id!;
+  const q = doc($firestore, FIRESTORE_PATH.chat_collection, documentGroupId);
+  const adminAndMemberRef = await getDoc(q);
+  const listRefs = [
+    ...adminAndMemberRef.data()?.admin_refs,
+    ...adminAndMemberRef.data()?.member_refs,
+  ];
+  console.log("adminAndMemberRef: ", listRefs);
+  listRefs.forEach(async (e) => {
+    const profileRefDetail: any = await getDoc(e);
+    tempProfiles.push(profileRefDetail.data());
+  });
+  setTimeout(() => {
+    adminsAndMembersProfiles.value = tempProfiles;
+  }, 500);
+};
 
 const getAllMessage = async () => {
   const documentGroupId = navigatorTab.$state.currentTab.group?.group_id!;
@@ -95,6 +141,7 @@ const sendMessage = async () => {
   const dataMessage = {
     message_id: messageKey,
     user_id: $state.profile.id,
+    user_ref: doc($firestore, `${FIRESTORE_PATH.user_collection}/${$state.profile.id}`),
     content: message.value,
     created_at: new Date().toString(),
   };
@@ -132,6 +179,7 @@ watch(messageList, () => {
 
 watchEffect(() => {
   getAllMessage();
+  getAllProfileOfAdminsAndMembers();
 });
 </script>
 

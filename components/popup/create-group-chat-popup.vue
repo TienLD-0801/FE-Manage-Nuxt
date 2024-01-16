@@ -186,10 +186,11 @@ const handleCreateGroupChat = async () => {
     is_approved: true,
     is_canceled: false,
     last_message: {
-      user_id: "",
-      content: "",
+      message_id: "message-group-0",
+      user_id: $state.profile.id,
+      user_ref: doc($firestore, `${FIRESTORE_PATH.user_collection}/${$state.profile.id}`),
+      content: "Say Hello to start the conservation !",
       created_at: new Date().toString(),
-      message_id: "",
     },
     admin_refs: [
       doc($firestore, `${FIRESTORE_PATH.user_collection}/${$state.profile.id}`),
