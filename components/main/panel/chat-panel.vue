@@ -20,6 +20,6 @@ const fullName = computed(() => {
 
 <style lang="scss" scoped>
 .chat-container {
-  margin: 0px 0px 0px 100px;
+  margin: 0;
 }
 </style>
