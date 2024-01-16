@@ -10,7 +10,10 @@
       <v-tab value="all">All</v-tab>
       <v-tab value="requests"
         >Requests
-        <v-badge color="red" :content="requestList.length" v-if="requestList.length"
+        <v-badge
+          color="red"
+          :content="requestList.$state.requestList.length"
+          v-if="requestList.$state.requestList.length"
       /></v-tab>
     </v-tabs>
     <v-window class="user-tab-container" v-model="tab">
@@ -36,13 +39,16 @@
         <div class="user-panel-list">
           <UserBox
             :is-skeleton="isLoading"
-            v-for="request in requestList"
+            v-for="request in requestList.$state.requestList"
             :key="request.id"
             :user="request"
             @on-approve-user="handleApproveUser(request)"
             @on-deny-user="handleDenyUser(request)"
           />
-          <v-container class="no-user-style" v-if="!requestList.length">
+          <v-container
+            class="no-user-style"
+            v-if="!requestList.$state.requestList.length"
+          >
             <p>No users here.</p>
             <div class="no-user-photo" />
           </v-container>
@@ -69,8 +75,8 @@ const { $firestore } = useNuxtApp();
 const { $state } = useProfileStore();
 const users = ref<TProfile[]>([]);
 const tab = ref(null);
-const requestList = ref<TProfile[]>([]);
 const navigatorTab = useNavigatorTabStore();
+const requestList = useRequestList();
 const isLoading = ref<boolean>(false);
 
 const getAllUsers = async () => {
@@ -97,23 +103,21 @@ const getAllRequests = () => {
     where("is_canceled", "==", false),
     where("group_type", "==", "private")
   );
-  onSnapshot(q, (chatList) => {
-    const templeChat: TProfile[] = [];
+  onSnapshot(q, async (chatList) => {
+    const tempRequestList: TProfile[] = [];
     chatList.docs.forEach(async (chatItem) => {
       const adminProfile = await getDoc(chatItem.data().admin_refs[0]);
-      if (adminProfile.id !== $state.profile.id)
-        templeChat.push(adminProfile.data() as TProfile);
+      if (
+        chatItem.id.split("-").includes($state.profile.id) &&
+        adminProfile.id !== $state.profile.id
+      ) {
+        tempRequestList.push(adminProfile.data() as TProfile);
+      }
+      requestList.updateRequestList(tempRequestList);
     });
-    setTimeout(() => {
-      requestList.value = templeChat;
-    }, 500);
   });
 };
 
-/**
- *  Handle add friend user
- * @param
- */
 const handleAddUser = async (userAdded: TProfile) => {
   const documentGroupId = `${$state.profile?.id}-${userAdded.id}`;
   const dataAdd: TMessageGroup = {
@@ -163,6 +167,7 @@ const handleDenyUser = async (userDeleted: TProfile) => {
     await updateDoc(doc($firestore, FIRESTORE_PATH.chat_collection, documentGroupId), {
       is_canceled: true,
     });
+    requestList.denyRequest(userDeleted.id);
     console.log("Deny User Successfully");
   } catch (err) {
     console.error("Error deny user: ", err);
