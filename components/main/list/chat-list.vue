@@ -7,11 +7,11 @@
     <ChatBox
       v-for="(item, i) in chatListMapping"
       :subMessage="
-        item.group_type === 'private'
-          ? item.last_message?.user_id === $state.profile?.id
-            ? 'You — '
-            : ''
-          : `${getProfileDetail(item.last_message.user_id).lastName} — `
+        item.last_message.user_id === $state.profile.id
+          ? 'You — '
+          : item.group_type === 'private'
+          ? ''
+          : `${getLastName(item.last_message.user_id)} — `
       "
       :name="`${item.oppositeUser?.firstName} ${item.oppositeUser?.lastName}`"
       :time="convertTimeMessage(item.last_message.created_at)"
@@ -26,56 +26,24 @@
 </template>
 <script lang="ts" setup>
 import { collection, doc, getDoc, onSnapshot, query, where } from "firebase/firestore";
-import { DEFAULT_AVATAR, DEFAULT_AVATAR_GROUP } from "~/shared/constant/constant";
+import { DEFAULT_AVATAR_GROUP } from "~/shared/constant/constant";
 import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
 
 const navigatorTab = useNavigatorTabStore();
 const { $firestore } = useNuxtApp();
 const { $state } = useProfileStore();
 const chatListMapping = ref<TMessageGroup[]>([]);
-const adminsAndMembersProfiles = ref<TProfile[]>([]);
+const lastProfileList = ref<TProfile[]>([]);
 
-const getProfileDetail = (userId: string) => {
-  const tempProfile: TProfile[] = [];
-
-  adminsAndMembersProfiles.value.some((e: TProfile) => {
-    if (e.id === userId) {
-      tempProfile.push(e);
+const getLastName = (userId: string) => {
+  const templeProfile: TProfile[] = [];
+  lastProfileList.value.some((user) => {
+    if (user.id === userId) {
+      templeProfile.push(JSON.parse(JSON.stringify(user)));
     }
   });
-
-  if (!tempProfile[0]) {
-    return {
-      id: "",
-      email: "",
-      lastName: "",
-      avatar: DEFAULT_AVATAR,
-      firstName: "",
-      created_at: "",
-      updated_at: "",
-    };
-  }
-
-  return JSON.parse(JSON.stringify(tempProfile[0]));
-};
-
-const getAllProfileOfAdminsAndMembers = async () => {
-  const tempProfiles: TProfile[] = [];
-  const documentGroupId = navigatorTab.$state.currentTab.group?.group_id!;
-  const q = doc($firestore, FIRESTORE_PATH.chat_collection, documentGroupId);
-  const adminAndMemberRef = await getDoc(q);
-  const listRefs = [
-    ...adminAndMemberRef.data()?.admin_refs,
-    ...adminAndMemberRef.data()?.member_refs,
-  ];
-  console.log("adminAndMemberRef: ", listRefs);
-  listRefs.forEach(async (e) => {
-    const profileRefDetail: any = await getDoc(e);
-    tempProfiles.push(profileRefDetail.data());
-  });
-  setTimeout(() => {
-    adminsAndMembersProfiles.value = tempProfiles;
-  }, 500);
+  if (!templeProfile[0]) return "";
+  return templeProfile[0].lastName;
 };
 
 const handleClickItemUser = (item: TMessageGroup) => {
@@ -92,6 +60,7 @@ const getListUserChat = () => {
 
   onSnapshot(qChats, (chatList) => {
     let tempListUserChat: TMessageGroup[] = [];
+    let tempProfileList: TProfile[] = [];
     chatList.forEach(async (chatItem) => {
       if (chatItem.data().group_type === "private") {
         const adminRef = chatItem.data().admin_refs[0];
@@ -121,7 +90,8 @@ const getListUserChat = () => {
           const memberItem = await getDoc(e);
           memberList.push(memberItem.data() as TProfile);
         });
-        setTimeout(() => {
+        const lastMessages = chatItem.get("last_message");
+        setTimeout(async () => {
           if (
             [...adminList.map((e) => e.id), ...memberList.map((e) => e.id)].includes(
               $state.profile.id
@@ -138,8 +108,11 @@ const getListUserChat = () => {
                 email: "",
                 updated_at: "",
               },
-              last_message: chatItem.get("last_message"),
+              last_message: lastMessages,
             });
+            const profile = await getDoc(lastMessages.user_ref);
+            tempProfileList.push(profile.data() as TProfile);
+            lastProfileList.value = tempProfileList;
           }
         }, 500);
       }
@@ -157,7 +130,6 @@ const getListUserChat = () => {
 
 watchEffect(() => {
   getListUserChat();
-  getAllProfileOfAdminsAndMembers();
 });
 </script>
 
