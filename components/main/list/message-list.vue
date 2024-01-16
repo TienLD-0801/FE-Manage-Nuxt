@@ -86,7 +86,6 @@ const getAllProfileOfAdminsAndMembers = async () => {
     ...adminAndMemberRef.data()?.admin_refs,
     ...adminAndMemberRef.data()?.member_refs,
   ];
-  console.log("adminAndMemberRef: ", listRefs);
   listRefs.forEach(async (e) => {
     const profileRefDetail: any = await getDoc(e);
     tempProfiles.push(profileRefDetail.data());
