@@ -25,7 +25,7 @@
   </v-list>
 </template>
 <script lang="ts" setup>
-import { collection, doc, getDoc, onSnapshot, query, where } from "firebase/firestore";
+import { collection, getDoc, onSnapshot, query, where } from "firebase/firestore";
 import { DEFAULT_AVATAR_GROUP } from "~/shared/constant/constant";
 import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
 
