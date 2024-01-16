@@ -1,6 +1,6 @@
 <template>
   <Loading :is-loading="isLoading" />
-  <v-navigation-drawer class="navigator-drawer-container">
+  <v-navigation-drawer :width="380" permanent>
     <v-toolbar color="#e4e8eb" class="px-0">
       <v-icon class="icon-app" size="large" icon="mdi-snapchat" />
       <v-toolbar-title>Chatty</v-toolbar-title>
@@ -73,9 +73,5 @@ const handleLogout = async () => {
 
 .icon-app {
   margin-left: 10px;
-}
-
-.navigator-drawer-container {
-  width: 360px !important;
 }
 </style>
