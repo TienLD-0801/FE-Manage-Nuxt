@@ -6,15 +6,17 @@
     </div>
     <ChatBox
       v-for="(item, i) in chatListMapping"
-      :subMessage="item.last_message?.user_id === $state.profile?.id ? 'You — ' : ''"
+      :subMessage="
+        item.group_type === 'private'
+          ? item.last_message?.user_id === $state.profile?.id
+            ? 'You — '
+            : ''
+          : `${getProfileDetail(item.last_message.user_id).lastName} — `
+      "
       :name="`${item.oppositeUser?.firstName} ${item.oppositeUser?.lastName}`"
       :time="convertTimeMessage(item.last_message.created_at)"
       :avatar="String(item.oppositeUser?.avatar)"
-      :last-message="
-        item.last_message.content.length
-          ? item.last_message?.content
-          : 'Say Hello to start the conservation !'
-      "
+      :last-message="item.last_message?.content"
       :key="i"
       :value="item"
       @click="handleClickItemUser(item)"
@@ -23,7 +25,7 @@
   </v-list>
 </template>
 <script lang="ts" setup>
-import { collection, getDoc, onSnapshot, query, where } from "firebase/firestore";
+import { collection, doc, getDoc, onSnapshot, query, where } from "firebase/firestore";
 import { DEFAULT_AVATAR, DEFAULT_AVATAR_GROUP } from "~/shared/constant/constant";
 import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
 
@@ -31,6 +33,50 @@ const navigatorTab = useNavigatorTabStore();
 const { $firestore } = useNuxtApp();
 const { $state } = useProfileStore();
 const chatListMapping = ref<TMessageGroup[]>([]);
+const adminsAndMembersProfiles = ref<TProfile[]>([]);
+
+const getProfileDetail = (userId: string) => {
+  const tempProfile: TProfile[] = [];
+
+  adminsAndMembersProfiles.value.some((e: TProfile) => {
+    if (e.id === userId) {
+      tempProfile.push(e);
+    }
+  });
+
+  if (!tempProfile[0]) {
+    return {
+      id: "",
+      email: "",
+      lastName: "",
+      avatar: DEFAULT_AVATAR,
+      firstName: "",
+      created_at: "",
+      updated_at: "",
+    };
+  }
+
+  return JSON.parse(JSON.stringify(tempProfile[0]));
+};
+
+const getAllProfileOfAdminsAndMembers = async () => {
+  const tempProfiles: TProfile[] = [];
+  const documentGroupId = navigatorTab.$state.currentTab.group?.group_id!;
+  const q = doc($firestore, FIRESTORE_PATH.chat_collection, documentGroupId);
+  const adminAndMemberRef = await getDoc(q);
+  const listRefs = [
+    ...adminAndMemberRef.data()?.admin_refs,
+    ...adminAndMemberRef.data()?.member_refs,
+  ];
+  console.log("adminAndMemberRef: ", listRefs);
+  listRefs.forEach(async (e) => {
+    const profileRefDetail: any = await getDoc(e);
+    tempProfiles.push(profileRefDetail.data());
+  });
+  setTimeout(() => {
+    adminsAndMembersProfiles.value = tempProfiles;
+  }, 500);
+};
 
 const handleClickItemUser = (item: TMessageGroup) => {
   if (!item) return;
@@ -111,6 +157,7 @@ const getListUserChat = () => {
 
 watchEffect(() => {
   getListUserChat();
+  getAllProfileOfAdminsAndMembers();
 });
 </script>
 

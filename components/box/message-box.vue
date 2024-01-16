@@ -4,13 +4,13 @@
       <v-avatar
         class="message-avatar"
         v-if="!isSelf"
-        :image="!isSelf && !notShowAvatarAndName ? DEFAULT_AVATAR : ''"
+        :image="!isSelf && !notShowAvatarAndName ? profile.avatar : ''"
       />
       <div class="message-content-frame">
         <v-list-subheader
           v-if="!isSelf && !notShowAvatarAndName"
           class="message-name-sender"
-          >Tien Le Duy</v-list-subheader
+          >{{ `${profile.firstName} ${profile.lastName}` }}</v-list-subheader
         >
         <div :class="isSelf ? 'message-view-self' : 'message-view'">
           {{ content }}
@@ -30,8 +30,8 @@ defineProps<{
   isSelf: boolean;
   notShowAvatarAndName?: boolean;
   notShowTime?: boolean;
+  profile: TProfile;
 }>();
-import { DEFAULT_AVATAR } from "../../shared/constant/constant";
 </script>
 
 <style lang="scss" scoped>
@@ -73,7 +73,6 @@ import { DEFAULT_AVATAR } from "../../shared/constant/constant";
 .message-avatar {
   margin-top: 40px;
   margin-right: 5px;
-  height: fit-content;
 }
 
 .message-name-sender {

@@ -54,8 +54,6 @@
 
 <script lang="ts" setup>
 import {
-  DocumentSnapshot,
-  FirestoreError,
   collection,
   doc,
   getDoc,
@@ -67,7 +65,6 @@ import {
   where,
 } from "firebase/firestore";
 import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
-import { PATH_ROUTER } from "~/shared/constant/router";
 const { $firestore } = useNuxtApp();
 const { $state } = useProfileStore();
 const users = ref<TProfile[]>([]);
@@ -128,10 +125,11 @@ const handleAddUser = async (userAdded: TProfile) => {
     group_type: "private",
     is_approved: false,
     last_message: {
-      user_id: "",
-      content: "",
+      message_id: "message-private-0",
+      user_id: $state.profile.id,
+      user_ref: doc($firestore, `${FIRESTORE_PATH.user_collection}/${$state.profile.id}`),
+      content: "Say Hello to start the conservation !",
       created_at: new Date().toString(),
-      message_id: "",
     },
     admin_refs: [
       doc($firestore, `${FIRESTORE_PATH.user_collection}/${$state.profile.id}`),
