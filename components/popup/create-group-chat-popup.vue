@@ -49,13 +49,7 @@
 
       <v-divider></v-divider>
       <v-card-actions>
-        <v-btn
-          color="blue-darken-1"
-          variant="text"
-          @click="handleClosePopupCreateGroupChat"
-        >
-          Close
-        </v-btn>
+        <v-btn color="blue-darken-1" variant="text" @click="closePopup"> Close </v-btn>
         <v-btn
           :disabled="userMappingSelectListByName.length < 2 || groupName.length === 0"
           color="blue-darken-1"
@@ -70,12 +64,6 @@
 </template>
 
 <script lang="ts" setup>
-const props = defineProps<{
-  title?: string;
-  name?: string;
-  isNewGroup?: boolean;
-}>();
-const { isNewGroup } = props;
 import {
   getDocs,
   query,
@@ -84,10 +72,17 @@ import {
   getDoc,
   doc,
   setDoc,
+type DocumentData,
+Query,
 } from "firebase/firestore";
 import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
 import { DEFAULT_AVATAR_GROUP } from "~/shared/constant/constant";
-
+const props = defineProps<{
+  title?: string;
+  name?: string;
+  isNewGroup?: boolean;
+}>();
+const { isNewGroup } = props;
 const navigatorTab = useNavigatorTabStore();
 const { $firestore } = useNuxtApp();
 const { $state } = useProfileStore();
@@ -96,83 +91,95 @@ const dialog = ref<boolean>(false);
 const connectedUsers = ref<TProfile[]>([]);
 const oppositeUser = computed(() => navigatorTab.$state.currentTab.group?.oppositeUser!);
 const selected = ref<TProfile[]>([]);
+
 const userMappingSelectListByName = computed(() => {
   return JSON.parse(JSON.stringify(selected.value)).map(
     (e: TProfile) => `${e.firstName} ${e.lastName}`
   );
 });
 
-const handleClosePopupCreateGroupChat = () => {
+const closePopup = () => {
   selected.value = [];
   groupName.value = "";
   dialog.value = false;
 };
 
-const handleGetAllConnectedUsers = async () => {
-  if (!isNewGroup && oppositeUser.value) {
+const createNewGroupInit = async (q:  Query<DocumentData, DocumentData>) => {
+  try {
+    const userList = await getDocs(q);
+    const tempConnectedUsers: TProfile[] = [];
+    userList.docs.forEach(async (chatItem, index) => {
+      const adminRef = chatItem.data().admin_refs[0];
+      const memberRef = chatItem.data().member_refs[0];
+      const [adminProfile, memberProfile] = await Promise.all([
+        getDoc(adminRef),
+        getDoc(memberRef),
+      ]);
+      if ([adminProfile.id, memberProfile.id].includes($state.profile.id)) {
+        const neededUsers =
+          adminProfile.id === $state.profile.id
+            ? memberProfile.data()
+            : adminProfile.data();
+        tempConnectedUsers.push(neededUsers as TProfile);
+      }
+      if (index === userList.docs.length - 1) {
+        connectedUsers.value = tempConnectedUsers;
+      }
+    });
+  } catch (error) {
+    console.error("Error get all connected users: ", error);
+  }
+};
+
+const createNewGroupWithAvailableFriend = async (q:  Query<DocumentData, DocumentData>) => {
+  if (oppositeUser.value) {
     selected.value = [oppositeUser.value];
   }
   try {
-    const q = query(
-      collection($firestore, FIRESTORE_PATH.chat_collection),
-      where("is_approved", "==", true),
-      where("is_canceled", "==", false)
-    );
     const userList = await getDocs(q);
-
-    // Refactor sau
-    const tempConnectedUsers: TProfile[] = [];
-    if (isNewGroup) {
-      userList.forEach(async (chatItem) => {
-        const adminRef = chatItem.data().admin_refs[0];
-        const memberRef = chatItem.data().member_refs[0];
-        const [adminProfile, memberProfile] = await Promise.all([
-          getDoc(adminRef),
-          getDoc(memberRef),
-        ]);
-        if ([adminProfile.id, memberProfile.id].includes($state.profile.id)) {
-          const neededUsers =
-            adminProfile.id === $state.profile.id
-              ? memberProfile.data()
-              : adminProfile.data();
-          tempConnectedUsers.push(neededUsers as TProfile);
+    const tempConnectedUsers: TProfile[] = [oppositeUser.value];
+    userList.docs.forEach(async (chatItem, index) => {
+      const adminRef = chatItem.data().admin_refs[0];
+      const memberRef = chatItem.data().member_refs[0];
+      const [adminProfile, memberProfile] = await Promise.all([
+        getDoc(adminRef),
+        getDoc(memberRef),
+      ]);
+      if ([adminProfile.id, memberProfile.id].includes($state.profile.id)) {
+        const neededUsers =
+          adminProfile.id === $state.profile.id
+            ? (memberProfile.data() as TProfile)
+            : (adminProfile.data() as TProfile);
+        if (neededUsers.id !== oppositeUser.value.id) {
+          tempConnectedUsers.push(neededUsers);
         }
-      });
-    } else {
-      userList.forEach(async (chatItem) => {
-        const adminRef = chatItem.data().admin_refs[0];
-        const memberRef = chatItem.data().member_refs[0];
-        const [adminProfile, memberProfile] = await Promise.all([
-          getDoc(adminRef),
-          getDoc(memberRef),
-        ]);
-        if ([adminProfile.id, memberProfile.id].includes($state.profile.id)) {
-          const neededUsers =
-            adminProfile.id === $state.profile.id
-              ? (memberProfile.data() as TProfile)
-              : (adminProfile.data() as TProfile);
-          if (neededUsers.id !== oppositeUser.value.id) {
-            tempConnectedUsers.push(neededUsers);
-          }
-        }
-      });
-    }
-    setTimeout(() => {
-      connectedUsers.value = tempConnectedUsers;
-    }, 500);
+      }
+      if (index === userList.docs.length - 1) {
+        connectedUsers.value = tempConnectedUsers;
+      }
+    });
   } catch (error) {
     console.error("Error get all connected users: ", error);
+  }
+};
+
+const handleGetAllConnectedUsers = () => {
+  const q = query(
+      collection($firestore, FIRESTORE_PATH.chat_collection),
+      where("is_approved", "==", true),
+      where("is_canceled", "==", false),
+      where("group_type", "==", "private")
+    );
+  if (isNewGroup) {
+    createNewGroupInit(q);
+  } else {
+    createNewGroupWithAvailableFriend(q);
   }
 };
 
 const handleCreateGroupChat = async () => {
   const userSelectedList = JSON.parse(JSON.stringify(selected.value));
   const selfProfile = JSON.parse(JSON.stringify($state.profile));
-  console.log("A new group created!");
-  console.log("Group Name ", groupName.value);
-  console.log("Group admins: ", [selfProfile]);
-  console.log("Group members: ", userSelectedList);
-
   const selectionRefs = userSelectedList.map((value: TProfile) => {
     return doc($firestore, `${FIRESTORE_PATH.user_collection}/${value.id}`);
   });
@@ -208,7 +215,7 @@ const handleCreateGroupChat = async () => {
   }
 
   // Handle logic create group here
-  handleClosePopupCreateGroupChat();
+  closePopup();
 };
 </script>
 

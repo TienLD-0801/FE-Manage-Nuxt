@@ -86,13 +86,14 @@ const getAllProfileOfAdminsAndMembers = async () => {
     ...adminAndMemberRef.data()?.admin_refs,
     ...adminAndMemberRef.data()?.member_refs,
   ];
-  listRefs.forEach(async (e) => {
+  listRefs.forEach(async (e, index) => {
     const profileRefDetail: any = await getDoc(e);
     tempProfiles.push(profileRefDetail.data());
+
+    if (index === listRefs.length - 1) {
+      adminsAndMembersProfiles.value = tempProfiles;
+    }
   });
-  setTimeout(() => {
-    adminsAndMembersProfiles.value = tempProfiles;
-  }, 500);
 };
 
 const getAllMessage = async () => {
