@@ -34,9 +34,54 @@
                 <v-expansion-panel
                   class="description-text"
                   title="Description"
-                  :text="description"
+                  :text="
+                    $state.currentTab.group?.description?.length
+                      ? $state.currentTab.group?.description
+                      : 'No description'
+                  "
                 />
-                <v-icon class="description-icon" icon="mdi-text-box-edit-outline" />
+                <v-dialog
+                  class="create-group-chat-popup-container"
+                  v-model="dialog"
+                  scrollable
+                  width="auto"
+                >
+                  <template v-slot:activator="{ props }">
+                    <v-icon
+                      v-bind="props"
+                      class="description-icon"
+                      icon="mdi-text-box-edit-outline"
+                    ></v-icon>
+                  </template>
+
+                  <v-card class="description-group-card" width="500px">
+                    <v-card-title>{{ `Edit Description` }}</v-card-title>
+
+                    <v-divider></v-divider>
+                    <v-container fluid>
+                      <v-textarea
+                        class="description-input"
+                        counter
+                        placeholder="Write description..."
+                        v-model="descriptionContent"
+                      ></v-textarea>
+                    </v-container>
+
+                    <v-divider></v-divider>
+                    <v-card-actions>
+                      <v-btn color="blue-darken-1" variant="text" @click="dialog = false">
+                        Close
+                      </v-btn>
+                      <v-btn
+                        color="blue-darken-1"
+                        variant="text"
+                        @click="handleSaveDescription"
+                      >
+                        Save
+                      </v-btn>
+                    </v-card-actions>
+                  </v-card>
+                </v-dialog>
               </v-expansion-panels>
 
               <CreateGroupChatPopup
@@ -58,14 +103,38 @@
 </template>
 
 <script lang="ts" setup>
-const description = `Meet: https://meet.google.com/ezf-soqu-ozx  \n DEV: https://alb-dev-apne1-cd022-01.zero-events.com \n Follow deploy : https://app.circleci.com/pipelines/bitbucket/hi817develop/bp-webapp_functiontest`;
+import { doc, updateDoc } from "firebase/firestore";
+import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
+
 const { $state } = useNavigatorTabStore();
+const descriptionContent = ref<string>($state.currentTab.group?.description || "");
+const { $firestore } = useNuxtApp();
 const fullName = computed(() => {
   const firstName = $state.currentTab.group?.oppositeUser?.firstName;
   const lastName = $state.currentTab.group?.oppositeUser?.lastName;
   return `${firstName} ${lastName}`;
 });
 const rail = ref(false);
+const dialog = ref<boolean>(false);
+
+const handleSaveDescription = async () => {
+  if (!$state.currentTab.group?.group_id) {
+    return;
+  }
+  try {
+    await updateDoc(
+      doc($firestore, FIRESTORE_PATH.chat_collection, $state.currentTab.group?.group_id),
+      {
+        description: descriptionContent.value,
+      }
+    );
+    dialog.value = false;
+
+    console.log("Save description successfully");
+  } catch (err) {
+    console.error("Error save description: ", err);
+  }
+};
 </script>
 
 <style lang="scss" scoped>
@@ -108,5 +177,13 @@ const rail = ref(false);
   position: absolute;
   left: 13px;
   top: 13px;
+
+  &:hover {
+    opacity: 0.5;
+  }
+}
+
+.description-group-card .description-input {
+  height: 350px;
 }
 </style>
