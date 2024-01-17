@@ -72,6 +72,7 @@ const tab = ref(null);
 const requestList = useState<TProfile[]>("requestList", () => []);
 const navigatorTab = useNavigatorTabStore();
 const isLoading = ref<boolean>(false);
+
 const getAllUsers = async () => {
   try {
     isLoading.value = true;
@@ -90,27 +91,24 @@ const getAllUsers = async () => {
 };
 
 const getAllRequests = () => {
-  const q = query(collection($firestore, FIRESTORE_PATH.chat_collection));
+  const q = query(
+    collection($firestore, FIRESTORE_PATH.chat_collection),
+    where("is_approved", "==", false),
+    where("is_canceled", "==", false),
+    where("group_type", "==", "private")
+  );
   onSnapshot(q, (chatList) => {
-    let templeChat: TProfile[] = [];
-    chatList.docs.forEach(async (chatItem) => {
-      const adminRef = chatItem.data().admin_refs[0];
-      const memberRef = chatItem.data().member_refs[0];
-      const [adminProfile, memberProfile] = await Promise.all([
-        getDoc(adminRef),
-        getDoc(memberRef),
-      ]);
-      if (
-        memberProfile.id === $state.profile.id &&
-        !chatItem.data().is_approved &&
-        !chatItem.data().is_canceled
-      ) {
-        templeChat.push(adminProfile.data() as TProfile);
+    const tempRequestList: TProfile[] = [];
+    chatList.docs.forEach(async (chatItem, index) => {
+      const memberProfile = await getDoc(chatItem.data().member_refs[0]);
+      const adminProfile = await getDoc(chatItem.data().admin_refs[0]);
+      if (memberProfile.id === $state.profile.id) {
+        tempRequestList.push(adminProfile.data() as TProfile);
+      }
+      if (index === chatList.docs.length - 1) {
+        requestList.value = tempRequestList;
       }
     });
-    setTimeout(() => {
-      requestList.value = templeChat;
-    }, 500);
   });
 };
 
@@ -155,6 +153,8 @@ const handleApproveUser = async (userApproved: TProfile) => {
     await updateDoc(doc($firestore, FIRESTORE_PATH.chat_collection, documentGroupId), {
       is_approved: true,
     });
+    const updateRequestList = requestList.value.filter((e) => e.id !== userApproved.id);
+    requestList.value = updateRequestList;
     console.log("Approve User Successfully");
   } catch (err) {
     console.error("Error approve user: ", err);
