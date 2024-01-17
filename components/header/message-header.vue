@@ -1,7 +1,12 @@
 <template>
   <v-toolbar class="message-toolbar" density="compact">
     <div class="message-header-bar">
-      <v-list-item :prepend-avatar="avatar" :title="name" :subtitle="'Active now'" nav />
+      <v-list-item
+        :prepend-avatar="$state.currentTab.group?.oppositeUser?.avatar"
+        :title="fullName"
+        :subtitle="'Active now'"
+        nav
+      />
       <div>
         <v-btn icon>
           <v-icon>mdi-magnify</v-icon>
@@ -14,8 +19,11 @@
             <v-list>
               <v-list-item>
                 <div class="header-profile">
-                  <v-avatar class="avatar" :image="avatar" />
-                  <v-list-item-title>{{ name }}</v-list-item-title>
+                  <v-avatar
+                    class="avatar"
+                    :image="$state.currentTab.group?.oppositeUser?.avatar"
+                  />
+                  <v-list-item-title>{{ fullName }}</v-list-item-title>
                 </div>
               </v-list-item>
               <v-divider></v-divider>
@@ -32,8 +40,9 @@
               </v-expansion-panels>
 
               <CreateGroupChatPopup
-                :title="`Create group chat with ${name}`"
-                :name="name"
+                v-if="$state.currentTab.group?.group_type === 'private'"
+                :title="`Create group chat with ${fullName}`"
+                :name="fullName"
               />
 
               <v-list-item
@@ -49,13 +58,13 @@
 </template>
 
 <script lang="ts" setup>
-defineProps<{
-  name: string;
-  avatar: string;
-}>();
-
 const description = `Meet: https://meet.google.com/ezf-soqu-ozx  \n DEV: https://alb-dev-apne1-cd022-01.zero-events.com \n Follow deploy : https://app.circleci.com/pipelines/bitbucket/hi817develop/bp-webapp_functiontest`;
-
+const { $state } = useNavigatorTabStore();
+const fullName = computed(() => {
+  const firstName = $state.currentTab.group?.oppositeUser?.firstName;
+  const lastName = $state.currentTab.group?.oppositeUser?.lastName;
+  return `${firstName} ${lastName}`;
+});
 const rail = ref(false);
 </script>
 
