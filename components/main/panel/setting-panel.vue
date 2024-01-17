@@ -45,14 +45,24 @@
         label="Email"
         variant="outlined"
       ></v-text-field>
-      <v-btn
-        class="button-save"
-        type="submit"
-        variant="elevated"
-        color="blue"
-        :disabled="isCheckDuplicateField || isSkeleton"
-        :text="typeEdit ? 'Save' : 'Edit'"
-      />
+      <div :style="{ display: 'flex', flexDirection: 'row-reverse', gap: '10px' }">
+        <v-btn
+          class="button-save"
+          type="submit"
+          variant="elevated"
+          color="blue"
+          :disabled="isCheckDuplicateField || isSkeleton"
+          :text="typeEdit ? 'Save' : 'Edit'"
+        />
+        <v-btn
+          class="button-save"
+          variant="elevated"
+          color="grey"
+          text="Cancel"
+          v-if="typeEdit"
+          @click="cancelEdit"
+        />
+      </div>
     </v-form>
   </v-main>
 </template>
@@ -61,10 +71,10 @@
 import { doc, updateDoc } from "firebase/firestore";
 import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
 const { $state, updateProfile } = useProfileStore();
-const { inputElementId, onOpenFile } = useElement();
 const { uploadCloudinary } = useCloudinary();
 const { $firestore } = useNuxtApp();
 const { start, finish } = useLoadingIndicator();
+const { inputElementId, onOpenFile } = useElement();
 const typeEdit = ref(false);
 const files = ref<File[]>([]);
 const isSkeleton = ref<boolean>(false);
@@ -95,9 +105,18 @@ const isCheckDuplicateField = computed(() => {
   );
 });
 
+const cancelEdit = () => {
+  typeEdit.value = false;
+  model.value.firstName = $state.profile.firstName;
+  model.value.lastName = $state.profile.lastName;
+  model.value.avatar = $state.profile.avatar;
+};
+
 const handleSaveProfile = async () => {
   typeEdit.value = !typeEdit.value;
-  if (typeEdit.value) return;
+  if (typeEdit.value === true) {
+    return;
+  }
   start();
   try {
     infoUser.value = {
@@ -111,9 +130,9 @@ const handleSaveProfile = async () => {
       model.value
     );
     updateProfile(model.value);
-    console.log("up date profile successfully");
+    console.log("Update profile successfully");
   } catch (error) {
-    console.log("Update profile Error :", error);
+    console.log("Error update profile: ", error);
   } finally {
     setTimeout(() => {
       finish();

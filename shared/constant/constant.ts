@@ -8,4 +8,4 @@ export const DEFAULT_AVATAR =
   'https://res.cloudinary.com/managecloud/image/upload/v1705221209/default_avatar.png';
 export const DEFAULT_AVATAR_GROUP =
   'https://res.cloudinary.com/managecloud/image/upload/v1705311135/oqqbeoxc5qgbakisjuge.webp';
-export const MESSAGE_LIMIT = 10;
+export const MESSAGE_LIMIT = 15;
