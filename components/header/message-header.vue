@@ -32,12 +32,11 @@
             <v-list class="options-info-chat mx-auto" width="300">
               <v-expansion-panels variant="accordion">
                 <v-expansion-panel
+                  @click="descriptionPrevious = descriptionGroup"
                   class="description-text"
                   title="Description"
                   :text="
-                    $state.currentTab.group?.description?.length
-                      ? $state.currentTab.group?.description
-                      : 'No description'
+                    descriptionPrevious.length ? descriptionPrevious : 'No description'
                   "
                 />
                 <v-dialog
@@ -48,6 +47,7 @@
                 >
                   <template v-slot:activator="{ props }">
                     <v-icon
+                      @click="handleOpenEditDescriptionPopup"
                       v-bind="props"
                       class="description-icon"
                       icon="mdi-text-box-edit-outline"
@@ -69,7 +69,7 @@
 
                     <v-divider></v-divider>
                     <v-card-actions>
-                      <v-btn color="blue-darken-1" variant="text" @click="dialog = false">
+                      <v-btn color="blue-darken-1" variant="text" @click="closePopup">
                         Close
                       </v-btn>
                       <v-btn
@@ -106,16 +106,32 @@
 import { doc, updateDoc } from "firebase/firestore";
 import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
 
-const { $state } = useNavigatorTabStore();
-const descriptionContent = ref<string>($state.currentTab.group?.description || "");
 const { $firestore } = useNuxtApp();
+const { $state } = useNavigatorTabStore();
+
+const descriptionGroup = computed(
+  (): string => $state.currentTab.group?.description || ""
+);
+
+const descriptionPrevious = ref<string>(descriptionGroup.value);
+const descriptionContent = ref<string>(descriptionGroup.value);
+
 const fullName = computed(() => {
+  descriptionPrevious.value = descriptionGroup.value;
   const firstName = $state.currentTab.group?.oppositeUser?.firstName;
   const lastName = $state.currentTab.group?.oppositeUser?.lastName;
   return `${firstName} ${lastName}`;
 });
 const rail = ref(false);
 const dialog = ref<boolean>(false);
+
+const handleOpenEditDescriptionPopup = () => {
+  descriptionContent.value = descriptionPrevious.value;
+};
+
+const closePopup = () => {
+  dialog.value = false;
+};
 
 const handleSaveDescription = async () => {
   if (!$state.currentTab.group?.group_id) {
@@ -128,11 +144,13 @@ const handleSaveDescription = async () => {
         description: descriptionContent.value,
       }
     );
-    dialog.value = false;
+    descriptionPrevious.value = descriptionContent.value;
 
     console.log("Save description successfully");
   } catch (err) {
     console.error("Error save description: ", err);
+  } finally {
+    closePopup();
   }
 };
 </script>
@@ -154,7 +172,7 @@ const handleSaveDescription = async () => {
 }
 
 .message-header-bar .left-drawer-chat {
-  height: 100%;
+  height: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
