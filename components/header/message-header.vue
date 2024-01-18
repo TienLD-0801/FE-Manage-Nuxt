@@ -1,7 +1,12 @@
 <template>
   <v-toolbar class="message-toolbar" density="compact">
     <div class="message-header-bar">
-      <v-list-item :prepend-avatar="avatar" :title="name" :subtitle="'Active now'" nav />
+      <v-list-item
+        :prepend-avatar="$state.currentTab.group?.oppositeUser?.avatar"
+        :title="fullName"
+        :subtitle="'Active now'"
+        nav
+      />
       <div>
         <v-btn icon>
           <v-icon>mdi-magnify</v-icon>
@@ -14,8 +19,11 @@
             <v-list>
               <v-list-item>
                 <div class="header-profile">
-                  <v-avatar class="avatar" :image="avatar" />
-                  <v-list-item-title>{{ name }}</v-list-item-title>
+                  <v-avatar
+                    class="avatar"
+                    :image="$state.currentTab.group?.oppositeUser?.avatar"
+                  />
+                  <v-list-item-title>{{ fullName }}</v-list-item-title>
                 </div>
               </v-list-item>
               <v-divider></v-divider>
@@ -24,16 +32,62 @@
             <v-list class="options-info-chat mx-auto" width="300">
               <v-expansion-panels variant="accordion">
                 <v-expansion-panel
+                  @click="descriptionPrevious = descriptionGroup"
                   class="description-text"
                   title="Description"
-                  :text="description"
+                  :text="
+                    descriptionPrevious.length ? descriptionPrevious : 'No description'
+                  "
                 />
-                <v-icon class="description-icon" icon="mdi-text-box-edit-outline" />
+                <v-dialog
+                  class="create-group-chat-popup-container"
+                  v-model="dialog"
+                  scrollable
+                  width="auto"
+                >
+                  <template v-slot:activator="{ props }">
+                    <v-icon
+                      @click="handleOpenEditDescriptionPopup"
+                      v-bind="props"
+                      class="description-icon"
+                      icon="mdi-text-box-edit-outline"
+                    ></v-icon>
+                  </template>
+
+                  <v-card class="description-group-card" width="500px">
+                    <v-card-title>{{ `Edit Description` }}</v-card-title>
+
+                    <v-divider></v-divider>
+                    <v-container fluid>
+                      <v-textarea
+                        class="description-input"
+                        counter
+                        placeholder="Write description..."
+                        v-model="descriptionContent"
+                      ></v-textarea>
+                    </v-container>
+
+                    <v-divider></v-divider>
+                    <v-card-actions>
+                      <v-btn color="blue-darken-1" variant="text" @click="closePopup">
+                        Close
+                      </v-btn>
+                      <v-btn
+                        color="blue-darken-1"
+                        variant="text"
+                        @click="handleSaveDescription"
+                      >
+                        Save
+                      </v-btn>
+                    </v-card-actions>
+                  </v-card>
+                </v-dialog>
               </v-expansion-panels>
 
               <CreateGroupChatPopup
-                :title="`Create group chat with ${name}`"
-                :name="name"
+                v-if="$state.currentTab.group?.group_type === 'private'"
+                :title="`Create group chat with ${fullName}`"
+                :name="fullName"
               />
 
               <v-list-item
@@ -49,14 +103,56 @@
 </template>
 
 <script lang="ts" setup>
-defineProps<{
-  name: string;
-  avatar: string;
-}>();
+import { doc, updateDoc } from "firebase/firestore";
+import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
 
-const description = `Meet: https://meet.google.com/ezf-soqu-ozx  \n DEV: https://alb-dev-apne1-cd022-01.zero-events.com \n Follow deploy : https://app.circleci.com/pipelines/bitbucket/hi817develop/bp-webapp_functiontest`;
+const { $firestore } = useNuxtApp();
+const { $state } = useNavigatorTabStore();
 
+const descriptionGroup = computed(
+  (): string => $state.currentTab.group?.description || ""
+);
+
+const descriptionPrevious = ref<string>(descriptionGroup.value);
+const descriptionContent = ref<string>(descriptionGroup.value);
+
+const fullName = computed(() => {
+  descriptionPrevious.value = descriptionGroup.value;
+  const firstName = $state.currentTab.group?.oppositeUser?.firstName;
+  const lastName = $state.currentTab.group?.oppositeUser?.lastName;
+  return `${firstName} ${lastName}`;
+});
 const rail = ref(false);
+const dialog = ref<boolean>(false);
+
+const handleOpenEditDescriptionPopup = () => {
+  descriptionContent.value = descriptionPrevious.value;
+};
+
+const closePopup = () => {
+  dialog.value = false;
+};
+
+const handleSaveDescription = async () => {
+  if (!$state.currentTab.group?.group_id) {
+    return;
+  }
+  try {
+    await updateDoc(
+      doc($firestore, FIRESTORE_PATH.chat_collection, $state.currentTab.group?.group_id),
+      {
+        description: descriptionContent.value,
+      }
+    );
+    descriptionPrevious.value = descriptionContent.value;
+
+    console.log("Save description successfully");
+  } catch (err) {
+    console.error("Error save description: ", err);
+  } finally {
+    closePopup();
+  }
+};
 </script>
 
 <style lang="scss" scoped>
@@ -76,7 +172,7 @@ const rail = ref(false);
 }
 
 .message-header-bar .left-drawer-chat {
-  height: 100%;
+  height: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -99,5 +195,13 @@ const rail = ref(false);
   position: absolute;
   left: 13px;
   top: 13px;
+
+  &:hover {
+    opacity: 0.5;
+  }
+}
+
+.description-group-card .description-input {
+  height: 350px;
 }
 </style>
