@@ -121,6 +121,7 @@ const handleAddUser = async (userAdded: TProfile) => {
   const dataAdd: TMessageGroup = {
     group_id: documentGroupId,
     group_type: "private",
+    description: "",
     is_approved: false,
     last_message: {
       message_id: "message-private-0",
