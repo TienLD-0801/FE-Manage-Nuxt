@@ -2,9 +2,9 @@
   <v-list-item :class="['message-box-container', isSelf && 'self-background'].join(' ')">
     <div :class="isSelf ? 'message-frame-self' : 'message-frame'">
       <v-avatar
-        class="message-avatar"
         v-if="!isSelf"
-        :image="!isSelf && !notShowAvatarAndName ? profile.avatar : ''"
+        :class="!notShowAvatarAndName ? 'message-avatar' : 'no-message-avatar'"
+        :image="profile.avatar"
       />
       <div class="message-content-frame">
         <v-list-subheader
@@ -37,7 +37,7 @@ defineProps<{
 <style lang="scss" scoped>
 .message-box-container {
   width: fit-content;
-  max-width: 400px;
+  max-width: 430px;
 }
 
 .self-background {
@@ -66,7 +66,7 @@ defineProps<{
   background-color: rgb(36, 111, 198) !important;
   color: white;
   padding: 10px 18px;
-  border-radius: 18px;
+  border-radius: 14px;
   word-wrap: break-word;
 }
 
@@ -75,7 +75,13 @@ defineProps<{
   margin-right: 5px;
 }
 
+.no-message-avatar {
+  visibility: hidden;
+  margin-left: 6px;
+}
+
 .message-name-sender {
   margin-left: 10px;
+  margin-bottom: -6px;
 }
 </style>
