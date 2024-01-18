@@ -27,14 +27,28 @@ body {
   max-width: unset !important;
   max-height: unset !important;
 }
-.description-text .v-expansion-panel__shadow {
+.description-panel .v-expansion-panel__shadow {
   box-shadow: unset !important;
   height: 10px;
   width: 10px;
 }
 
-.description-text .v-expansion-panel-title {
+.description-panel .v-expansion-panel-title {
   padding-left: 55px;
+}
+
+.member-panel .v-expansion-panel__shadow {
+  box-shadow: unset !important;
+  height: 10px;
+  width: 10px;
+}
+
+.member-panel .v-expansion-panel-title {
+  padding-left: 55px;
+}
+
+.member-list-panel .v-expansion-panel-text__wrapper {
+  padding: 10px 10px;
 }
 
 .options-info-chat .v-list-item__prepend {
