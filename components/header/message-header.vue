@@ -8,6 +8,9 @@
         nav
       />
       <div>
+        <v-btn @click="$emit('on-called')" icon>
+          <v-icon> mdi-phone</v-icon>
+        </v-btn>
         <v-btn icon>
           <v-icon>mdi-magnify</v-icon>
         </v-btn>
@@ -105,14 +108,12 @@
 <script lang="ts" setup>
 import { doc, updateDoc } from "firebase/firestore";
 import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
-
 const { $firestore } = useNuxtApp();
 const { $state } = useNavigatorTabStore();
-
 const descriptionGroup = computed(
   (): string => $state.currentTab.group?.description || ""
 );
-
+defineEmits(["on-called"]);
 const descriptionPrevious = ref<string>(descriptionGroup.value);
 const descriptionContent = ref<string>(descriptionGroup.value);
 
