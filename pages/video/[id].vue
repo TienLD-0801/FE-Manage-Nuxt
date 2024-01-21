@@ -138,7 +138,7 @@ const handleHangUp = async () => {
     await deleteDoc(roomRef);
   }
   $turnOffVoice();
-  // window.close();
+  window.close();
 };
 </script>
 
