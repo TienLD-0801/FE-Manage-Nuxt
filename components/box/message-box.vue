@@ -59,6 +59,7 @@ defineProps<{
   padding: 10px 18px;
   border-radius: 18px;
   word-wrap: break-word;
+  word-break: break-all;
   white-space: pre-line;
 }
 
@@ -68,6 +69,8 @@ defineProps<{
   padding: 10px 18px;
   border-radius: 14px;
   word-wrap: break-word;
+  word-break: break-all;
+  white-space: pre-line;
 }
 
 .message-avatar {
