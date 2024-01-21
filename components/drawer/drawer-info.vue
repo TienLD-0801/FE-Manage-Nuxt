@@ -1,5 +1,8 @@
 <template>
   <div>
+    <v-btn @click="$emit('on-called')" icon>
+      <v-icon> mdi-phone</v-icon>
+    </v-btn>
     <v-btn icon>
       <v-icon>mdi-magnify</v-icon>
     </v-btn>
@@ -132,9 +135,8 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
-import { DEFAULT_AVATAR } from "../../shared/constant/constant";
 import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
-
+defineEmits(["on-called"]);
 const { $state } = useNavigatorTabStore();
 const { $firestore } = useNuxtApp();
 const dialog = ref<boolean>(false);

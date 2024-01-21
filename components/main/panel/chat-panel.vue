@@ -6,7 +6,6 @@
 </template>
 
 <script lang="ts" setup></script>
-
 <style lang="scss" scoped>
 .chat-container {
   margin: 0;
