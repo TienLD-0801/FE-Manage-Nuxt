@@ -14,21 +14,25 @@
       />
     </v-card>
   </v-layout>
-
   <v-layout :fullHeight="true" v-else>
-    <video class="video-local" :srcObject="localRef" autoPlay playsInline muted />
     <v-card class="video-remote">
       <video width="100%" :srcObject="remoteRef" autoPlay playsInline />
     </v-card>
   </v-layout>
-
+  <video
+    v-if="isAnswer || videoCallId.split('-')[1] !== self.$state.profile.id"
+    class="video-local"
+    :srcObject="localRef"
+    autoPlay
+    playsInline
+    muted
+  />
   <Control
     :is-receiver="videoCallId.split('-')[1] === self.$state.profile.id"
     :is-answer="isAnswer"
     :is-voice="isVoice"
     @on-answer="handleAnswer"
     @on-hangup="handleHangUp"
-    @on-camera="openCamera"
   />
 </template>
 <script lang="ts" setup>
@@ -188,6 +192,7 @@ const someoneConnecting = () => {
 };
 
 watchEffect(() => {
+  openCamera();
   someoneConnecting();
 });
 </script>

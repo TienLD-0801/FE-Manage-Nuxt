@@ -49,7 +49,6 @@ watch(listenCalled, () => {
       },
     });
   }
-  // isCalling.value = true;
 });
 
 watchEffect(() => {
