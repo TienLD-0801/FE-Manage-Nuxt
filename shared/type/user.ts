@@ -6,6 +6,7 @@ type TProfile = {
   firstName: string;
   created_at: string;
   updated_at: string;
+  role?: string;
 };
 
 type TRegisterInfo = {

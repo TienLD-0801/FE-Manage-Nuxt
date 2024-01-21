@@ -7,7 +7,12 @@
         <v-list-item>
           <div class="setting-profile">
             <v-skeleton-loader :loading="isSkeleton" class="mx-auto" type="avatar">
-              <v-avatar :image="model.avatar" class="avatar" :size="140" />
+              <v-avatar
+                :style="typeEdit && { opacity: 0.3 }"
+                :image="model.avatar"
+                class="avatar"
+                :size="100"
+              />
             </v-skeleton-loader>
             <v-file-input
               v-model="files"
@@ -16,7 +21,9 @@
               :id="inputElementId"
               @change="handleChangeAvatar"
             />
-            <v-btn @click="onOpenFile()" text="Upload" v-if="typeEdit" />
+            <v-btn v-if="typeEdit" @click="onOpenFile()" class="upload-btn">
+              <v-icon size="30" icon="mdi-camera-plus-outline"></v-icon>
+            </v-btn>
           </div>
           <div class="setting-info">
             <v-list-item-title class="title">{{ infoUser.name }}</v-list-item-title>
@@ -161,7 +168,6 @@ const handleChangeAvatar = async () => {
   margin: 0px 200px 500px 200px;
 }
 .setting-container {
-  height: 100%;
   display: flex;
   justify-content: center;
 }
@@ -195,5 +201,16 @@ const handleChangeAvatar = async () => {
   font-size: 18px;
   font-weight: 600;
   color: blueviolet;
+}
+
+.upload-btn {
+  background-color: rgba(1, 1, 1, 0.1);
+  width: 100px;
+  height: 100px;
+  border-radius: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
 }
 </style>
