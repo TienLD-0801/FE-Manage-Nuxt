@@ -40,9 +40,9 @@ watch(listenCalled, () => {
       open: {
         target: "_blank",
         windowFeatures: {
-          width: 650,
+          width: 900,
           height: 650,
-          left: (window.innerWidth - 600) / 2,
+          left: (window.innerWidth - 900) / 2,
           top: (window.innerHeight - 600) / 2,
           popup: true,
         },
