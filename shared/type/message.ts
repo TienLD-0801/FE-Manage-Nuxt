@@ -9,7 +9,7 @@ type TMessage = {
 type TMessageGroup = {
   group_id: string;
   group_name?: string;
-  description?: string;
+  description: string;
   avatar?: string;
   group_type: 'private' | 'group';
   admin_refs: any; // DocumentReference type

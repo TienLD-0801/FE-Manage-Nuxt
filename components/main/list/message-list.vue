@@ -147,6 +147,7 @@ const sendMessage = async () => {
   };
 
   try {
+    clearMessage();
     messageList.value = [dataMessage, ...messageList.value];
     await setDoc(
       doc(
@@ -164,8 +165,6 @@ const sendMessage = async () => {
     console.log("send message success");
   } catch (error) {
     console.log("send message Error: ", error);
-  } finally {
-    clearMessage();
   }
 };
 

@@ -189,6 +189,7 @@ const handleCreateGroupChat = async () => {
     group_id: documentGroupId,
     group_name: groupName.value,
     group_type: "group",
+    description: "",
     avatar: DEFAULT_AVATAR_GROUP,
     is_approved: true,
     is_canceled: false,
