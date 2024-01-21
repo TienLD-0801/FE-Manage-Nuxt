@@ -18,7 +18,7 @@
   <v-layout :fullHeight="true" v-else>
     <video class="video-local" :srcObject="localRef" autoPlay playsInline muted />
     <v-card class="video-remote">
-      <video :srcObject="remoteRef" autoPlay playsInline />
+      <video width="100%" :srcObject="remoteRef" autoPlay playsInline />
     </v-card>
   </v-layout>
 
