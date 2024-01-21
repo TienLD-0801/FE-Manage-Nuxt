@@ -6,51 +6,12 @@
 </template>
 
 <script lang="ts" setup>
-import { addDoc, collection, doc, onSnapshot, setDoc } from "firebase/firestore";
-
 const { $state } = useNavigatorTabStore();
-const { $pc, $firestore, $openCamera } = useNuxtApp();
 const self = useProfileStore();
 
 const handleCalled = async () => {
-  await $openCamera();
   const idCalled = `${self.$state.profile.id}-${$state.currentTab.group?.oppositeUser?.id}`;
-  const callDoc = doc(collection($firestore, "calls"), idCalled);
-  const offerCandidates = collection(callDoc, "caller");
-  const answerCandidates = collection(callDoc, "answerer");
-
-  $pc.onicecandidate = (event) => {
-    event.candidate && addDoc(offerCandidates, event.candidate.toJSON());
-  };
-
-  const offerDescription = await $pc.createOffer();
-  await $pc.setLocalDescription(offerDescription);
-
-  const offer = {
-    sdp: offerDescription.sdp,
-    type: offerDescription.type,
-  };
-
-  await setDoc(callDoc, { offer });
-
-  onSnapshot(callDoc, (snapshot) => {
-    const data = snapshot.data();
-    if (!$pc.currentRemoteDescription && data?.answer) {
-      const answerDescription = new RTCSessionDescription(data.answer);
-      $pc.setRemoteDescription(answerDescription);
-    }
-  });
-
-  onSnapshot(answerCandidates, (snapshot) => {
-    snapshot.docChanges().forEach((change) => {
-      if (change.type === "added") {
-        const candidate = new RTCIceCandidate(change.doc.data());
-        $pc.addIceCandidate(candidate);
-      }
-    });
-  });
-
-  navigateTo(`/video/${idCalled}`, {
+  navigateTo(`/video/${idCalled}?status=start`, {
     open: {
       target: "_blank",
       windowFeatures: {

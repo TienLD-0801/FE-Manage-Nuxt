@@ -1,5 +1,6 @@
 <template>
   <v-container class="control" elevation="0">
+    <v-btn icon="mdi-video-outline" @click="$emit('on-camera')" />
     <v-btn icon="mdi-volume-high" v-if="!isReceiver || isAnswer" />
     <v-btn icon="mdi-phone-hangup" color="red" @click="$emit('on-hangup')" />
     <div @click="$emit('on-voice')">
@@ -21,7 +22,7 @@ defineProps<{
   isAnswer: boolean;
   isReceiver: boolean;
 }>();
-defineEmits(["on-voice", "on-hangup", "on-answer"]);
+defineEmits(["on-voice", "on-hangup", "on-answer", "on-camera"]);
 </script>
 
 <style lang="scss" scoped>

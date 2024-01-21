@@ -1,5 +1,5 @@
 <template>
-  <v-layout :fullHeight="true" v-if="!$isCalling">
+  <v-layout :fullHeight="true" v-if="!isCalling">
     <v-card class="calling-container">
       <v-avatar
         size="150"
@@ -14,19 +14,21 @@
       />
     </v-card>
   </v-layout>
+
   <v-layout :fullHeight="true" v-else>
-    <video class="video-local" :srcObject="$local" autoPlay playsInline muted />
+    <video class="video-local" :srcObject="localRef" autoPlay playsInline muted />
     <v-card class="video-remote">
-      <video :srcObject="$remote" autoPlay playsInline />
+      <video :srcObject="remoteRef" autoPlay playsInline />
     </v-card>
   </v-layout>
+
   <Control
     :is-receiver="videoCallId.split('-')[1] === self.$state.profile.id"
     :is-answer="isAnswer"
     :is-voice="isVoice"
     @on-answer="handleAnswer"
-    @on-voice="handleVoice"
     @on-hangup="handleHangUp"
+    @on-camera="openCamera"
   />
 </template>
 <script lang="ts" setup>
@@ -38,21 +40,86 @@ import {
   getDoc,
   getDocs,
   onSnapshot,
+  setDoc,
   updateDoc,
 } from "firebase/firestore";
-const { $firestore, $pc, $isCalling, $local, $remote, $openCamera } = useNuxtApp();
+const { $firestore } = useNuxtApp();
 const route = useRoute();
 const { $state } = useNavigatorTabStore();
 const self = useProfileStore();
-
 const isAnswer = ref<boolean>(false);
 const isVoice = ref<boolean>(false);
-
 const videoCallId = computed(() => route.params.id.toString());
+const localRef = ref<MediaStream | undefined>();
+const remoteRef = ref<MediaStream | undefined>();
+const isCalling = ref<boolean>();
 
-const handleVoice = () => {
-  if ($isCalling) return;
-  isVoice.value = !isVoice.value;
+const servers = {
+  iceServers: [
+    {
+      urls: ["stun:stun1.l.google.com:19302", "stun:stun2.l.google.com:19302"],
+    },
+  ],
+  iceCandidatePoolSize: 10,
+};
+const pc = new RTCPeerConnection(servers);
+
+const openCamera = async () => {
+  const localStream = await navigator.mediaDevices.getUserMedia({
+    video: true,
+    audio: true,
+  });
+  const remoteStream = new MediaStream();
+
+  localStream.getTracks().forEach((track) => {
+    pc.addTrack(track, localStream);
+  });
+
+  pc.ontrack = (event) => {
+    event.streams[0].getTracks().forEach((track) => {
+      remoteStream.addTrack(track);
+    });
+  };
+
+  localRef.value = localStream;
+  remoteRef.value = remoteStream;
+
+  if (route.query.status === "start") {
+    const callDoc = doc(collection($firestore, "calls"), route.params.id.toString());
+    const offerCandidates = collection(callDoc, "caller");
+    const answerCandidates = collection(callDoc, "answerer");
+
+    pc.onicecandidate = (event) => {
+      event.candidate && addDoc(offerCandidates, event.candidate.toJSON());
+    };
+
+    const offerDescription = await pc.createOffer();
+    await pc.setLocalDescription(offerDescription);
+
+    const offer = {
+      sdp: offerDescription.sdp,
+      type: offerDescription.type,
+    };
+
+    await setDoc(callDoc, { offer });
+
+    onSnapshot(callDoc, (snapshot) => {
+      const data = snapshot.data();
+      if (!pc.currentRemoteDescription && data?.answer) {
+        const answerDescription = new RTCSessionDescription(data.answer);
+        pc.setRemoteDescription(answerDescription);
+      }
+    });
+
+    onSnapshot(answerCandidates, (snapshot) => {
+      snapshot.docChanges().forEach((change) => {
+        if (change.type === "added") {
+          const candidate = new RTCIceCandidate(change.doc.data());
+          pc.addIceCandidate(candidate);
+        }
+      });
+    });
+  }
 };
 
 const handleAnswer = async () => {
@@ -60,17 +127,17 @@ const handleAnswer = async () => {
   const offerCandidates = collection(callDoc, "caller");
   const answerCandidates = collection(callDoc, "answerer");
 
-  $pc.onicecandidate = (event) => {
+  pc.onicecandidate = (event) => {
     event.candidate && addDoc(answerCandidates, event.candidate.toJSON());
   };
 
   const callData = (await getDoc(callDoc)).data();
 
   const offerDescription = callData?.offer;
-  await $pc.setRemoteDescription(new RTCSessionDescription(offerDescription));
+  await pc.setRemoteDescription(new RTCSessionDescription(offerDescription));
 
-  const answerDescription = await $pc.createAnswer();
-  await $pc.setLocalDescription(answerDescription);
+  const answerDescription = await pc.createAnswer();
+  await pc.setLocalDescription(answerDescription);
 
   const answer = {
     type: answerDescription.type,
@@ -78,7 +145,6 @@ const handleAnswer = async () => {
   };
 
   await updateDoc(callDoc, { answer });
-
   await updateDoc(doc($firestore, "calls", route.params.id.toString()), {
     is_approved: true,
   });
@@ -87,17 +153,16 @@ const handleAnswer = async () => {
     snapshot.docChanges().forEach((change) => {
       if (change.type === "added") {
         let data = change.doc.data();
-        $pc.addIceCandidate(new RTCIceCandidate(data));
+        pc.addIceCandidate(new RTCIceCandidate(data));
       }
     });
   });
   isAnswer.value = true;
-  $isCalling.value = true;
+  isCalling.value = true;
 };
 
 const handleHangUp = async () => {
-  $openCamera();
-  $pc.close();
+  pc.close();
   if (route.params.id.toString()) {
     let roomRef = doc($firestore, "calls", route.params.id.toString());
     await getDocs(collection(roomRef, "caller")).then((querySnapshot) => {
@@ -118,8 +183,7 @@ const handleHangUp = async () => {
 const someoneConnecting = () => {
   const q = doc($firestore, "calls", route.params.id.toString());
   onSnapshot(q, (snapshot) => {
-    $openCamera();
-    $isCalling.value = snapshot.data()?.is_approved as boolean;
+    isCalling.value = snapshot.data()?.is_approved as boolean;
   });
 };
 

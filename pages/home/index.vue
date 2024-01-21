@@ -8,7 +8,7 @@ definePageMeta({
 import { collection, doc, getDoc, onSnapshot, query } from "firebase/firestore";
 import MainLayout from "~/layouts/home/main-layout.vue";
 import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
-const { $firestore, $isCalling } = useNuxtApp();
+const { $firestore } = useNuxtApp();
 const { $state, updateProfile } = useProfileStore();
 const authStore = useAuthStore();
 const navigatorTabStore = useNavigatorTabStore();
@@ -49,7 +49,7 @@ watch(listenCalled, () => {
       },
     });
   }
-  $isCalling.value = true;
+  // isCalling.value = true;
 });
 
 watchEffect(() => {
