@@ -8,6 +8,7 @@
 <script lang="ts" setup>
 const { $state } = useNavigatorTabStore();
 const self = useProfileStore();
+const call = useCall();
 
 const handleCalled = async () => {
   const idCalled = `${self.$state.profile.id}-${$state.currentTab.group?.oppositeUser?.id}`;

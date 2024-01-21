@@ -1,16 +1,10 @@
 <template>
   <v-layout :fullHeight="true" v-if="!isCalling">
     <v-card class="calling-container">
-      <v-avatar
-        size="150"
-        class="message-avatar"
-        :image="$state.currentTab.group?.oppositeUser?.avatar"
-      />
+      <v-avatar size="150" class="message-avatar" :image="callerProfile?.avatar" />
+      <v-label :text="`${callerProfile?.firstName} ${callerProfile?.lastName}`" />
       <v-label
-        :text="`${$state.currentTab.group?.oppositeUser?.firstName}${$state.currentTab.group?.oppositeUser?.lastName}`"
-      />
-      <v-label
-        :text="`Connecting to the machine ${$state.currentTab.group?.oppositeUser?.firstName}${$state.currentTab.group?.oppositeUser?.lastName} ...`"
+        :text="`Connecting to the machine ${callerProfile?.firstName} ${callerProfile?.lastName} ...`"
       />
     </v-card>
   </v-layout>
@@ -49,6 +43,7 @@ import {
   setDoc,
   updateDoc,
 } from "firebase/firestore";
+import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
 const { $firestore } = useNuxtApp();
 const route = useRoute();
 const { $state } = useNavigatorTabStore();
@@ -60,6 +55,16 @@ const localRef = ref<MediaStream | undefined>();
 const remoteRef = ref<MediaStream | undefined>();
 const isCalling = ref<boolean>();
 const isCamera = ref<boolean>(false);
+
+const callerProfile = ref<TProfile>({
+  id: "",
+  email: "",
+  lastName: "",
+  avatar: "",
+  firstName: "",
+  created_at: "",
+  updated_at: "",
+});
 
 const servers = {
   iceServers: [
@@ -193,8 +198,21 @@ const handleHangUp = async () => {
 
 const someoneConnecting = () => {
   const q = doc($firestore, "calls", route.params.id.toString());
+  const qUser = doc(
+    $firestore,
+    FIRESTORE_PATH.user_collection,
+    route.params.id.toString().split("-")[0]
+  );
   onSnapshot(q, (snapshot) => {
     isCalling.value = snapshot.data()?.is_approved as boolean;
+  });
+
+  onSnapshot(qUser, (profile) => {
+    if (profile.id === self.profile.id) {
+      callerProfile.value = $state.currentTab.group?.oppositeUser!;
+    } else {
+      callerProfile.value = profile.data() as TProfile;
+    }
   });
 };
 
