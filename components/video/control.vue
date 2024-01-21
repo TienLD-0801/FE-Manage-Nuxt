@@ -1,6 +1,10 @@
 <template>
   <v-container class="control" elevation="0">
-    <v-btn icon="mdi-video-outline" @click="$emit('on-camera')" />
+    <v-btn
+      :icon="!isCamera ? 'mdi-video-outline' : 'mdi-video-off-outline'"
+      v-if="!isReceiver || isAnswer"
+      @click="$emit('on-camera')"
+    />
     <v-btn icon="mdi-volume-high" v-if="!isReceiver || isAnswer" />
     <v-btn icon="mdi-phone-hangup" color="red" @click="$emit('on-hangup')" />
     <div @click="$emit('on-voice')">
@@ -21,6 +25,7 @@ defineProps<{
   isVoice: boolean;
   isAnswer: boolean;
   isReceiver: boolean;
+  isCamera: boolean;
 }>();
 defineEmits(["on-voice", "on-hangup", "on-answer", "on-camera"]);
 </script>

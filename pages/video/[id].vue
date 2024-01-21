@@ -31,8 +31,10 @@
     :is-receiver="videoCallId.split('-')[1] === self.$state.profile.id"
     :is-answer="isAnswer"
     :is-voice="isVoice"
+    :is-camera="isCamera"
     @on-answer="handleAnswer"
     @on-hangup="handleHangUp"
+    @on-camera="handleToggleCamera"
   />
 </template>
 <script lang="ts" setup>
@@ -57,6 +59,7 @@ const videoCallId = computed(() => route.params.id.toString());
 const localRef = ref<MediaStream | undefined>();
 const remoteRef = ref<MediaStream | undefined>();
 const isCalling = ref<boolean>();
+const isCamera = ref<boolean>(false);
 
 const servers = {
   iceServers: [
@@ -67,6 +70,10 @@ const servers = {
   iceCandidatePoolSize: 10,
 };
 const pc = new RTCPeerConnection(servers);
+
+const handleToggleCamera = async () => {
+  //handleLater
+};
 
 const openCamera = async () => {
   const localStream = await navigator.mediaDevices.getUserMedia({
