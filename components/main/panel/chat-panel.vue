@@ -9,11 +9,10 @@
 import { addDoc, collection, doc, onSnapshot, setDoc } from "firebase/firestore";
 
 const { $state } = useNavigatorTabStore();
-const { $openVoice, $pc, $firestore } = useNuxtApp();
+const { $pc, $firestore } = useNuxtApp();
 const self = useProfileStore();
 
 const handleCalled = async () => {
-  await $openVoice();
   const idCalled = `${self.$state.profile.id}-${$state.currentTab.group?.oppositeUser?.id}`;
   const callDoc = doc(collection($firestore, "calls"), idCalled);
   const offerCandidates = collection(callDoc, "caller");
