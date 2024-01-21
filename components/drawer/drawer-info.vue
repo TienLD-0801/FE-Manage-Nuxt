@@ -89,22 +89,16 @@
               <v-expansion-panel-title>Members</v-expansion-panel-title>
               <v-expansion-panel-text>
                 <div class="member-list-panel">
-                  <div class="member-item">
-                    <v-avatar class="message-avatar" :image="DEFAULT_AVATAR"></v-avatar>
-                    <span>Steven Rogers</span>
-                    <v-list-item-subtitle>(Admin)</v-list-item-subtitle>
-                  </div>
-                  <div class="member-item">
-                    <v-avatar class="message-avatar" :image="DEFAULT_AVATAR"></v-avatar>
-                    <span>Le Duy Tien</span>
-                  </div>
-                  <div class="member-item">
-                    <v-avatar class="message-avatar" :image="DEFAULT_AVATAR"></v-avatar>
-                    <span>DuyNA</span>
-                  </div>
-                  <div class="member-item">
-                    <v-avatar class="message-avatar" :image="DEFAULT_AVATAR"></v-avatar>
-                    <span>Trieu Tan Vinh</span>
+                  <div
+                    v-for="member in memberMapList"
+                    :key="member.id"
+                    class="member-item"
+                  >
+                    <v-avatar class="message-avatar" :image="member.avatar"></v-avatar>
+                    <span>{{ `${member.firstName} ${member.lastName}` }}</span>
+                    <v-list-item-subtitle v-if="member?.role === 'admin'">{{
+                      `(${member.role})`
+                    }}</v-list-item-subtitle>
                   </div>
                 </div>
               </v-expansion-panel-text>
@@ -129,7 +123,15 @@
 </template>
 
 <script lang="ts" setup>
-import { doc, updateDoc } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDoc,
+  onSnapshot,
+  query,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 import { DEFAULT_AVATAR } from "../../shared/constant/constant";
 import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
 
@@ -137,6 +139,7 @@ const { $state } = useNavigatorTabStore();
 const { $firestore } = useNuxtApp();
 const dialog = ref<boolean>(false);
 const rail = ref<boolean>(false);
+const memberMapList = ref<TProfile[]>([]);
 
 const descriptionGroup = computed((): string => {
   return $state.currentTab.group?.description || "";
@@ -144,6 +147,43 @@ const descriptionGroup = computed((): string => {
 
 const descriptionPrevious = ref<string>(descriptionGroup.value);
 const descriptionContent = ref<string>(descriptionGroup.value);
+
+const getMembers = () => {
+  const memberTemp: any = [];
+  const qChats = query(
+    collection($firestore, FIRESTORE_PATH.chat_collection),
+    where("is_approved", "==", true),
+    where("is_canceled", "==", false)
+  );
+
+  onSnapshot(qChats, () => {
+    $state.currentTab.group?.admin_refs.length > 0 &&
+      $state.currentTab.group?.admin_refs.forEach(async (ref: any) => {
+        const memberInfo = await getDoc(ref);
+        if (memberInfo.data()) {
+          memberTemp.push({
+            ...(memberInfo.data() as TProfile),
+            role: "admin",
+          });
+        }
+      });
+
+    $state.currentTab.group?.member_refs.length > 0 &&
+      $state.currentTab.group?.member_refs.forEach(async (ref: any) => {
+        const memberInfo = await getDoc(ref);
+        if (memberInfo.data()) {
+          memberTemp.push({
+            ...(memberInfo.data() as TProfile),
+            role: "member",
+          });
+        }
+      });
+  });
+
+  setTimeout(() => {
+    memberMapList.value = memberTemp;
+  }, 500);
+};
 
 const fullName = computed(() => {
   descriptionPrevious.value = descriptionGroup.value;
@@ -180,6 +220,11 @@ const handleSaveDescription = async () => {
     closePopup();
   }
 };
+
+const currentGroup = computed(() => $state.currentTab?.group);
+watch(currentGroup, () => {
+  getMembers();
+});
 </script>
 
 <style lang="scss" scoped>
