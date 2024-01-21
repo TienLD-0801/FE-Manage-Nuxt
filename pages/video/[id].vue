@@ -15,9 +15,9 @@
     </v-card>
   </v-layout>
   <v-layout :fullHeight="true" v-else>
-    <video class="video-local" :srcObject="local" autoPlay playsInline muted />
+    <video class="video-local" :srcObject="$local" autoPlay playsInline muted />
     <v-card class="video-remote">
-      <video :srcObject="remote" autoPlay playsInline />
+      <video :srcObject="$remote" autoPlay playsInline />
     </v-card>
   </v-layout>
   <Control
@@ -40,13 +40,11 @@ import {
   onSnapshot,
   updateDoc,
 } from "firebase/firestore";
-const { $firestore, $pc, $isCalling } = useNuxtApp();
+const { $firestore, $pc, $isCalling, $local, $remote, $openCamera } = useNuxtApp();
 const route = useRoute();
 const { $state } = useNavigatorTabStore();
 const self = useProfileStore();
 
-const local = ref<MediaStream>();
-const remote = ref<MediaStream>();
 const isAnswer = ref<boolean>(false);
 const isVoice = ref<boolean>(false);
 
@@ -98,6 +96,7 @@ const handleAnswer = async () => {
 };
 
 const handleHangUp = async () => {
+  $openCamera();
   $pc.close();
   if (route.params.id.toString()) {
     let roomRef = doc($firestore, "calls", route.params.id.toString());
@@ -119,37 +118,12 @@ const handleHangUp = async () => {
 const someoneConnecting = () => {
   const q = doc($firestore, "calls", route.params.id.toString());
   onSnapshot(q, (snapshot) => {
+    $openCamera();
     $isCalling.value = snapshot.data()?.is_approved as boolean;
   });
 };
 
-const openCamera = async () => {
-  const localStream = await navigator.mediaDevices.getUserMedia({
-    video: true,
-    audio: true,
-  });
-  const remoteStream = new MediaStream();
-
-  localStream.getTracks().forEach((track) => {
-    $pc.addTrack(track, localStream);
-  });
-
-  $pc.ontrack = (event) => {
-    event.streams[0].getTracks().forEach((track) => {
-      remoteStream.addTrack(track);
-    });
-  };
-  console.log(localStream);
-  console.log(remoteStream);
-
-  setTimeout(() => {
-    local.value = localStream;
-    remote.value = remoteStream;
-  }, 500);
-};
-
 watchEffect(() => {
-  openCamera();
   someoneConnecting();
 });
 </script>

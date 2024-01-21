@@ -9,10 +9,11 @@
 import { addDoc, collection, doc, onSnapshot, setDoc } from "firebase/firestore";
 
 const { $state } = useNavigatorTabStore();
-const { $pc, $firestore } = useNuxtApp();
+const { $pc, $firestore, $openCamera } = useNuxtApp();
 const self = useProfileStore();
 
 const handleCalled = async () => {
+  await $openCamera();
   const idCalled = `${self.$state.profile.id}-${$state.currentTab.group?.oppositeUser?.id}`;
   const callDoc = doc(collection($firestore, "calls"), idCalled);
   const offerCandidates = collection(callDoc, "caller");
