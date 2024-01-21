@@ -8,7 +8,7 @@ definePageMeta({
 import { collection, doc, getDoc, onSnapshot, query } from "firebase/firestore";
 import MainLayout from "~/layouts/home/main-layout.vue";
 import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
-const { $firestore } = useNuxtApp();
+const { $firestore, $isCalling } = useNuxtApp();
 const { $state, updateProfile } = useProfileStore();
 const authStore = useAuthStore();
 const navigatorTabStore = useNavigatorTabStore();
@@ -25,9 +25,9 @@ const someoneCalling = () => {
   const q = query(collection($firestore, "calls"));
   onSnapshot(q, (snapshot) => {
     let roomId: string = "";
-    snapshot.docs.forEach((data) => {
-      if (data.id.split("-")[1].includes($state.profile.id)) {
-        roomId = data.id;
+    snapshot.docs.forEach((call) => {
+      if (call.id.split("-")[1].includes($state.profile.id)) {
+        roomId = call.id;
       }
     });
     listenCalled.value = roomId;
@@ -49,6 +49,7 @@ watch(listenCalled, () => {
       },
     });
   }
+  $isCalling.value = true;
 });
 
 watchEffect(() => {

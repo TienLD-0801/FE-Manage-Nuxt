@@ -20,7 +20,6 @@ const handleCalled = async () => {
   const answerCandidates = collection(callDoc, "answerer");
 
   $pc.onicecandidate = (event) => {
-    console.log(event);
     event.candidate && addDoc(offerCandidates, event.candidate.toJSON());
   };
 

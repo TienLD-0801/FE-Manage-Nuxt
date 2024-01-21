@@ -1,4 +1,7 @@
 export default defineNuxtPlugin(async () => {
+  const local = ref<MediaStream>();
+  const remote = ref<MediaStream>();
+  const isCalling = ref<boolean>(false);
   const servers = {
     iceServers: [
       {
@@ -11,9 +14,6 @@ export default defineNuxtPlugin(async () => {
     iceCandidatePoolSize: 10,
   };
   const pc = new RTCPeerConnection(servers);
-
-  let local: MediaStream | undefined;
-  let remote: MediaStream | undefined;
 
   const openVoice = async () => {
     try {
@@ -32,23 +32,20 @@ export default defineNuxtPlugin(async () => {
           remoteStream.addTrack(track);
         });
       };
-      local = localStream;
-      remote = remoteStream;
+      local.value = localStream;
+      remote.value = remoteStream;
     } catch (error) {
       console.log(error);
     }
   };
 
-  // const turnOffVoice = () => {
-
-  // };
-
   return {
     provide: {
       pc: pc,
       openVoice: openVoice,
-      local: local!,
-      remote: remote!,
+      local: local,
+      remote: remote,
+      isCalling: isCalling,
     },
   };
 });

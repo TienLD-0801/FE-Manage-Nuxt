@@ -1,5 +1,5 @@
 <template>
-  <v-layout :fullHeight="true" v-if="!isCalling">
+  <v-layout :fullHeight="true" v-if="!$isCalling">
     <v-card class="calling-container">
       <v-avatar
         size="150"
@@ -23,7 +23,6 @@
   <Control
     :is-receiver="videoCallId.split('-')[1] === self.$state.profile.id"
     :is-answer="isAnswer"
-    :is-calling="isCalling"
     :is-voice="isVoice"
     @on-answer="handleAnswer"
     @on-voice="handleVoice"
@@ -41,36 +40,21 @@ import {
   onSnapshot,
   updateDoc,
 } from "firebase/firestore";
-const { $firestore, $openVoice, $local, $remote } = useNuxtApp();
+const { $firestore, $openVoice, $pc, $local, $remote, $isCalling } = useNuxtApp();
 const route = useRoute();
 const { $state } = useNavigatorTabStore();
 const self = useProfileStore();
+console.log($local.value, $remote.value);
 
-// Initialize WebRTC
-const servers = {
-  iceServers: [
-    {
-      urls: ["stun:stun1.l.google.com:19302", "stun:stun2.l.google.com:19302"],
-    },
-  ],
-  iceCandidatePoolSize: 10,
-};
-
-const localRef = ref<MediaStream | undefined>();
-const remoteRef = ref<MediaStream | undefined>();
-const isCalling = ref<boolean>(false);
 const isAnswer = ref<boolean>(false);
-const isReceiver = ref<boolean>(false);
 const isVoice = ref<boolean>(false);
 
 const videoCallId = computed(() => route.params.id.toString());
 
 const handleVoice = () => {
-  if (isCalling) return;
+  if ($isCalling) return;
   isVoice.value = !isVoice.value;
 };
-
-const pc = new RTCPeerConnection(servers);
 
 const handleAnswer = async () => {
   await $openVoice();
@@ -78,17 +62,17 @@ const handleAnswer = async () => {
   const offerCandidates = collection(callDoc, "caller");
   const answerCandidates = collection(callDoc, "answerer");
 
-  pc.onicecandidate = (event) => {
+  $pc.onicecandidate = (event) => {
     event.candidate && addDoc(answerCandidates, event.candidate.toJSON());
   };
 
   const callData = (await getDoc(callDoc)).data();
 
   const offerDescription = callData?.offer;
-  await pc.setRemoteDescription(new RTCSessionDescription(offerDescription));
+  await $pc.setRemoteDescription(new RTCSessionDescription(offerDescription));
 
-  const answerDescription = await pc.createAnswer();
-  await pc.setLocalDescription(answerDescription);
+  const answerDescription = await $pc.createAnswer();
+  await $pc.setLocalDescription(answerDescription);
 
   const answer = {
     type: answerDescription.type,
@@ -97,28 +81,32 @@ const handleAnswer = async () => {
 
   await updateDoc(callDoc, { answer });
 
+  await updateDoc(doc($firestore, "calls", route.params.id.toString()), {
+    is_approved: true,
+  });
+
   onSnapshot(offerCandidates, (snapshot) => {
     snapshot.docChanges().forEach((change) => {
       if (change.type === "added") {
         let data = change.doc.data();
-        pc.addIceCandidate(new RTCIceCandidate(data));
-        isAnswer.value = true;
-        isCalling.value = true;
+        $pc.addIceCandidate(new RTCIceCandidate(data));
       }
     });
   });
+  isAnswer.value = true;
+  $isCalling.value = true;
 };
 
 const handleHangUp = async () => {
-  pc.close();
+  $pc.close();
   if (route.params.id.toString()) {
     let roomRef = doc($firestore, "calls", route.params.id.toString());
-    await getDocs(collection(roomRef, "answerCandidates")).then((querySnapshot) => {
+    await getDocs(collection(roomRef, "caller")).then((querySnapshot) => {
       querySnapshot.forEach((doc) => {
         deleteDoc(doc.ref);
       });
     });
-    await getDocs(collection(roomRef, "offerCandidates")).then((querySnapshot) => {
+    await getDocs(collection(roomRef, "answerer")).then((querySnapshot) => {
       querySnapshot.forEach((doc) => {
         deleteDoc(doc.ref);
       });
@@ -127,6 +115,17 @@ const handleHangUp = async () => {
   }
   window.close();
 };
+
+const someoneConnecting = () => {
+  const q = doc($firestore, "calls", route.params.id.toString());
+  onSnapshot(q, (snapshot) => {
+    $isCalling.value = snapshot.data()?.is_approved as boolean;
+  });
+};
+
+watchEffect(() => {
+  someoneConnecting();
+});
 </script>
 
 <style lang="scss" scoped>
