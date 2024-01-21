@@ -15,14 +15,17 @@
     </v-card>
   </v-layout>
   <v-layout :fullHeight="true" v-else>
-    <video class="video-local" :srcObject="localRef" autoPlay playsInline muted />
+    <video class="video-local" :srcObject="$local" autoPlay playsInline muted />
     <v-card class="video-remote">
-      <video :srcObject="remoteRef" autoPlay playsInline />
+      <video :srcObject="$remote" autoPlay playsInline />
     </v-card>
   </v-layout>
   <Control
+    :is-receiver="videoCallId.split('-')[1] === self.$state.profile.id"
+    :is-answer="isAnswer"
     :is-calling="isCalling"
     :is-voice="isVoice"
+    @on-answer="handleAnswer"
     @on-voice="handleVoice"
     @on-hangup="handleHangUp"
   />
@@ -38,9 +41,10 @@ import {
   onSnapshot,
   updateDoc,
 } from "firebase/firestore";
-const { $firestore, $openVoice, $turnOffVoice } = useNuxtApp();
+const { $firestore, $openVoice, $local, $remote } = useNuxtApp();
 const route = useRoute();
 const { $state } = useNavigatorTabStore();
+const self = useProfileStore();
 
 // Initialize WebRTC
 const servers = {
@@ -55,7 +59,11 @@ const servers = {
 const localRef = ref<MediaStream | undefined>();
 const remoteRef = ref<MediaStream | undefined>();
 const isCalling = ref<boolean>(false);
+const isAnswer = ref<boolean>(false);
+const isReceiver = ref<boolean>(false);
 const isVoice = ref<boolean>(false);
+
+const videoCallId = computed(() => route.params.id.toString());
 
 const handleVoice = () => {
   if (isCalling) return;
@@ -64,33 +72,11 @@ const handleVoice = () => {
 
 const pc = new RTCPeerConnection(servers);
 
-const openCamera = async () => {
-  const localStream = await navigator.mediaDevices.getUserMedia({
-    video: true,
-    audio: true,
-  });
-  const remoteStream = new MediaStream();
-
-  localStream.getTracks().forEach((track) => {
-    pc.addTrack(track, localStream);
-  });
-
-  pc.ontrack = (event) => {
-    event.streams[0].getTracks().forEach((track) => {
-      remoteStream.addTrack(track);
-    });
-  };
-
-  localRef.value = localStream;
-  remoteRef.value = remoteStream;
-};
-
-const handleStartCall = async () => {};
-
 const handleAnswer = async () => {
+  await $openVoice();
   const callDoc = doc(collection($firestore, "calls"), route.params.id.toString());
-  const offerCandidates = collection(callDoc, "offerCandidates");
-  const answerCandidates = collection(callDoc, "answerCandidates");
+  const offerCandidates = collection(callDoc, "caller");
+  const answerCandidates = collection(callDoc, "answerer");
 
   pc.onicecandidate = (event) => {
     event.candidate && addDoc(answerCandidates, event.candidate.toJSON());
@@ -116,6 +102,8 @@ const handleAnswer = async () => {
       if (change.type === "added") {
         let data = change.doc.data();
         pc.addIceCandidate(new RTCIceCandidate(data));
+        isAnswer.value = true;
+        isCalling.value = true;
       }
     });
   });
@@ -137,7 +125,6 @@ const handleHangUp = async () => {
     });
     await deleteDoc(roomRef);
   }
-  $turnOffVoice();
   window.close();
 };
 </script>

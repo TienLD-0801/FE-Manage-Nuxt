@@ -35,18 +35,20 @@ const someoneCalling = () => {
 };
 
 watch(listenCalled, () => {
-  navigateTo(`/video/${listenCalled.value}`, {
-    open: {
-      target: "_blank",
-      windowFeatures: {
-        width: 650,
-        height: 650,
-        left: (window.innerWidth - 600) / 2,
-        top: (window.innerHeight - 600) / 2,
-        popup: true,
+  if (listenCalled.value) {
+    navigateTo(`/video/${listenCalled.value}`, {
+      open: {
+        target: "_blank",
+        windowFeatures: {
+          width: 650,
+          height: 650,
+          left: (window.innerWidth - 600) / 2,
+          top: (window.innerHeight - 600) / 2,
+          popup: true,
+        },
       },
-    },
-  });
+    });
+  }
 });
 
 watchEffect(() => {

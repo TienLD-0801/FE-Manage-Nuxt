@@ -1,10 +1,20 @@
 <template>
   <v-container class="control" elevation="0">
-    <v-btn icon="mdi-volume-high" />
-    <v-btn icon="mdi-phone-hangup" @click="$emit('on-hangup')" />
+    <v-btn icon="mdi-volume-high" v-if="!isReceiver && isAnswer" />
+    <v-btn icon="mdi-phone-hangup" color="red" @click="$emit('on-hangup')" />
     <div @click="$emit('on-voice')">
-      <v-btn icon="mdi-microphone" v-if="!isVoice" :disabled="!isCalling" />
-      <v-btn icon="mdi-microphone-off" v-else />
+      <v-btn
+        icon="mdi-microphone"
+        v-if="!isReceiver && isAnswer"
+        :disabled="!isCalling"
+      />
+      <!-- <v-btn icon="mdi-microphone-off" v-else /> -->
+      <v-btn
+        icon="mdi-phone"
+        color="green"
+        @click="$emit('on-answer')"
+        v-if="!isAnswer && isReceiver"
+      />
     </div>
   </v-container>
 </template>
@@ -13,8 +23,10 @@
 defineProps<{
   isVoice: boolean;
   isCalling: boolean;
+  isAnswer: boolean;
+  isReceiver: boolean;
 }>();
-defineEmits(["on-voice", "on-hangup"]);
+defineEmits(["on-voice", "on-hangup", "on-answer"]);
 </script>
 
 <style lang="scss" scoped>

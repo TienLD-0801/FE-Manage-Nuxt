@@ -18,7 +18,7 @@ export default defineNuxtPlugin(async () => {
   const openVoice = async () => {
     try {
       const localStream = await navigator.mediaDevices.getUserMedia({
-        video: false,
+        video: true,
         audio: true,
       });
       const remoteStream = new MediaStream();
@@ -39,10 +39,9 @@ export default defineNuxtPlugin(async () => {
     }
   };
 
-  const turnOffVoice = () => {
-    //handle sau
-    local = undefined;
-  };
+  // const turnOffVoice = () => {
+
+  // };
 
   return {
     provide: {
@@ -50,7 +49,6 @@ export default defineNuxtPlugin(async () => {
       openVoice: openVoice,
       local: local!,
       remote: remote!,
-      turnOffVoice: turnOffVoice,
     },
   };
 });
