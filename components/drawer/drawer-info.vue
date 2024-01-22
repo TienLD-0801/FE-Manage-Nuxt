@@ -1,7 +1,10 @@
 <template>
   <div>
-    <v-btn @click="$emit('on-called')" icon>
-      <v-icon> mdi-phone</v-icon>
+    <v-btn @click="$emit('on-audio-called')" icon>
+      <v-icon>mdi-phone</v-icon>
+    </v-btn>
+    <v-btn @click="$emit('on-video-called')" icon>
+      <v-icon>mdi-video</v-icon>
     </v-btn>
     <v-btn icon>
       <v-icon>mdi-magnify</v-icon>
@@ -126,6 +129,8 @@
 </template>
 
 <script lang="ts" setup>
+defineEmits(["on-audio-called", "on-video-called"]);
+
 import {
   collection,
   doc,
@@ -136,7 +141,6 @@ import {
   where,
 } from "firebase/firestore";
 import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
-defineEmits(["on-called"]);
 const { $state } = useNavigatorTabStore();
 const { $firestore } = useNuxtApp();
 const dialog = ref<boolean>(false);
