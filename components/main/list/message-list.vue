@@ -3,6 +3,8 @@
     height="100%"
     side="end"
     @load="load"
+    ref="refInfiniteScroll"
+    :items="messageList"
     :id="scrollElementId"
     class="message-scroll"
     :v-slot:empty="true"
@@ -33,23 +35,25 @@
 import {
   collection,
   doc,
+  getCountFromServer,
   getDoc,
+  getDocs,
   limit,
   onSnapshot,
   orderBy,
   query,
   setDoc,
+  startAfter,
   updateDoc,
 } from "firebase/firestore";
 import { DEFAULT_AVATAR, MESSAGE_LIMIT } from "~/shared/constant/constant";
 import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
-
 const { $state } = useProfileStore();
 const navigatorTab = useNavigatorTabStore();
 const messageList = ref<TMessage[]>([]);
 const { $firestore } = useNuxtApp();
 const adminsAndMembersProfiles = ref<TProfile[]>([]);
-
+const refInfiniteScroll = ref<ComponentPublicInstance>();
 const message = ref<string>("");
 const { scrollElementId, onSetScroll } = useElement();
 
@@ -96,7 +100,7 @@ const getAllProfileOfAdminsAndMembers = async () => {
   });
 };
 
-const getAllMessage = async () => {
+const getAllMessage = () => {
   const documentGroupId = navigatorTab.$state.currentTab.group?.group_id!;
   const q = query(
     collection(
@@ -117,11 +121,46 @@ const getAllMessage = async () => {
   });
 };
 
+const nextPage = async (id: string) => {
+  const lastIndex = messageList.value[messageList.value.length - 1].created_at;
+  const nextPage = query(
+    collection(
+      $firestore,
+      FIRESTORE_PATH.chat_collection,
+      id,
+      FIRESTORE_PATH.message_collection
+    ),
+    orderBy("created_at", "desc"),
+    startAfter(lastIndex),
+    limit(MESSAGE_LIMIT)
+  );
+  const dataMessagePagination = await getDocs(nextPage);
+  dataMessagePagination.forEach((pagination) => {
+    messageList.value.push(pagination.data() as TMessage);
+  });
+};
+
 const load = async ({ done }: any) => {
-  console.log("Scrolling to load");
-  setTimeout(() => {
-    done("empty");
-  }, 1000);
+  const documentGroupId = navigatorTab.$state.currentTab.group?.group_id!;
+  const count = collection(
+    $firestore,
+    FIRESTORE_PATH.chat_collection,
+    documentGroupId,
+    FIRESTORE_PATH.message_collection
+  );
+  const pageSize = (await getCountFromServer(count)).data().count;
+  setTimeout(async () => {
+    if (
+      refInfiniteScroll.value?.$el.scrollTop === 0 ||
+      messageList.value.length >= pageSize
+    ) {
+      done("empty");
+    } else {
+      console.log("call api");
+      await nextPage(documentGroupId);
+      done("ok");
+    }
+  }, 1200);
 };
 
 const sendMessage = async () => {
@@ -187,7 +226,7 @@ watchEffect(() => {
 .message-scroll {
   flex-direction: column-reverse;
   height: 100vh;
-  // gap: 20px;
   padding: 0 25px;
+  scrollbar-color: transparent transparent;
 }
 </style>
