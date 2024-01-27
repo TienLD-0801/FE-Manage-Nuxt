@@ -242,6 +242,7 @@ const handleAddMoreMembersGroupChat = async () => {
     return doc($firestore, `${FIRESTORE_PATH.user_collection}/${value.id}`);
   });
   try {
+    onClose && onClose(groupName.value, [...availableMembers.filter(mem => mem.id !== $state.profile.id), ...userSelectedList]);
     const objectUpdate = selected.value.length > 0 && groupName.value !== availableName ?
       {
         group_name: groupName.value,
@@ -256,7 +257,6 @@ const handleAddMoreMembersGroupChat = async () => {
       doc($firestore, FIRESTORE_PATH.chat_collection, navigator.$state.currentTab.group?.group_id),
       objectUpdate
     );
-    onClose && onClose(groupName.value, [...availableMembers.filter(mem => mem.id !== $state.profile.id), ...userSelectedList]);
     closePopup();
     console.log("Add more member successfully");
   } catch (err) {
