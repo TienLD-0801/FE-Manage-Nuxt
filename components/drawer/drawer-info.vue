@@ -15,20 +15,16 @@
     <v-navigation-drawer :width="300" location="right" v-if="rail" permanent>
       <div class="right-drawer-chat">
         <v-list>
-          <v-list-item>
+          <v-list-item class="drawer-header-block">
             <div class="header-profile">
               <v-avatar
                 class="drawer-avatar"
                 :image="$state.currentTab.group?.oppositeUser?.avatar"
               />
               <v-list-item-title style="display: flex">
-                {{ fullName }}
-                <v-icon
-                  v-if="$state.currentTab.group?.group_type === 'group'"
-                  class="edit-name"
-                  size="20"
-                  >mdi-pencil-outline</v-icon
-                >
+                <span :class="fullName.length > 16 && 'animated-name'">
+                  {{ fullName }}
+                </span>
               </v-list-item-title>
             </div>
           </v-list-item>
@@ -250,7 +246,6 @@ watch(currentGroup, () => {
 }
 
 .header-profile {
-  width: 120px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -262,6 +257,32 @@ watch(currentGroup, () => {
   width: 50px;
   height: 50px;
   border-radius: 50px;
+}
+
+.drawer-header-block {
+  width: 170px;
+  display: flex;
+  justify-content: center;
+}
+
+.animated-name {
+  display: inline-block;
+  font-family: "Arial", sans-serif;
+  width: 100%;
+}
+
+/* Keyframes cho hiệu ứng chạy chữ */
+@keyframes slide {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.animated-name {
+  animation: slide 7s linear infinite;
 }
 
 .header-profile .edit-name {
