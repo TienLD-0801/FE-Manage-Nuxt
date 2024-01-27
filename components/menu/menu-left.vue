@@ -10,7 +10,7 @@
       </v-btn>
 
       <div class="drawer-create-new-group">
-        <CreateGroupChatPopup isNewGroup />
+        <CreateGroupChatPopup mode="create-new" />
       </div>
 
       <template v-slot:extension>
