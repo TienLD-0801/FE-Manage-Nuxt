@@ -106,6 +106,7 @@
                       :availableMembers="memberMapList"
                       :availableName="fullName"
                       v-if="expanded"
+                      :onClose="(name, members) => updateMemberMapList(name, members)"
                     />
                   </div>
                 </template>
@@ -222,6 +223,10 @@ const handleOpenEditDescriptionPopup = () => {
 
 const closePopup = () => {
   dialog.value = false;
+};
+
+const updateMemberMapList = (updatedName: string, updatedMembers: TProfile[]) => {
+  memberMapList.value = updatedMembers;
 };
 
 const handleSaveDescription = async () => {

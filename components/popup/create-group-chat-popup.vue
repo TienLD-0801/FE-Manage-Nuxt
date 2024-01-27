@@ -64,6 +64,7 @@
         </v-btn>
         <v-btn
           v-if="mode === 'add-more'"
+          :disabled="selected.length === 0 && groupName === availableName"
           color="blue-darken-1"
           variant="text"
           @click="handleAddMoreMembersGroupChat"
@@ -96,14 +97,16 @@ const props = defineProps<{
   mode?: "create-new" | "create-with-friend" | "add-more";
   availableName?: string;
   availableMembers?: TProfile[];
+  onClose?: (groupName: string, members: TProfile[]) => void
 }>();
-const { mode, availableName, availableMembers } = props;
+
+const { mode, availableName, availableMembers, onClose } = props;
 
 const navigatorTab = useNavigatorTabStore();
 const { $firestore } = useNuxtApp();
 const { $state } = useProfileStore();
 const navigator = useNavigatorTabStore();
-const groupName = ref<string>(availableName ? availableName : "");
+const groupName = ref<string>("");
 const dialog = ref<boolean>(false);
 const connectedUsers = ref<TProfile[]>([]);
 const oppositeUser = computed(() => navigatorTab.$state.currentTab.group?.oppositeUser!);
@@ -122,6 +125,9 @@ const closePopup = () => {
 };
 
 const addMoreMember = async (q:  Query<DocumentData, DocumentData>) => {
+  if (availableName) {
+    groupName.value = availableName;
+  }
   try {
     const userList = await getDocs(q);
     const tempConnectedUsers: TProfile[] = [];
@@ -236,13 +242,21 @@ const handleAddMoreMembersGroupChat = async () => {
     return doc($firestore, `${FIRESTORE_PATH.user_collection}/${value.id}`);
   });
   try {
-    await updateDoc(
-      doc($firestore, FIRESTORE_PATH.chat_collection, navigator.$state.currentTab.group?.group_id),
+    const objectUpdate = selected.value.length > 0 && groupName.value !== availableName ?
       {
         group_name: groupName.value,
         member_refs: selectionRefs,
+      } : selected.value.length === 0 && groupName.value !== availableName ? {
+        group_name: groupName.value,
+      } : {
+        member_refs: selectionRefs,
       }
+
+    await updateDoc(
+      doc($firestore, FIRESTORE_PATH.chat_collection, navigator.$state.currentTab.group?.group_id),
+      objectUpdate
     );
+    onClose && onClose(groupName.value, [...availableMembers.filter(mem => mem.id !== $state.profile.id), ...userSelectedList]);
     closePopup();
     console.log("Add more member successfully");
   } catch (err) {
