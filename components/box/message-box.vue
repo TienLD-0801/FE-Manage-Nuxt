@@ -13,7 +13,7 @@
           >{{ `${profile.firstName} ${profile.lastName}` }}</v-list-subheader
         >
         <div :class="isSelf ? 'message-view-self' : 'message-view'">
-          {{ content }}
+          <div>{{ content }}</div>
           <v-list-item-subtitle v-if="!notShowTime">
             {{ convertTimeMessage(time) }}
           </v-list-item-subtitle>
