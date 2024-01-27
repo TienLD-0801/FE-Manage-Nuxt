@@ -12,7 +12,7 @@
       :key="item.message_id"
       :content="item.content"
       :profile="getProfileDetail(item.user_id)"
-      :time="item.created_at"
+      :time="item.datetime"
       :isSelf="item.user_id === $state.profile.id"
       :notShowAvatarAndName="
         i < messageList.length - 1 && item.user_id === messageList[i + 1].user_id
@@ -143,7 +143,8 @@ const sendMessage = async () => {
     user_id: $state.profile.id,
     user_ref: doc($firestore, `${FIRESTORE_PATH.user_collection}/${$state.profile.id}`),
     content: message.value,
-    created_at: new Date().toString(),
+    datetime: new Date().toString(),
+    created_at: new Date().getTime(),
   };
 
   try {

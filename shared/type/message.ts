@@ -3,7 +3,8 @@ type TMessage = {
   user_id: string;
   user_ref: any; // DocumentReference type
   content: string;
-  created_at: string;
+  datetime: string;
+  created_at: number;
 };
 
 type TMessageGroup = {

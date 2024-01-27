@@ -128,7 +128,8 @@ const handleAddUser = async (userAdded: TProfile) => {
       user_id: $state.profile.id,
       user_ref: doc($firestore, `${FIRESTORE_PATH.user_collection}/${$state.profile.id}`),
       content: "Say Hello to start the conservation !",
-      created_at: new Date().toString(),
+      datetime: new Date().toString(),
+      created_at: new Date().getTime(),
     },
     admin_refs: [
       doc($firestore, `${FIRESTORE_PATH.user_collection}/${$state.profile.id}`),
