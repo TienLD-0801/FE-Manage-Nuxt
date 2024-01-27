@@ -96,7 +96,20 @@
             variant="accordion"
           >
             <v-expansion-panel class="member-panel">
-              <v-expansion-panel-title>Members</v-expansion-panel-title>
+              <v-expansion-panel-title>
+                Members
+                <template v-slot:actions="{ expanded }">
+                  <v-icon v-if="!expanded" :icon="'mdi-chevron-down'"></v-icon>
+                  <div class="add-more-member">
+                    <CreateGroupChatPopup
+                      mode="add-more"
+                      :availableMembers="memberMapList"
+                      :availableName="fullName"
+                      v-if="expanded"
+                    />
+                  </div>
+                </template>
+              </v-expansion-panel-title>
               <v-expansion-panel-text>
                 <div class="member-list-panel">
                   <div
@@ -120,6 +133,7 @@
             v-if="$state.currentTab.group?.group_type === 'private'"
             :title="`Create group chat with ${fullName}`"
             :name="fullName"
+            mode="create-with-friend"
           />
 
           <v-list-item
@@ -274,7 +288,7 @@ watch(currentGroup, () => {
 /* Keyframes cho hiệu ứng chạy chữ */
 @keyframes slide {
   0% {
-    transform: translateX(100%);
+    transform: translateX(80%);
   }
   100% {
     transform: translateX(-100%);

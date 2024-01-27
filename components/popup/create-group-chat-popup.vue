@@ -15,8 +15,11 @@
     </template>
 
     <v-card class="user-selection-card" width="500px">
-      <v-card-title>{{
+      <v-card-title v-if="mode !== 'add-more'">{{
         `Create Group Chat  ${name ? `with ${name}` : ""}`
+      }}</v-card-title>
+      <v-card-title v-if="mode === 'add-more'">{{
+        `Information of group ${name ? `with ${name}` : ""}`
       }}</v-card-title>
       <v-divider></v-divider>
       <v-text-field
@@ -41,7 +44,7 @@
           :value="user"
           :label="`${user.firstName} ${user.lastName}`"
           :disabled="
-            !isNewGroup &&
+            mode !== 'create-new' &&
             user.id === navigatorTab.$state.currentTab.group?.oppositeUser?.id
           "
         />
@@ -51,12 +54,21 @@
       <v-card-actions>
         <v-btn color="blue-darken-1" variant="text" @click="closePopup"> Close </v-btn>
         <v-btn
+          v-if="mode !== 'add-more'"
           :disabled="userMappingSelectListByName.length < 2 || groupName.length === 0"
           color="blue-darken-1"
           variant="text"
           @click="handleCreateGroupChat"
         >
           Create
+        </v-btn>
+        <v-btn
+          v-if="mode === 'add-more'"
+          color="blue-darken-1"
+          variant="text"
+          @click="handleAddMoreMembersGroupChat"
+        >
+          Update
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -72,6 +84,7 @@ import {
   getDoc,
   doc,
   setDoc,
+  updateDoc,
 type DocumentData,
 Query,
 } from "firebase/firestore";
@@ -80,13 +93,17 @@ import { DEFAULT_AVATAR_GROUP } from "~/shared/constant/constant";
 const props = defineProps<{
   title?: string;
   name?: string;
-  isNewGroup?: boolean;
+  mode?: "create-new" | "create-with-friend" | "add-more";
+  availableName?: string;
+  availableMembers?: TProfile[];
 }>();
-const { isNewGroup } = props;
+const { mode, availableName, availableMembers } = props;
+
 const navigatorTab = useNavigatorTabStore();
 const { $firestore } = useNuxtApp();
 const { $state } = useProfileStore();
-const groupName = ref<string>("");
+const navigator = useNavigatorTabStore();
+const groupName = ref<string>(availableName ? availableName : "");
 const dialog = ref<boolean>(false);
 const connectedUsers = ref<TProfile[]>([]);
 const oppositeUser = computed(() => navigatorTab.$state.currentTab.group?.oppositeUser!);
@@ -104,6 +121,36 @@ const closePopup = () => {
   dialog.value = false;
 };
 
+const addMoreMember = async (q:  Query<DocumentData, DocumentData>) => {
+  try {
+    const userList = await getDocs(q);
+    const tempConnectedUsers: TProfile[] = [];
+    userList.docs.forEach(async (chatItem, index) => {
+      const adminRef = chatItem.data().admin_refs[0];
+      const memberRef = chatItem.data().member_refs[0];
+      const [adminProfile, memberProfile] = await Promise.all([
+        getDoc(adminRef),
+        getDoc(memberRef),
+      ]);
+      if ([adminProfile.id, memberProfile.id].includes($state.profile.id)) {
+        const neededUser: TProfile =
+          adminProfile.id === $state.profile.id
+            ? memberProfile.data() as TProfile
+            : adminProfile.data() as TProfile;
+
+        if(availableMembers && !availableMembers.map(e => e.id).includes(neededUser.id)) {
+          tempConnectedUsers.push(neededUser as TProfile);
+        }
+      }
+    });
+    setTimeout(() => {
+      connectedUsers.value = tempConnectedUsers;
+    }, 500)
+  } catch (error) {
+    console.error("Error get all connected users: ", error);
+  }
+}
+
 const createNewGroupInit = async (q:  Query<DocumentData, DocumentData>) => {
   try {
     const userList = await getDocs(q);
@@ -116,11 +163,12 @@ const createNewGroupInit = async (q:  Query<DocumentData, DocumentData>) => {
         getDoc(memberRef),
       ]);
       if ([adminProfile.id, memberProfile.id].includes($state.profile.id)) {
-        const neededUsers =
+        const neededUser: TProfile =
           adminProfile.id === $state.profile.id
-            ? memberProfile.data()
-            : adminProfile.data();
-        tempConnectedUsers.push(neededUsers as TProfile);
+            ? memberProfile.data() as TProfile
+            : adminProfile.data() as TProfile;
+
+        tempConnectedUsers.push(neededUser as TProfile);
       }
     });
     setTimeout(() => {
@@ -146,12 +194,12 @@ const createNewGroupWithAvailableFriend = async (q:  Query<DocumentData, Documen
         getDoc(memberRef),
       ]);
       if ([adminProfile.id, memberProfile.id].includes($state.profile.id)) {
-        const neededUsers =
+        const neededUser =
           adminProfile.id === $state.profile.id
             ? (memberProfile.data() as TProfile)
             : (adminProfile.data() as TProfile);
-        if (neededUsers.id !== oppositeUser.value.id) {
-          tempConnectedUsers.push(neededUsers);
+        if (neededUser.id !== oppositeUser.value.id) {
+          tempConnectedUsers.push(neededUser);
         }
       }
     });
@@ -170,12 +218,37 @@ const handleGetAllConnectedUsers = () => {
       where("is_canceled", "==", false),
       where("group_type", "==", "private")
     );
-  if (isNewGroup) {
+  if (mode === "create-new") {
     createNewGroupInit(q);
-  } else {
+  } else if (mode === "create-with-friend") {
     createNewGroupWithAvailableFriend(q);
+  } else {
+    addMoreMember(q);
   }
 };
+
+const handleAddMoreMembersGroupChat = async () => {
+  if (!navigator.$state.currentTab.group?.group_id || !availableMembers) {
+    return;
+  }
+  const userSelectedList = JSON.parse(JSON.stringify(selected.value));
+  const selectionRefs = [...availableMembers.filter(mem => mem.id !== $state.profile.id), ...userSelectedList].map((value: TProfile) => {
+    return doc($firestore, `${FIRESTORE_PATH.user_collection}/${value.id}`);
+  });
+  try {
+    await updateDoc(
+      doc($firestore, FIRESTORE_PATH.chat_collection, navigator.$state.currentTab.group?.group_id),
+      {
+        group_name: groupName.value,
+        member_refs: selectionRefs,
+      }
+    );
+    closePopup();
+    console.log("Add more member successfully");
+  } catch (err) {
+    console.error("Error add more member: ", err);
+  }
+}
 
 const handleCreateGroupChat = async () => {
   const userSelectedList = JSON.parse(JSON.stringify(selected.value));

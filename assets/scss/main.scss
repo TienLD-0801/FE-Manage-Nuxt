@@ -78,3 +78,8 @@ body {
 .description-input .v-field__input {
   height: 335px;
 }
+
+.add-more-member .v-list-item {
+  min-height: unset !important;
+  width: 40px;
+}
