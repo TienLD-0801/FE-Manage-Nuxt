@@ -14,7 +14,7 @@
           : `${getLastName(item.last_message.user_id)} — `
       "
       :name="`${item.oppositeUser?.firstName} ${item.oppositeUser?.lastName}`"
-      :time="convertTimeMessage(item.last_message.created_at)"
+      :time="convertTimeMessage(item.last_message.datetime)"
       :avatar="String(item.oppositeUser?.avatar)"
       :last-message="item.last_message?.content"
       :key="i"
@@ -120,8 +120,8 @@ const getListUserChat = () => {
 
     setTimeout(() => {
       chatListMapping.value = tempListUserChat.sort((a, b) => {
-        const date1 = new Date(b.last_message.created_at);
-        const date2 = new Date(a.last_message.created_at);
+        const date1 = new Date(b.last_message.datetime);
+        const date2 = new Date(a.last_message.datetime);
         return Number(date1) - Number(date2);
       });
     }, 500);

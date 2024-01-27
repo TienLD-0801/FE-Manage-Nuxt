@@ -1,7 +1,10 @@
 <template>
   <div>
-    <v-btn @click="$emit('on-called')" icon>
-      <v-icon> mdi-phone</v-icon>
+    <v-btn @click="$emit('on-audio-called')" icon>
+      <v-icon>mdi-phone</v-icon>
+    </v-btn>
+    <v-btn @click="$emit('on-video-called')" icon>
+      <v-icon>mdi-video</v-icon>
     </v-btn>
     <v-btn icon>
       <v-icon>mdi-magnify</v-icon>
@@ -15,10 +18,18 @@
           <v-list-item>
             <div class="header-profile">
               <v-avatar
-                class="avatar"
+                class="drawer-avatar"
                 :image="$state.currentTab.group?.oppositeUser?.avatar"
               />
-              <v-list-item-title>{{ fullName }}</v-list-item-title>
+              <v-list-item-title style="display: flex">
+                {{ fullName }}
+                <v-icon
+                  v-if="$state.currentTab.group?.group_type === 'group'"
+                  class="edit-name"
+                  size="20"
+                  >mdi-pencil-outline</v-icon
+                >
+              </v-list-item-title>
             </div>
           </v-list-item>
           <v-divider></v-divider>
@@ -126,6 +137,8 @@
 </template>
 
 <script lang="ts" setup>
+defineEmits(["on-audio-called", "on-video-called"]);
+
 import {
   collection,
   doc,
@@ -136,7 +149,6 @@ import {
   where,
 } from "firebase/firestore";
 import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
-defineEmits(["on-called"]);
 const { $state } = useNavigatorTabStore();
 const { $firestore } = useNuxtApp();
 const dialog = ref<boolean>(false);
@@ -238,10 +250,24 @@ watch(currentGroup, () => {
 }
 
 .header-profile {
+  width: 120px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  row-gap: 7px;
+}
+
+.header-profile .drawer-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50px;
+}
+
+.header-profile .edit-name {
+  position: absolute;
+  right: 0;
+  bottom: 7px;
 }
 
 .description-panel {

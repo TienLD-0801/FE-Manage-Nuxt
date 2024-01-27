@@ -7,7 +7,7 @@
         :subtitle="'Active now'"
         nav
       />
-      <DrawerInfo @on-called="handleCalled" />
+      <DrawerInfo @on-audio-called="handleCalled" @on-video-called="handleCalled" />
     </div>
   </v-toolbar>
 </template>

@@ -122,10 +122,10 @@ const createNewGroupInit = async (q:  Query<DocumentData, DocumentData>) => {
             : adminProfile.data();
         tempConnectedUsers.push(neededUsers as TProfile);
       }
-      if (index === userList.docs.length - 1) {
-        connectedUsers.value = tempConnectedUsers;
-      }
     });
+    setTimeout(() => {
+      connectedUsers.value = tempConnectedUsers;
+    }, 500)
   } catch (error) {
     console.error("Error get all connected users: ", error);
   }
@@ -154,10 +154,10 @@ const createNewGroupWithAvailableFriend = async (q:  Query<DocumentData, Documen
           tempConnectedUsers.push(neededUsers);
         }
       }
-      if (index === userList.docs.length - 1) {
-        connectedUsers.value = tempConnectedUsers;
-      }
     });
+    setTimeout(() => {
+      connectedUsers.value = tempConnectedUsers;
+    }, 500)
   } catch (error) {
     console.error("Error get all connected users: ", error);
   }
@@ -179,7 +179,6 @@ const handleGetAllConnectedUsers = () => {
 
 const handleCreateGroupChat = async () => {
   const userSelectedList = JSON.parse(JSON.stringify(selected.value));
-  const selfProfile = JSON.parse(JSON.stringify($state.profile));
   const selectionRefs = userSelectedList.map((value: TProfile) => {
     return doc($firestore, `${FIRESTORE_PATH.user_collection}/${value.id}`);
   });
@@ -198,7 +197,8 @@ const handleCreateGroupChat = async () => {
       user_id: $state.profile.id,
       user_ref: doc($firestore, `${FIRESTORE_PATH.user_collection}/${$state.profile.id}`),
       content: "Say Hello to start the conservation !",
-      created_at: new Date().toString(),
+      datetime: new Date().toString(),
+      created_at: new Date().getTime(),
     },
     admin_refs: [
       doc($firestore, `${FIRESTORE_PATH.user_collection}/${$state.profile.id}`),
