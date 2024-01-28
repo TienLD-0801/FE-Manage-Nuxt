@@ -12,7 +12,7 @@
     <MessageBox
       v-for="(item, i) in messageList"
       :key="item.message_id"
-      :content="item.content"
+      :content="item.content.toLowerCase().includes('lồn') ? 'l**' : item.content"
       :profile="getProfileDetail(item.user_id)"
       :time="item.datetime"
       :isSelf="item.user_id === $state.profile.id"
