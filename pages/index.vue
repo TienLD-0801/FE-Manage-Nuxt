@@ -6,7 +6,6 @@ definePageMeta({
   middleware: "home-guard",
 });
 import { collection, doc, getDoc, onSnapshot, query } from "firebase/firestore";
-import MainLayout from "~/layouts/home/main-layout.vue";
 import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
 const { $firestore } = useNuxtApp();
 const { $state, updateProfile } = useProfileStore();

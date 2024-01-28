@@ -1,5 +1,5 @@
 export const PATH_ROUTER = {
-  home: '/home',
+  home: '/',
   login: '/login',
   register: '/register',
 };
