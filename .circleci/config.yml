@@ -14,7 +14,6 @@ jobs:
       - run:
           name: Config environment variable
           command: |
-              echo "DATABASE_URL=$DATABASE_URL" >>.env
               echo "API_KEY=$API_KEY" >>.env
               echo "AUTH_DOMAIN=$AUTH_DOMAIN" >>.env
               echo "STORAGE_BUCKET=$STORAGE_BUCKET" >>.env
