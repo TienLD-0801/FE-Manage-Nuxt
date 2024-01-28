@@ -14,8 +14,18 @@ jobs:
       - run:
           name: Config environment variable
           command: |
-             echo "LOCAL=$LOCAL" >>.env
-             echo "VITE_API_UR=$VITE_API_URL" >>.env
+              echo "DATABASE_URL=$DATABASE_URL" >>.env
+              echo "API_KEY=$API_KEY" >>.env
+              echo "AUTH_DOMAIN=$AUTH_DOMAIN" >>.env
+              echo "STORAGE_BUCKET=$STORAGE_BUCKET" >>.env
+              echo "MESSAGING_SENDER_ID=$MESSAGING_SENDER_ID" >>.env
+              echo "APP_ID=$APP_ID" >>.env
+              echo "MEASUREMENT_ID=$MEASUREMENT_ID" >>.env
+              echo "MEASUREMENT_ID=$MEASUREMENT_ID" >>.env
+              echo "URL_IMAGE_CLOUD=$URL_IMAGE_CLOUD" >>.env
+              echo "CLOUD_API_KEY=$CLOUD_API_KEY" >>.env
+              echo "CLOUD_NAME=$CLOUD_NAME" >>.env
+              echo "UPLOAD_PRESET=$UPLOAD_PRESET" >>.env
       - run:
           name: Build generate source
           command: yarn generate
