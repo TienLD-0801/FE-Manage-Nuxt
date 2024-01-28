@@ -1,32 +1,61 @@
 <template>
-  <div class="container">
-    <div>Counter: {{ counter.number }}</div>
-    <button class="cong" @click="increment">+</button>
-    <button class="tru" @click="decrement">-</button>
-    <video ref="videoCaller" />
-    <video ref="videoReceiver" />
-  </div>
+  <MainLayout />
 </template>
 <script lang="ts" setup>
-const counter = useCounterStore();
-const increment = () => {
-  counter.increment();
+definePageMeta({
+  middleware: "home-guard",
+});
+import { collection, doc, getDoc, onSnapshot, query } from "firebase/firestore";
+import MainLayout from "~/layouts/home/main-layout.vue";
+import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
+const { $firestore } = useNuxtApp();
+const { $state, updateProfile } = useProfileStore();
+const authStore = useAuthStore();
+const navigatorTabStore = useNavigatorTabStore();
+const listenCalled = ref<string>("");
+
+const getUserDatabase = async () => {
+  const userInfo = await getDoc(
+    doc($firestore, FIRESTORE_PATH.user_collection, authStore.token?.localId!)
+  );
+  updateProfile(userInfo.data() as TProfile);
 };
-const decrement = () => {
-  counter.decrement();
+
+const someoneCalling = () => {
+  const q = query(collection($firestore, "calls"));
+  onSnapshot(q, (snapshot) => {
+    let roomId: string = "";
+    snapshot.docs.forEach((call) => {
+      if (call.id.split("-")[1].includes($state.profile.id)) {
+        roomId = call.id;
+      }
+    });
+    listenCalled.value = roomId;
+  });
 };
+
+watch(listenCalled, () => {
+  if (listenCalled.value) {
+    navigateTo(`/video/${listenCalled.value}`, {
+      open: {
+        target: "_blank",
+        windowFeatures: {
+          width: 900,
+          height: 650,
+          left: (window.innerWidth - 900) / 2,
+          top: (window.innerHeight - 600) / 2,
+          popup: true,
+        },
+      },
+    });
+  }
+});
+
+watchEffect(() => {
+  someoneCalling();
+  getUserDatabase();
+  navigatorTabStore.changeNavigatorTab({ tab: "default" });
+});
 </script>
 
-<style lang="scss" scoped>
-.container {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-.cong {
-  background: red;
-}
-.tru {
-  background: blue;
-}
-</style>
+<style lang="scss" scoped></style>
