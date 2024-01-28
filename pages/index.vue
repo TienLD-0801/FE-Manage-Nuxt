@@ -3,6 +3,8 @@
     <div>Counter: {{ counter.number }}</div>
     <button class="cong" @click="increment">+</button>
     <button class="tru" @click="decrement">-</button>
+    <video ref="videoCaller" />
+    <video ref="videoReceiver" />
   </div>
 </template>
 <script lang="ts" setup>
