@@ -2,10 +2,9 @@
   <v-toolbar class="message-toolbar" density="compact">
     <div class="message-header-bar">
       <v-list-item
-        :prepend-avatar="avatar"
-        :title="fullName"
+        :prepend-avatar="$state.currentTab.group?.oppositeUser?.avatar"
+        :title="`${$state.currentTab.group?.oppositeUser?.firstName} ${$state.currentTab.group?.oppositeUser?.lastName}`"
         :subtitle="'Active now'"
-        nav
       />
       <DrawerInfo @on-audio-called="handleCalled" @on-video-called="handleCalled" />
     </div>
@@ -15,13 +14,6 @@
 <script lang="ts" setup>
 const { $state } = useNavigatorTabStore();
 const self = useProfileStore();
-
-const fullName = computed(() => {
-  const firstName = $state.currentTab.group?.oppositeUser?.firstName;
-  const lastName = $state.currentTab.group?.oppositeUser?.lastName;
-  return `${firstName} ${lastName}`;
-});
-const avatar = computed(() => $state.currentTab.group?.oppositeUser?.avatar);
 
 const handleCalled = async () => {
   const idCalled = `${self.$state.profile.id}-${$state.currentTab.group?.oppositeUser?.id}`;
