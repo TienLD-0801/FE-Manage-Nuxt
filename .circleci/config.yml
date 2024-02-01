@@ -42,8 +42,8 @@ jobs:
       - run:
           name: Upload file to S3
           command: |
-            aws s3 rm s3://chatty-bt.app --recursive
-            aws s3 sync ./build/ s3://chatty-bt.app
+            aws s3 rm s3://chatty-tb.app --recursive
+            aws s3 sync ./build/ s3://chatty-tb.app
 workflows:
   frontend-manage-pipeline:
     jobs:
