@@ -19,7 +19,11 @@
             <div class="header-profile">
               <v-avatar
                 class="drawer-avatar"
-                :image="$state.currentTab.group?.oppositeUser?.avatar"
+                :image="
+                  $state.currentTab.group?.group_type === 'private'
+                    ? $state.currentTab.group?.oppositeUser?.avatar
+                    : $state.currentTab.group?.avatar
+                "
               />
               <v-list-item-title style="display: flex">
                 <span :class="fullName.length > 16 && 'animated-name'">
@@ -105,6 +109,7 @@
                       mode="add-more"
                       :availableMembers="memberMapList"
                       :availableName="fullName"
+                      :availableAvatar="$state.currentTab.group?.avatar"
                       v-if="expanded"
                       :onClose="(name, members) => updateMemberMapList(name, members)"
                     />
