@@ -10,7 +10,7 @@ definePageMeta({
   middleware: "auth-guard",
 });
 
-import { CustomError } from "~/shared/Error/error";
+import { CustomError } from "~/shared/error/error";
 import { DEFAULT_AVATAR } from "~/shared/constant/constant";
 import { PATH_ROUTER } from "~/shared/constant/router";
 
