@@ -5,7 +5,7 @@ import {
   signOut,
 } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
-import { CustomError } from '~/shared/Error/error';
+import { CustomError } from '~/shared/error/error';
 import { FIRESTORE_PATH } from '~/shared/constant/firebase-store';
 
 export const useFirebaseAuth = () => {

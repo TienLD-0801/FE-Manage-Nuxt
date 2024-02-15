@@ -9,7 +9,7 @@
 definePageMeta({
   middleware: "auth-guard",
 });
-import { CustomError } from "~/shared/Error/error";
+import { CustomError } from "~/shared/error/error";
 import { PATH_ROUTER } from "~/shared/constant/router";
 
 const { login } = useFirebaseAuth();
