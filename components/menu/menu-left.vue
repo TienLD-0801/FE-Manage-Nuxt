@@ -46,7 +46,7 @@ const chats = ref("chats");
 const settings = ref("settings");
 const authStore = useAuthStore();
 const { logout } = useFirebaseAuth();
-const isLoading = useState<boolean>("isLoading", () => false);
+const isLoading = ref<boolean>(false);
 const handleLogout = async () => {
   isLoading.value = true;
   try {

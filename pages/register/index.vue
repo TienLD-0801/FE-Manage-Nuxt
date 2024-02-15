@@ -16,7 +16,7 @@ import { PATH_ROUTER } from "~/shared/constant/router";
 
 const { register, addUsersFirebaseStore } = useFirebaseAuth();
 const isLoading = ref<boolean>(false);
-const alertText = ref("");
+const alertText = ref<string>("");
 
 const handleRegister = async (dataForm: TRegisterInfo) => {
   // reset value
