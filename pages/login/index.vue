@@ -13,8 +13,8 @@ import { CustomError } from "~/shared/error/error";
 import { PATH_ROUTER } from "~/shared/constant/router";
 
 const { login } = useFirebaseAuth();
-const isLoading = useState<boolean>("isLoading", () => false);
-const message = useState<string>("message", () => "");
+const isLoading = ref<boolean>(false);
+const message = ref<string>("");
 const authStore = useAuthStore();
 
 const handleLogin = async (user: { email: string; password: string }) => {
