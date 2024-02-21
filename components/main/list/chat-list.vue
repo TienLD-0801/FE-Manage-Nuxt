@@ -15,7 +15,9 @@
       "
       :name="`${item.oppositeUser?.firstName} ${item.oppositeUser?.lastName}`"
       :time="convertTimeMessage(item.last_message.datetime)"
-      :avatar="String(item.oppositeUser?.avatar)"
+      :avatar="
+        String(item.group_type === 'private' ? item.oppositeUser?.avatar : item.avatar)
+      "
       :last-message="item.last_message?.content"
       :key="i"
       :value="item"

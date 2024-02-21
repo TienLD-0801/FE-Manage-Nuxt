@@ -10,13 +10,13 @@ definePageMeta({
   middleware: "auth-guard",
 });
 
-import { CustomError } from "~/shared/Error/error";
+import { CustomError } from "~/shared/error/error";
 import { DEFAULT_AVATAR } from "~/shared/constant/constant";
 import { PATH_ROUTER } from "~/shared/constant/router";
 
 const { register, addUsersFirebaseStore } = useFirebaseAuth();
 const isLoading = ref<boolean>(false);
-const alertText = ref("");
+const alertText = ref<string>("");
 
 const handleRegister = async (dataForm: TRegisterInfo) => {
   // reset value

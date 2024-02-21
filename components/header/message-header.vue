@@ -2,7 +2,11 @@
   <v-toolbar class="message-toolbar" density="compact">
     <div class="message-header-bar">
       <v-list-item
-        :prepend-avatar="$state.currentTab.group?.oppositeUser?.avatar"
+        :prepend-avatar="
+          $state.currentTab.group?.group_type === 'private'
+            ? $state.currentTab.group?.oppositeUser?.avatar
+            : $state.currentTab.group?.avatar
+        "
         :title="`${$state.currentTab.group?.oppositeUser?.firstName} ${$state.currentTab.group?.oppositeUser?.lastName}`"
         :subtitle="'Active now'"
       />

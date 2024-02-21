@@ -22,6 +22,22 @@
         `Information of group ${name ? `with ${name}` : ""}`
       }}</v-card-title>
       <v-divider></v-divider>
+
+      <div v-if="mode === 'add-more'" class="header-avatar">
+        <v-avatar class="drawer-avatar" :image="groupAvatar" />
+        <v-file-input
+          v-model="files"
+          accept="image/*"
+          style="display: none"
+          :id="inputElementId"
+          @change="handleChangeAvatar"
+        />
+        <v-btn @click="onOpenFile()" class="upload-btn">
+          <v-icon size="30" icon="mdi-camera-plus-outline"></v-icon>
+        </v-btn>
+      </div>
+      <v-divider></v-divider>
+
       <v-text-field
         class="group-name"
         variant="underlined"
@@ -55,7 +71,11 @@
         <v-btn color="blue-darken-1" variant="text" @click="closePopup"> Close </v-btn>
         <v-btn
           v-if="mode !== 'add-more'"
-          :disabled="userMappingSelectListByName.length < 2 || groupName.length === 0"
+          :disabled="
+            userMappingSelectListByName.length < 2 ||
+            groupName.length === 0 ||
+            groupAvatar.length === 0
+          "
           color="blue-darken-1"
           variant="text"
           @click="handleCreateGroupChat"
@@ -97,26 +117,42 @@ const props = defineProps<{
   mode?: "create-new" | "create-with-friend" | "add-more";
   availableName?: string;
   availableMembers?: TProfile[];
+  availableAvatar?: string;
   onClose?: (groupName: string, members: TProfile[]) => void
 }>();
 
-const { mode, availableName, availableMembers, onClose } = props;
+const { mode, availableName, availableMembers, availableAvatar, onClose } = props;
 
 const navigatorTab = useNavigatorTabStore();
 const { $firestore } = useNuxtApp();
 const { $state } = useProfileStore();
 const navigator = useNavigatorTabStore();
 const groupName = ref<string>("");
+const groupAvatar = ref<string>("");
 const dialog = ref<boolean>(false);
 const connectedUsers = ref<TProfile[]>([]);
 const oppositeUser = computed(() => navigatorTab.$state.currentTab.group?.oppositeUser!);
 const selected = ref<TProfile[]>([]);
+const { uploadCloudinary } = useCloudinary();
+const { inputElementId, onOpenFile } = useElement();
+const files = ref<File[]>([]);
 
 const userMappingSelectListByName = computed(() => {
   return JSON.parse(JSON.stringify(selected.value)).map(
     (e: TProfile) => `${e.firstName} ${e.lastName}`
   );
 });
+
+const handleChangeAvatar = async () => {
+  try {
+    const secure_url = await uploadCloudinary(files.value[0]);
+    if (secure_url) {
+      groupAvatar.value = secure_url;
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 const closePopup = () => {
   selected.value = [];
@@ -125,8 +161,9 @@ const closePopup = () => {
 };
 
 const addMoreMember = async (q:  Query<DocumentData, DocumentData>) => {
-  if (availableName) {
+  if (availableName && availableAvatar) {
     groupName.value = availableName;
+    groupAvatar.value = availableAvatar;
   }
   try {
     const userList = await getDocs(q);
@@ -243,14 +280,14 @@ const handleAddMoreMembersGroupChat = async () => {
   });
   try {
     onClose && onClose(groupName.value, [...availableMembers.filter(mem => mem.id !== $state.profile.id), ...userSelectedList]);
-    const objectUpdate = selected.value.length > 0 && groupName.value !== availableName ?
+    const objectUpdate = selected.value.length > 0 ?
       {
-        group_name: groupName.value,
         member_refs: selectionRefs,
-      } : selected.value.length === 0 && groupName.value !== availableName ? {
         group_name: groupName.value,
+        avatar: groupAvatar.value
       } : {
-        member_refs: selectionRefs,
+        group_name: groupName.value,
+        avatar: groupAvatar.value
       }
 
     await updateDoc(
@@ -315,5 +352,27 @@ const handleCreateGroupChat = async () => {
 
 .create-group-chat-popup-container .group-name {
   margin: 15px 10px;
+}
+
+.create-group-chat-popup-container .header-avatar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px 0;
+}
+
+.header-avatar .drawer-avatar {
+  width: 55px;
+  height: 55px;
+  opacity: 0.9;
+}
+
+.header-avatar .upload-btn {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  border-radius: 60px;
+  background-color: rgba($color: #000000, $alpha: 0.1);
+  opacity: 0.7;
 }
 </style>

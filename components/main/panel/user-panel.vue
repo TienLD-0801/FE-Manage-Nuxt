@@ -69,7 +69,7 @@ const { $firestore } = useNuxtApp();
 const { $state } = useProfileStore();
 const users = ref<TProfile[]>([]);
 const tab = ref(null);
-const requestList = useState<TProfile[]>("requestList", () => []);
+const requestList = ref<TProfile[]>([]);
 const navigatorTab = useNavigatorTabStore();
 const isLoading = ref<boolean>(false);
 
