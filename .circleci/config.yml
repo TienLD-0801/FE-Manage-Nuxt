@@ -9,9 +9,6 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Installing yarn
-          command: yarn
-      - run:
           name: Config environment variable
           command: |
               echo "API_KEY=$API_KEY" >>.env
@@ -25,6 +22,18 @@ jobs:
               echo "CLOUD_API_KEY=$CLOUD_API_KEY" >>.env
               echo "CLOUD_NAME=$CLOUD_NAME" >>.env
               echo "UPLOAD_PRESET=$UPLOAD_PRESET" >>.env
+      - restore_cache:
+          name: Restore Yarn Package Cache
+          keys:
+            - yarn-packages-{{ checksum "yarn.lock" }}
+      - run:
+          name: Install Yarn
+          command: yarn install --frozen-lockfile --cache-folder ~/.cache/yarn
+      - save_cache:
+          name: Save Yarn Package Cache
+          key: yarn-packages-{{ checksum "yarn.lock" }}
+          paths:
+            - ~/.cache/yarn
       - run:
           name: Build generate source
           command: yarn generate
