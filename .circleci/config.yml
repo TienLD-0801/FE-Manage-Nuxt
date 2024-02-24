@@ -3,16 +3,11 @@ orbs:
   aws-cli: circleci/aws-cli@4.1.2
 jobs:
   build_project:
-    working_directory: ~/frontend-manage-nuxt
+    working_directory: /frontend-manage-nuxt
     docker:
       - image: node:latest
     steps:
       - checkout
-      - run:
-          name: Remove working directory
-          command: |
-            echo "Removing working directory"
-            rm -rf $CIRCLE_WORKING_DIRECTORY
       - run:
           name: Installing yarn
           command: yarn
