@@ -24,7 +24,7 @@ jobs:
               echo "UPLOAD_PRESET=$UPLOAD_PRESET" >>.env
       - run: 
           name : Clean cache
-          command: rm -fr node_modules && yarn cache clean
+          command: rm -fr shared && yarn cache clean
       - restore_cache:
           name: Restore Yarn Package Cache
           keys:
