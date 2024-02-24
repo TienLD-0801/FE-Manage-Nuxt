@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@mdi/font": "^7.4.47",
+    "@nuxtjs/robots": "^3.0.0",
     "@pinia/nuxt": "^0.5.1",
     "firebase": "^10.7.1",
     "sass": "^1.69.7",

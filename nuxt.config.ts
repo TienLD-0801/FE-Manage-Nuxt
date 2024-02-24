@@ -2,8 +2,11 @@ const path = require('path');
 export default defineNuxtConfig({
   app: {
     head: {
-      title: 'Chatty',
+      title: 'Chatty App',
       meta: [{ name: 'description', content: 'My amazing site.' }],
+      link: [
+        { rel: 'icon', type: 'image/x-icon', href: 'chat.ico' , sizes: '180x180'}
+      ]
     },
   },
   components: [
@@ -24,7 +27,7 @@ export default defineNuxtConfig({
   build: {
     transpile: ['vuetify'],
   },
-  modules: ['@pinia/nuxt', '@pinia-plugin-persistedstate/nuxt'],
+  modules: ['@pinia/nuxt', '@pinia-plugin-persistedstate/nuxt', '@nuxtjs/robots'],
   piniaPersistedstate: {
     cookieOptions: {
       sameSite: 'strict',
