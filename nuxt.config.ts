@@ -1,5 +1,4 @@
 const path = require('path');
-import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify';
 export default defineNuxtConfig({
   app: {
     head: {
@@ -36,20 +35,7 @@ export default defineNuxtConfig({
   build: {
     transpile: ['vuetify'],
   },
-  vite: {
-    vue: {
-      template: {
-        transformAssetUrls,
-      },
-    },
-  },
   modules: [
-    (_options, nuxt) => {
-      nuxt.hooks.hook('vite:extendConfig', (config) => {
-        // @ts-expect-error
-        config.plugins.push(vuetify({ autoImport: true }));
-      });
-    },
     '@pinia/nuxt',
     '@pinia-plugin-persistedstate/nuxt',
     '@nuxtjs/robots',
@@ -59,6 +45,11 @@ export default defineNuxtConfig({
       sameSite: 'strict',
     },
     storage: 'localStorage',
+  },
+  nitro: {
+    output: {
+      publicDir: path.join(__dirname, 'build'),
+    },
   },
   ssr: false,
   runtimeConfig: {
