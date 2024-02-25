@@ -1,12 +1,21 @@
 const path = require('path');
+import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify';
 export default defineNuxtConfig({
   app: {
     head: {
       title: 'Chatty App',
-      meta: [{ name: 'description', content: 'My amazing site.' }],
+      htmlAttrs: {
+        lang: 'en',
+      },
+      meta: [{ name: 'description', content: 'Chatty app amazing' }],
       link: [
-        { rel: 'icon', type: 'image/x-icon', href: 'chat.ico' , sizes: '180x180'}
-      ]
+        {
+          rel: 'icon',
+          type: 'image/x-icon',
+          href: 'chat.ico',
+          sizes: '180x180',
+        },
+      ],
     },
   },
   components: [
@@ -26,20 +35,48 @@ export default defineNuxtConfig({
   ],
   build: {
     transpile: ['vuetify'],
+    extractCSS: true,
+    terser: {
+      terserOptions: {
+        compress: {
+          drop_console: true
+        }
+      }
+    }
   },
-  modules: ['@pinia/nuxt', '@pinia-plugin-persistedstate/nuxt', '@nuxtjs/robots'],
+  vite: {
+    vue: {
+      template: {
+        transformAssetUrls,
+      },
+    },
+  },
+  image: {
+    formats: {
+      webp: {
+        quality: 80
+      }
+    }
+  },
+  modules: [
+    (_options, nuxt) => {
+      nuxt.hooks.hook('vite:extendConfig', (config) => {
+        // @ts-expect-error
+        config.plugins.push(vuetify({ autoImport: true }));
+      });
+    },
+    '@pinia/nuxt',
+    '@pinia-plugin-persistedstate/nuxt',
+    '@nuxtjs/robots',
+  ],
   piniaPersistedstate: {
     cookieOptions: {
       sameSite: 'strict',
     },
     storage: 'localStorage',
   },
+  buildModules: ['@nuxt/image'],
   ssr: false,
-  nitro: {
-    output: {
-      publicDir: path.join(__dirname, 'build'),
-    },
-  },
   runtimeConfig: {
     public: {
       firebaseConfig: {
