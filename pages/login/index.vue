@@ -9,8 +9,9 @@
 definePageMeta({
   middleware: "auth-guard",
 });
-import { CustomError } from "~/shared/error/error";
+
 import { PATH_ROUTER } from "~/shared/constant/router";
+import { CustomError } from "~/shared/error/error-firebase";
 
 const { login } = useFirebaseAuth();
 const isLoading = ref<boolean>(false);
