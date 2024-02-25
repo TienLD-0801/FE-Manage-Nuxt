@@ -26,8 +26,8 @@ jobs:
               echo "CLOUD_NAME=$CLOUD_NAME" >>.env
               echo "UPLOAD_PRESET=$UPLOAD_PRESET" >>.env
       - run:
-          name: Build generate source
-          command: yarn generate
+          name: Build build source
+          command: yarn build
       - persist_to_workspace:
           root: .
           paths:
@@ -43,7 +43,7 @@ jobs:
           name: Upload file to S3
           command: |
             aws s3 rm s3://chatty-tb.app --recursive
-            aws s3 sync ./dist/ s3://chatty-tb.app
+            aws s3 sync ./.output/public/ s3://chatty-tb.app
 workflows:
   frontend-manage-pipeline:
     jobs:
