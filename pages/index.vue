@@ -1,5 +1,7 @@
 <template>
-  <MainLayout />
+  <NuxtLayout>
+    <MainLayout />
+  </NuxtLayout>
 </template>
 <script lang="ts" setup>
 definePageMeta({
