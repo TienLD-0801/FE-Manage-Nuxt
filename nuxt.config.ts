@@ -35,14 +35,6 @@ export default defineNuxtConfig({
   ],
   build: {
     transpile: ['vuetify'],
-    extractCSS: true,
-    terser: {
-      terserOptions: {
-        compress: {
-          drop_console: true
-        }
-      }
-    }
   },
   vite: {
     vue: {
@@ -50,13 +42,6 @@ export default defineNuxtConfig({
         transformAssetUrls,
       },
     },
-  },
-  image: {
-    formats: {
-      webp: {
-        quality: 80
-      }
-    }
   },
   modules: [
     (_options, nuxt) => {
@@ -75,7 +60,6 @@ export default defineNuxtConfig({
     },
     storage: 'localStorage',
   },
-  buildModules: ['@nuxt/image'],
   ssr: false,
   runtimeConfig: {
     public: {
