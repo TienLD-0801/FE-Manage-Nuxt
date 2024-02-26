@@ -65,12 +65,12 @@ import {
   where,
 } from "firebase/firestore";
 import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
+import { PATH_ROUTER } from "~/shared/constant/router";
 const { $firestore } = useNuxtApp();
 const { $state } = useProfileStore();
 const users = ref<TProfile[]>([]);
 const tab = ref(null);
 const requestList = ref<TProfile[]>([]);
-const navigatorTab = useNavigatorTabStore();
 const isLoading = ref<boolean>(false);
 
 const getAllUsers = async () => {
@@ -199,10 +199,9 @@ const handleChatUser = async (dataUser: TProfile) => {
               ? (memberProfile.data() as TProfile)
               : (adminProfile.data() as TProfile),
         };
-        navigatorTab.changeNavigatorTab({
-          tab: "chats",
-          group: groupOppositeConvert as TMessageGroup,
-        });
+        navigateTo(
+          `${PATH_ROUTER.message}/${groupDetail.group_id}?type=${groupDetail.group_type}&answerer=${groupOppositeConvert.oppositeUser.id}`
+        );
       }
     });
   } catch (err) {

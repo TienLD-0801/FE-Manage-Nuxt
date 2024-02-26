@@ -20,13 +20,11 @@
               <v-avatar
                 class="drawer-avatar"
                 :image="
-                  $state.currentTab.group?.group_type === 'private'
-                    ? $state.currentTab.group?.oppositeUser?.avatar
-                    : $state.currentTab.group?.avatar
+                  route.query.type === 'private' ? infoAnswerer.avatar : infoGroup.avatar
                 "
               />
               <v-list-item-title style="display: flex">
-                <span :class="fullName.length > 16 && 'animated-name'">
+                <span :class="'animated-name'">
                   {{ fullName }}
                 </span>
               </v-list-item-title>
@@ -154,7 +152,6 @@
 
 <script lang="ts" setup>
 defineEmits(["on-audio-called", "on-video-called"]);
-
 import {
   collection,
   doc,
@@ -170,6 +167,34 @@ const { $firestore } = useNuxtApp();
 const dialog = ref<boolean>(false);
 const rail = ref<boolean>(false);
 const memberMapList = ref<TProfile[]>([]);
+const route = useRoute();
+
+const infoAnswerer = ref<TProfile>({
+  id: "",
+  email: "",
+  lastName: "",
+  avatar: "",
+  firstName: "",
+  created_at: "",
+  updated_at: "",
+});
+const infoGroup = ref<TMessageGroup>({
+  group_id: "",
+  description: "",
+  group_type: "group",
+  admin_refs: undefined,
+  member_refs: undefined,
+  last_message: {
+    message_id: "",
+    user_id: "",
+    user_ref: undefined,
+    content: "",
+    datetime: "",
+    created_at: 0,
+  },
+  is_canceled: false,
+  is_approved: false,
+});
 
 const descriptionGroup = computed((): string => {
   return $state.currentTab.group?.description || "";
@@ -215,13 +240,6 @@ const getMembers = () => {
   }, 500);
 };
 
-const fullName = computed(() => {
-  descriptionPrevious.value = descriptionGroup.value;
-  const firstName = $state.currentTab.group?.oppositeUser?.firstName;
-  const lastName = $state.currentTab.group?.oppositeUser?.lastName;
-  return `${firstName} ${lastName}`;
-});
-
 const handleOpenEditDescriptionPopup = () => {
   descriptionContent.value = descriptionPrevious.value;
 };
@@ -255,7 +273,33 @@ const handleSaveDescription = async () => {
   }
 };
 
+const getProfileUserChat = async () => {
+  const collection =
+    route.query.type === "private"
+      ? FIRESTORE_PATH.user_collection
+      : FIRESTORE_PATH.chat_collection;
+  const userInfo = await getDoc(
+    doc($firestore, collection, route.query.answerer!.toString())
+  );
+  route.query.type === "private"
+    ? (infoAnswerer.value = userInfo.data() as TProfile)
+    : (infoGroup.value = userInfo.data() as TMessageGroup);
+};
+
+const fullName = computed(() => {
+  const name =
+    route.query.type === "private"
+      ? infoAnswerer.value.lastName
+      : infoGroup.value.group_name;
+  return name && name;
+});
+
 const currentGroup = computed(() => $state.currentTab?.group);
+
+watchEffect(() => {
+  getProfileUserChat();
+});
+
 watch(currentGroup, () => {
   getMembers();
 });
@@ -306,7 +350,7 @@ watch(currentGroup, () => {
 }
 
 .animated-name {
-  animation: slide 7s linear infinite;
+  animation: slide 4s linear infinite;
 }
 
 .header-profile .edit-name {
