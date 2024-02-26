@@ -1,33 +1,21 @@
 <template>
   <v-list class="setting-list-container" density="compact" nav>
     <v-list-item
-      @click="
-        navigatorTab.changeNavigatorTab({
-          tab: 'security',
-        })
-      "
+      @click="navigateTo(PATH_ROUTER.security)"
       prepend-icon="mdi-account-lock"
       title="Security"
       value="security"
       color="primary"
     ></v-list-item>
     <v-list-item
-      @click="
-        navigatorTab.changeNavigatorTab({
-          tab: 'users',
-        })
-      "
+      @click="navigateTo(PATH_ROUTER.users)"
       prepend-icon="mdi-account-group-outline"
       title="Users"
       value="users"
       color="primary"
     ></v-list-item>
     <v-list-item
-      @click="
-        navigatorTab.changeNavigatorTab({
-          tab: 'settings',
-        })
-      "
+      @click="navigateTo(PATH_ROUTER.settings)"
       prepend-icon="mdi-cog-outline"
       title="Settings"
       value="settings"
@@ -61,7 +49,7 @@
   </v-list>
 </template>
 <script lang="ts" setup>
-const navigatorTab = useNavigatorTabStore();
+import { PATH_ROUTER } from "~/shared/constant/router";
 </script>
 
 <style lang="scss" scoped>

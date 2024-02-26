@@ -11,7 +11,6 @@ import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
 const { $firestore } = useNuxtApp();
 const { $state, updateProfile } = useProfileStore();
 const authStore = useAuthStore();
-const navigatorTabStore = useNavigatorTabStore();
 const listenCalled = ref<string>("");
 
 const getUserDatabase = async () => {
@@ -54,7 +53,6 @@ watch(listenCalled, () => {
 watchEffect(() => {
   someoneCalling();
   getUserDatabase();
-  navigatorTabStore.changeNavigatorTab({ tab: "default" });
 });
 </script>
 

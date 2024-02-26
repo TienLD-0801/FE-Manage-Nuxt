@@ -1,7 +1,7 @@
 <template>
   <v-layout class="main-layout">
     <MenuLeft />
-    <BodyMain />
+    <NuxtPage />
   </v-layout>
 </template>
 
