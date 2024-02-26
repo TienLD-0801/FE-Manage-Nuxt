@@ -26,7 +26,7 @@ const handleLogin = async (user: { email: string; password: string }) => {
     const userCredential = await login(user.email, user.password);
     if (userCredential) {
       authStore.saveToken(userCredential._tokenResponse!);
-      navigateTo(PATH_ROUTER.message);
+      navigateTo(PATH_ROUTER.home);
     }
   } catch (error) {
     if (error instanceof CustomError) {
