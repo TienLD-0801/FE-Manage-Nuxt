@@ -3,11 +3,19 @@
     <div class="message-header-bar">
       <v-list-item
         :prepend-avatar="
-          $state.currentTab.group?.group_type === 'private'
-            ? $state.currentTab.group?.oppositeUser?.avatar
-            : $state.currentTab.group?.avatar
+          infoAnswerer || infoGroup
+            ? route.query.type === 'private'
+              ? infoAnswerer?.avatar
+              : infoGroup?.avatar
+            : DEFAULT_AVATAR
         "
-        :title="`${$state.currentTab.group?.oppositeUser?.firstName} ${$state.currentTab.group?.oppositeUser?.lastName}`"
+        :title="
+          infoAnswerer || infoGroup
+            ? route.query.type === 'private'
+              ? `${infoAnswerer?.firstName} ${infoAnswerer?.lastName}`
+              : infoGroup?.group_name
+            : ''
+        "
         :subtitle="'Active now'"
       />
       <DrawerInfo @on-audio-called="handleCalled" @on-video-called="handleCalled" />
@@ -16,11 +24,60 @@
 </template>
 
 <script lang="ts" setup>
-const { $state } = useNavigatorTabStore();
+import { doc, getDoc } from "firebase/firestore";
+import { DEFAULT_AVATAR } from "~/shared/constant/constant";
+import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
+const { $firestore } = useNuxtApp();
+const { updateAnswerCallerProfile } = useAnswerCallerProfile();
+const infoAnswerer = ref<TProfile>({
+  id: "",
+  email: "",
+  lastName: "",
+  avatar: "",
+  firstName: "",
+  created_at: "",
+  updated_at: "",
+});
+const infoGroup = ref<TMessageGroup>({
+  group_id: "",
+  description: "",
+  group_type: "group",
+  admin_refs: undefined,
+  member_refs: undefined,
+  last_message: {
+    message_id: "",
+    user_id: "",
+    user_ref: undefined,
+    content: "",
+    datetime: "",
+    created_at: 0,
+  },
+  is_canceled: false,
+  is_approved: false,
+});
 const self = useProfileStore();
+const route = useRoute();
+
+const getProfileUserChat = async () => {
+  const collection =
+    route.query.type === "private"
+      ? FIRESTORE_PATH.user_collection
+      : FIRESTORE_PATH.chat_collection;
+  const userInfo = await getDoc(
+    doc($firestore, collection, route.query.answerer!.toString())
+  );
+  route.query.type === "private"
+    ? (infoAnswerer.value = userInfo.data() as TProfile)
+    : (infoGroup.value = userInfo.data() as TMessageGroup);
+  updateAnswerCallerProfile(infoAnswerer.value);
+};
+
+watchEffect(() => {
+  getProfileUserChat();
+});
 
 const handleCalled = async () => {
-  const idCalled = `${self.$state.profile.id}-${$state.currentTab.group?.oppositeUser?.id}`;
+  const idCalled = `${self.$state.profile.id}-${route.query.answerer!.toString()}`;
   navigateTo(`/video/${idCalled}?status=start`, {
     open: {
       target: "_blank",

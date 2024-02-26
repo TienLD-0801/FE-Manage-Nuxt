@@ -46,7 +46,7 @@ import {
 import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
 const { $firestore } = useNuxtApp();
 const route = useRoute();
-const { $state } = useNavigatorTabStore();
+const { answerCallerProfile } = useAnswerCallerProfile();
 const self = useProfileStore();
 const isAnswer = ref<boolean>(false);
 const isVoice = ref<boolean>(false);
@@ -209,7 +209,7 @@ const someoneConnecting = () => {
 
   onSnapshot(qUser, (profile) => {
     if (profile.id === self.profile.id) {
-      callerProfile.value = $state.currentTab.group?.oppositeUser!;
+      callerProfile.value = answerCallerProfile!;
     } else {
       callerProfile.value = profile.data() as TProfile;
     }

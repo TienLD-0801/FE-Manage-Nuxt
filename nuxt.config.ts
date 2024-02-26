@@ -11,7 +11,7 @@ export default defineNuxtConfig({
         {
           rel: 'icon',
           type: 'image/x-icon',
-          href: 'chat.ico',
+          href: '/chat.ico',
           sizes: '180x180',
         },
       ],

@@ -22,7 +22,7 @@
       :key="i"
       :value="item"
       @click="handleClickItemUser(item)"
-      :activeItem="navigatorTab.$state.currentTab.group?.group_id === item.group_id"
+      :activeItem="$route.params.id === item.group_id"
     />
   </v-list>
 </template>
@@ -30,8 +30,8 @@
 import { collection, getDoc, onSnapshot, query, where } from "firebase/firestore";
 import { DEFAULT_AVATAR_GROUP } from "~/shared/constant/constant";
 import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
+import { PATH_ROUTER } from "~/shared/constant/router";
 
-const navigatorTab = useNavigatorTabStore();
 const { $firestore } = useNuxtApp();
 const { $state } = useProfileStore();
 const chatListMapping = ref<TMessageGroup[]>([]);
@@ -50,7 +50,14 @@ const getLastName = (userId: string) => {
 
 const handleClickItemUser = (item: TMessageGroup) => {
   if (!item) return;
-  navigatorTab.changeNavigatorTab({ tab: "chats", group: item });
+  let id = item.group_id;
+  id =
+    item.group_id.split("-")[0] === $state.profile.id
+      ? item.group_id.split("-")[1]
+      : item.group_id.split("-")[0];
+  navigateTo(
+    `${PATH_ROUTER.message}/${item.group_id}?type=${item.group_type}&answerer=${id}`
+  );
 };
 
 const getListUserChat = () => {
