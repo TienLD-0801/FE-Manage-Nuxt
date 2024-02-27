@@ -93,10 +93,7 @@
             <v-icon class="description-icon" icon="mdi-text-box-edit-outline"></v-icon>
           </v-expansion-panels>
 
-          <v-expansion-panels
-            v-if="$state.currentTab.group?.group_type === 'group'"
-            variant="accordion"
-          >
+          <v-expansion-panels v-if="route.query.type === 'group'" variant="accordion">
             <v-expansion-panel class="member-panel">
               <v-expansion-panel-title>
                 Members
@@ -134,7 +131,7 @@
           </v-expansion-panels>
 
           <CreateGroupChatPopup
-            v-if="$state.currentTab.group?.group_type === 'private'"
+            v-if="route.query.type === 'private'"
             :title="`Create group chat with ${fullName}`"
             :name="fullName"
             mode="create-with-friend"
@@ -253,12 +250,12 @@ const updateMemberMapList = (updatedName: string, updatedMembers: TProfile[]) =>
 };
 
 const handleSaveDescription = async () => {
-  if (!$state.currentTab.group?.group_id) {
+  if (!route.params.id.toString()) {
     return;
   }
   try {
     await updateDoc(
-      doc($firestore, FIRESTORE_PATH.chat_collection, $state.currentTab.group?.group_id),
+      doc($firestore, FIRESTORE_PATH.chat_collection, route.params.id.toString()),
       {
         description: descriptionContent.value,
       }

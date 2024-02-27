@@ -61,7 +61,7 @@
           :label="`${user.firstName} ${user.lastName}`"
           :disabled="
             mode !== 'create-new' &&
-            user.id === navigatorTab.$state.currentTab.group?.oppositeUser?.id
+            user.id === answerCaller.$state.answerCallerProfile?.id
           "
         />
       </v-card-text>
@@ -126,12 +126,13 @@ const { mode, availableName, availableMembers, availableAvatar, onClose } = prop
 const navigatorTab = useNavigatorTabStore();
 const { $firestore } = useNuxtApp();
 const { $state } = useProfileStore();
+const answerCaller = useAnswerCallerProfile();
 const navigator = useNavigatorTabStore();
 const groupName = ref<string>("");
 const groupAvatar = ref<string>("");
 const dialog = ref<boolean>(false);
 const connectedUsers = ref<TProfile[]>([]);
-const oppositeUser = computed(() => navigatorTab.$state.currentTab.group?.oppositeUser!);
+const oppositeUser = computed(() => answerCaller.$state?.answerCallerProfile!);
 const selected = ref<TProfile[]>([]);
 const { uploadCloudinary } = useCloudinary();
 const { inputElementId, onOpenFile } = useElement();
