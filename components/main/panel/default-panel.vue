@@ -9,8 +9,16 @@
       </p>
     </div>
     <div class="default-body-view">
-      <div class="default-view-1" />
-      <div class="default-view-2" />
+      <div class="default-view-1">
+        <video autoplay loop muted playsinline width="100%" height="100%">
+          <source src="/imgs/default-panel-1.mp4" type="video/mp4" />
+        </video>
+      </div>
+      <div class="default-view-2">
+        <video autoplay loop muted playsinline width="100%" height="100%">
+          <source src="/imgs/default-panel-0.mp4" type="video/mp4" />
+        </video>
+      </div>
     </div>
     <div class="default-footer">
       Get started chat with your friends to have great conservations.
@@ -59,16 +67,14 @@
 }
 
 .default-panel-container .default-view-1 {
-  width: 400px;
-  height: 300px;
-  background-image: url("/imgs/default-panel-0.gif");
-  background-size: contain;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
 }
 
 .default-panel-container .default-view-2 {
-  width: 400px;
-  height: 300px;
-  background-image: url("/imgs/default-panel-1.gif");
-  background-size: contain;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
 }
 </style>
