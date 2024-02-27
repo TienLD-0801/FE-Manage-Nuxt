@@ -61,7 +61,7 @@
           :label="`${user.firstName} ${user.lastName}`"
           :disabled="
             mode !== 'create-new' &&
-            user.id === navigatorTab.$state.currentTab.group?.oppositeUser?.id
+            user.id === answerCaller.$state.answerCallerProfile?.id
           "
         />
       </v-card-text>
@@ -71,11 +71,7 @@
         <v-btn color="blue-darken-1" variant="text" @click="closePopup"> Close </v-btn>
         <v-btn
           v-if="mode !== 'add-more'"
-          :disabled="
-            userMappingSelectListByName.length < 2 ||
-            groupName.length === 0 ||
-            groupAvatar.length === 0
-          "
+          :disabled="userMappingSelectListByName.length < 2 || groupName.length === 0"
           color="blue-darken-1"
           variant="text"
           @click="handleCreateGroupChat"
@@ -84,7 +80,9 @@
         </v-btn>
         <v-btn
           v-if="mode === 'add-more'"
-          :disabled="selected.length === 0 && groupName === availableName"
+          :disabled="
+            selected.length === 0 && groupName === groupStore.$state.group?.group_name
+          "
           color="blue-darken-1"
           variant="text"
           @click="handleAddMoreMembersGroupChat"
@@ -115,27 +113,25 @@ const props = defineProps<{
   title?: string;
   name?: string;
   mode?: "create-new" | "create-with-friend" | "add-more";
-  availableName?: string;
   availableMembers?: TProfile[];
-  availableAvatar?: string;
   onClose?: (groupName: string, members: TProfile[]) => void
 }>();
 
-const { mode, availableName, availableMembers, availableAvatar, onClose } = props;
-
-const navigatorTab = useNavigatorTabStore();
+const { mode, availableMembers, onClose } = props;
 const { $firestore } = useNuxtApp();
 const { $state } = useProfileStore();
-const navigator = useNavigatorTabStore();
+const answerCaller = useAnswerCallerProfile();
+const groupStore = useGroupStore()
 const groupName = ref<string>("");
 const groupAvatar = ref<string>("");
 const dialog = ref<boolean>(false);
 const connectedUsers = ref<TProfile[]>([]);
-const oppositeUser = computed(() => navigatorTab.$state.currentTab.group?.oppositeUser!);
+const oppositeUser = computed(() => answerCaller.$state?.answerCallerProfile!);
 const selected = ref<TProfile[]>([]);
 const { uploadCloudinary } = useCloudinary();
 const { inputElementId, onOpenFile } = useElement();
 const files = ref<File[]>([]);
+const route = useRoute();
 
 const userMappingSelectListByName = computed(() => {
   return JSON.parse(JSON.stringify(selected.value)).map(
@@ -161,9 +157,9 @@ const closePopup = () => {
 };
 
 const addMoreMember = async (q:  Query<DocumentData, DocumentData>) => {
-  if (availableName && availableAvatar) {
-    groupName.value = availableName;
-    groupAvatar.value = availableAvatar;
+  if (groupStore.$state.group) {
+    groupName.value = groupStore.$state.group?.group_name!;
+    groupAvatar.value = groupStore.$state.group?.avatar!;
   }
   try {
     const userList = await getDocs(q);
@@ -271,9 +267,8 @@ const handleGetAllConnectedUsers = () => {
 };
 
 const handleAddMoreMembersGroupChat = async () => {
-  if (!navigator.$state.currentTab.group?.group_id || !availableMembers) {
-    return;
-  }
+  if (!route.params.id || !availableMembers) return;
+
   const userSelectedList = JSON.parse(JSON.stringify(selected.value));
   const selectionRefs = [...availableMembers.filter(mem => mem.id !== $state.profile.id), ...userSelectedList].map((value: TProfile) => {
     return doc($firestore, `${FIRESTORE_PATH.user_collection}/${value.id}`);
@@ -284,14 +279,14 @@ const handleAddMoreMembersGroupChat = async () => {
       {
         member_refs: selectionRefs,
         group_name: groupName.value,
-        avatar: groupAvatar.value
+        avatar: groupAvatar.value || DEFAULT_AVATAR_GROUP
       } : {
         group_name: groupName.value,
-        avatar: groupAvatar.value
+        avatar: groupAvatar.value || DEFAULT_AVATAR_GROUP
       }
 
     await updateDoc(
-      doc($firestore, FIRESTORE_PATH.chat_collection, navigator.$state.currentTab.group?.group_id),
+      doc($firestore, FIRESTORE_PATH.chat_collection, route.params.id.toString()),
       objectUpdate
     );
     closePopup();

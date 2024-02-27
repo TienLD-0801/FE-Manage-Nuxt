@@ -39,7 +39,19 @@ export default defineNuxtConfig({
     '@pinia/nuxt',
     '@pinia-plugin-persistedstate/nuxt',
     '@nuxtjs/robots',
+    "nuxt-lodash"
   ],
+  lodash: {
+    prefix: "_",
+    prefixSkip: ["string"],
+    upperAfterPrefix: false,
+    exclude: ["map"],
+    alias: [
+      ["camelCase", "stringToCamelCase"], 
+      ["kebabCase", "stringToKebab"], 
+      ["isDate", "isLodashDate"], 
+    ],
+  },
   piniaPersistedstate: {
     cookieOptions: {
       sameSite: 'strict',
