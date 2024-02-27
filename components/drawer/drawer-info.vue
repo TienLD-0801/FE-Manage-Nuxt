@@ -87,7 +87,7 @@
                 </template>
               </v-expansion-panel-title>
               <v-expansion-panel-text>
-                {{ descriptionPrevious.length ? descriptionPrevious : "No description" }}
+                {{ descriptionGroup.length ? descriptionGroup : "No description" }}
               </v-expansion-panel-text>
             </v-expansion-panel>
             <v-icon class="description-icon" icon="mdi-text-box-edit-outline"></v-icon>
@@ -103,8 +103,6 @@
                     <CreateGroupChatPopup
                       mode="add-more"
                       :availableMembers="memberMapList"
-                      :availableName="fullName"
-                      :availableAvatar="$state.currentTab.group?.avatar"
                       v-if="expanded"
                       :onClose="(name, members) => updateMemberMapList(name, members)"
                     />
@@ -150,6 +148,7 @@
 <script lang="ts" setup>
 defineEmits(["on-audio-called", "on-video-called"]);
 import {
+DocumentReference,
   collection,
   doc,
   getDoc,
@@ -157,9 +156,10 @@ import {
   query,
   updateDoc,
   where,
+type DocumentData,
 } from "firebase/firestore";
 import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
-const { $state } = useNavigatorTabStore();
+const { $state, group, updateGroup } = useGroupStore();
 const { $firestore } = useNuxtApp();
 const dialog = ref<boolean>(false);
 const rail = ref<boolean>(false);
@@ -194,51 +194,55 @@ const infoGroup = ref<TMessageGroup>({
 });
 
 const descriptionGroup = computed((): string => {
-  return $state.currentTab.group?.description || "";
+  return $state.group?.description || "";
 });
 
-const descriptionPrevious = ref<string>(descriptionGroup.value);
 const descriptionContent = ref<string>(descriptionGroup.value);
 
 const getMembers = () => {
-  const memberTemp: any = [];
+  const memberTemp: TProfile[] = [];
   const qChats = query(
     collection($firestore, FIRESTORE_PATH.chat_collection),
     where("is_approved", "==", true),
     where("is_canceled", "==", false)
   );
 
-  onSnapshot(qChats, () => {
-    $state.currentTab.group?.admin_refs.length > 0 &&
-      $state.currentTab.group?.admin_refs.forEach(async (ref: any) => {
-        const memberInfo = await getDoc(ref);
-        if (memberInfo.data()) {
-          memberTemp.push({
-            ...(memberInfo.data() as TProfile),
-            role: "admin",
+  onSnapshot(qChats, (snapShot) => {
+    snapShot.forEach((infoRef) => {
+      if (route.params.id === infoRef.data().group_id) {
+        infoRef.data().admin_refs.length > 0 &&
+          infoRef.data().admin_refs.forEach(async (ref: DocumentReference<unknown, DocumentData>) => {
+            const memberInfo = await getDoc(ref);
+            if (memberInfo.data()) {
+              memberTemp.push({
+                ...(memberInfo.data() as TProfile),
+                role: "admin",
+              });
+            }
           });
-        }
-      });
 
-    $state.currentTab.group?.member_refs.length > 0 &&
-      $state.currentTab.group?.member_refs.forEach(async (ref: any) => {
-        const memberInfo = await getDoc(ref);
-        if (memberInfo.data()) {
-          memberTemp.push({
-            ...(memberInfo.data() as TProfile),
-            role: "member",
+        infoRef.data().member_refs.length > 0 &&
+          infoRef.data().member_refs.forEach(async (ref: DocumentReference<unknown, DocumentData>) => {
+            const memberInfo = await getDoc(ref);
+            if (memberInfo.data()) {
+              memberTemp.push({
+                ...(memberInfo.data() as TProfile),
+                role: "member",
+              });
+            }
           });
-        }
-      });
+      }
+    });
   });
 
   setTimeout(() => {
-    memberMapList.value = memberTemp;
+    const arrayCheckDuplicate = _uniqBy(memberTemp, "id");
+    memberMapList.value = arrayCheckDuplicate;
   }, 500);
 };
 
 const handleOpenEditDescriptionPopup = () => {
-  descriptionContent.value = descriptionPrevious.value;
+  descriptionContent.value = $state.group?.description!;
 };
 
 const closePopup = () => {
@@ -250,9 +254,8 @@ const updateMemberMapList = (updatedName: string, updatedMembers: TProfile[]) =>
 };
 
 const handleSaveDescription = async () => {
-  if (!route.params.id.toString()) {
-    return;
-  }
+  if (!route.params.id.toString()) return;
+
   try {
     await updateDoc(
       doc($firestore, FIRESTORE_PATH.chat_collection, route.params.id.toString()),
@@ -260,7 +263,11 @@ const handleSaveDescription = async () => {
         description: descriptionContent.value,
       }
     );
-    descriptionPrevious.value = descriptionContent.value;
+
+    updateGroup({
+      ...group!,
+      description: descriptionContent.value,
+    });
 
     console.log("Save description successfully");
   } catch (err) {
@@ -291,14 +298,9 @@ const fullName = computed(() => {
   return name && name;
 });
 
-const currentGroup = computed(() => $state.currentTab?.group);
-
 watchEffect(() => {
-  getProfileUserChat();
-});
-
-watch(currentGroup, () => {
   getMembers();
+  getProfileUserChat();
 });
 </script>
 
@@ -336,7 +338,7 @@ watch(currentGroup, () => {
   width: 100%;
 }
 
-/* Keyframes cho hiệu ứng chạy chữ */
+/* Keyframes for character */
 @keyframes slide {
   0% {
     transform: translateX(80%);

@@ -209,8 +209,8 @@ const getAllProfileOfAdminsAndMembers = async () => {
     ...adminAndMemberRef.data()?.member_refs,
   ];
   listRefs.forEach(async (e, index) => {
-    const profileRefDetail: any = await getDoc(e);
-    tempProfiles.push(profileRefDetail.data());
+    const profileRefDetail = await getDoc(e);
+    tempProfiles.push(profileRefDetail.data() as TProfile);
 
     if (index === listRefs.length - 1) {
       adminsAndMembersProfiles.value = tempProfiles;
