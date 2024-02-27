@@ -14,6 +14,14 @@ export default defineNuxtConfig({
           href: '/chat.ico',
           sizes: '180x180',
         },
+        {
+          rel: "firebase" , 
+          href: "https://firestore.googleapis.com"
+        },
+        {
+          rel: "googleapis" , 
+          href: "https://identitytoolkit.googleapis.com"
+        },
       ],
     },
   },
