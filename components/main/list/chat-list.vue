@@ -2,7 +2,11 @@
   <v-list class="chat-list-container" item-props lines="three">
     <div class="no-chat-list" v-if="!chatListMapping.length">
       <p>Let's add friend to have happy conservations.</p>
-      <div class="intro-chat" />
+      <div class="intro-chat">
+        <video autoplay loop muted playsinline width="100%" height="100%">
+          <source src="/imgs/chat-intro.mp4" type="video/mp4" />
+        </video>
+      </div>
     </div>
     <ChatBox
       v-for="(item, i) in chatListMapping"
@@ -150,7 +154,8 @@ watchEffect(() => {
 
 <style lang="scss" scoped>
 .chat-list-container {
-  padding-top: 0px !important;
+  padding: 0px;
+  margin-top: 20px;
 }
 
 .chat-list-container .no-chat-list {
@@ -158,18 +163,12 @@ watchEffect(() => {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding-top: 15px !important;
+  gap: 20px;
 }
 
 .chat-list-container .intro-chat {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  width: 200px;
-  height: 250px;
-  background-image: url("/imgs/chat-intro.gif");
+  width: 80%;
+  height: 80%;
   background-size: contain;
-  margin-top: 20px;
 }
 </style>

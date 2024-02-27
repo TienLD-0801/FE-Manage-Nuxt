@@ -17,6 +17,14 @@ export default defineNuxtConfig({
       ],
     },
   },
+  vite: {
+    build: {
+      chunkSizeWarningLimit: 1600,
+      minify: 'terser',
+      cssMinify: true,
+      manifest: true,
+    },
+  },
   components: [
     {
       path: '~/components',
