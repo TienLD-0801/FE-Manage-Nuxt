@@ -27,11 +27,11 @@
   </v-list>
 </template>
 <script lang="ts" setup>
-import { collection, getDoc, onSnapshot, query, where } from "firebase/firestore";
+import { collection, doc, getDoc, onSnapshot, query, where, type DocumentData, DocumentReference } from "firebase/firestore";
 import { DEFAULT_AVATAR_GROUP } from "~/shared/constant/constant";
 import { FIRESTORE_PATH } from "~/shared/constant/firebase-store";
 import { PATH_ROUTER } from "~/shared/constant/router";
-
+const { updateGroup } = useGroupStore();
 const { $firestore } = useNuxtApp();
 const { $state } = useProfileStore();
 const chatListMapping = ref<TMessageGroup[]>([]);
@@ -55,9 +55,15 @@ const handleClickItemUser = (item: TMessageGroup) => {
     item.group_id.split("-")[0] === $state.profile.id
       ? item.group_id.split("-")[1]
       : item.group_id.split("-")[0];
+  getGroupInfo(item.group_id);
   navigateTo(
     `${PATH_ROUTER.message}/${item.group_id}?type=${item.group_type}&answerer=${id}`
   );
+};
+
+const getGroupInfo = async (id: string) => {
+  const infoGroup = await getDoc(doc($firestore, FIRESTORE_PATH.chat_collection, id));
+  updateGroup(infoGroup.data() as TMessageGroup);
 };
 
 const getListUserChat = () => {
@@ -90,13 +96,13 @@ const getListUserChat = () => {
         }
       } else {
         const adminList: TProfile[] = [];
-        chatItem.data().admin_refs.forEach(async (e: any) => {
-          const adminItem = await getDoc(e);
+        chatItem.data().admin_refs.forEach(async (ref: DocumentReference<unknown, DocumentData>) => {
+          const adminItem = await getDoc(ref);
           adminList.push(adminItem.data() as TProfile);
         });
         const memberList: TProfile[] = [];
-        chatItem.data().member_refs.forEach(async (e: any) => {
-          const memberItem = await getDoc(e);
+        chatItem.data().member_refs.forEach(async (ref: DocumentReference<unknown, DocumentData>) => {
+          const memberItem = await getDoc(ref);
           memberList.push(memberItem.data() as TProfile);
         });
         const lastMessages = chatItem.get("last_message");
