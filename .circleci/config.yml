@@ -9,10 +9,6 @@ jobs:
       - image: node:latest
     steps:
       - checkout
-      - cypress/install:
-          working-directory: frontend-manage-nuxt
-          cypress-cache-key: cypress-cache-{{ arch }}-{{ checksum "frontend-manage-nuxt/package.json" }}
-          include-branch-in-node-cache-key: true
       - run:
           name: Installing yarn
           command: yarn   
@@ -30,9 +26,6 @@ jobs:
               echo "CLOUD_API_KEY=$CLOUD_API_KEY" >>.env
               echo "CLOUD_NAME=$CLOUD_NAME" >>.env
               echo "UPLOAD_PRESET=$UPLOAD_PRESET" >>.env
-      - cypress/run-tests:
-          working-directory: frontend-manage-nuxt
-          cypress-command: "yarn cypress run --component --parallel --record --group 2x-chrome --browser chrome"        
       - run:
           name: Build build source
           command: yarn generate
@@ -55,7 +48,13 @@ jobs:
 workflows:
   frontend-manage-pipeline:
     jobs:
+      - cypress/run:
+          cypress-command: yarn cypress run --browser chrome
+          install-browsers: true
+          start-command: yarn dev
       - build_project:
+          requires:
+            - cypress/run
           context:
             - frontend-env
           filters:
