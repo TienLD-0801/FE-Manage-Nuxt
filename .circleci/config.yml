@@ -26,10 +26,6 @@ jobs:
               echo "CLOUD_API_KEY=$CLOUD_API_KEY" >>.env
               echo "CLOUD_NAME=$CLOUD_NAME" >>.env
               echo "UPLOAD_PRESET=$UPLOAD_PRESET" >>.env
-      - cypress/run:
-          cypress-command: yarn cypress run --browser chrome
-          install-browsers: true
-          start-command: yarn dev
       - run:
           name: Build build source
           command: yarn generate
@@ -52,7 +48,13 @@ jobs:
 workflows:
   frontend-manage-pipeline:
     jobs:
+      - cypress/run:
+          cypress-command: yarn cypress run --browser chrome
+          install-browsers: true
+          start-command: yarn dev
       - build_project:
+          requires:
+            - cypress/run
           context:
             - frontend-env
           filters:
