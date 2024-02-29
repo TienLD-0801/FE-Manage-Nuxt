@@ -1,7 +1,7 @@
 version: 2.1
 orbs:
   aws-cli: circleci/aws-cli@4.1.2
-  cypress: cypress-io/cypress@3.3.0
+  cypress: cypress-io/cypress@3
 jobs:
   build_project:
     working_directory: ~/frontend-manage-nuxt
@@ -9,6 +9,10 @@ jobs:
       - image: node:latest
     steps:
       - checkout
+      - cypress/install:
+          working-directory: frontend-manage-nuxt
+          cypress-cache-key: cypress-cache-{{ arch }}-{{ checksum "frontend-manage-nuxt/package.json" }}
+          include-branch-in-node-cache-key: true
       - run:
           name: Installing yarn
           command: yarn   
@@ -26,10 +30,9 @@ jobs:
               echo "CLOUD_API_KEY=$CLOUD_API_KEY" >>.env
               echo "CLOUD_NAME=$CLOUD_NAME" >>.env
               echo "UPLOAD_PRESET=$UPLOAD_PRESET" >>.env
-      - cypress/run: 
-          start-command: yarn dev
-          cypress-command: yarn cypress run --parallel --record --group all tests
-          parallelism: 4        
+      - cypress/run-tests:
+          working-directory: frontend-manage-nuxt
+          cypress-command: "yarn cypress run --component --parallel --record --group 2x-chrome --browser chrome"        
       - run:
           name: Build build source
           command: yarn generate
