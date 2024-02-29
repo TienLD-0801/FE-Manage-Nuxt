@@ -7,7 +7,8 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "test-e2e" : "cypress run"
   },
   "devDependencies": {
     "@nuxt/devtools": "latest",
@@ -23,6 +24,7 @@
     "@mdi/font": "^7.4.47",
     "@nuxtjs/robots": "^3.0.0",
     "@pinia/nuxt": "^0.5.1",
+    "cypress": "^13.6.6",
     "firebase": "^10.7.1",
     "sass": "^1.69.7",
     "vee-validate": "^4.12.4",
