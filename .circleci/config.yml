@@ -1,6 +1,7 @@
 version: 2.1
 orbs:
   aws-cli: circleci/aws-cli@4.1.2
+  cypress: cypress-io/cypress@3.3.0
 jobs:
   build_project:
     working_directory: ~/frontend-manage-nuxt
@@ -10,7 +11,7 @@ jobs:
       - checkout
       - run:
           name: Installing yarn
-          command: yarn
+          command: yarn   
       - run:
           name: Config environment variable
           command: |
@@ -25,6 +26,10 @@ jobs:
               echo "CLOUD_API_KEY=$CLOUD_API_KEY" >>.env
               echo "CLOUD_NAME=$CLOUD_NAME" >>.env
               echo "UPLOAD_PRESET=$UPLOAD_PRESET" >>.env
+      - cypress/run: 
+          start-command: 'yarn dev'
+          cypress-command: 'yarn cypress run --parallel --record --group all tests'
+          parallelism: 4        
       - run:
           name: Build build source
           command: yarn generate
