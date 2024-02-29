@@ -48,8 +48,6 @@ workflows:
   frontend-manage-pipeline:
     jobs:
       - build_project:
-          requires:
-            - cypress/run
           context:
             - frontend-env
           filters:
