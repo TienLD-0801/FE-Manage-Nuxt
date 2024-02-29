@@ -27,8 +27,8 @@ jobs:
               echo "CLOUD_NAME=$CLOUD_NAME" >>.env
               echo "UPLOAD_PRESET=$UPLOAD_PRESET" >>.env
       - cypress/run: 
-          start-command: 'yarn dev'
-          cypress-command: 'yarn cypress run --parallel --record --group all tests'
+          start-command: yarn dev
+          cypress-command: yarn cypress run --parallel --record --group all tests
           parallelism: 4        
       - run:
           name: Build build source
