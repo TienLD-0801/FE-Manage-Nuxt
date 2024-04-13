@@ -2,7 +2,7 @@ const path = require('path');
 export default defineNuxtConfig({
   app: {
     head: {
-      title: 'Chatty App',
+      title: 'Chatty App 1',
       htmlAttrs: {
         lang: 'en',
       },
@@ -15,12 +15,12 @@ export default defineNuxtConfig({
           sizes: '180x180',
         },
         {
-          rel: "firebase" , 
-          href: "https://firestore.googleapis.com"
+          rel: 'firebase',
+          href: 'https://firestore.googleapis.com',
         },
         {
-          rel: "googleapis" , 
-          href: "https://identitytoolkit.googleapis.com"
+          rel: 'googleapis',
+          href: 'https://identitytoolkit.googleapis.com',
         },
       ],
     },
@@ -55,17 +55,17 @@ export default defineNuxtConfig({
     '@pinia/nuxt',
     '@pinia-plugin-persistedstate/nuxt',
     '@nuxtjs/robots',
-    "nuxt-lodash"
+    'nuxt-lodash',
   ],
   lodash: {
-    prefix: "_",
-    prefixSkip: ["string"],
+    prefix: '_',
+    prefixSkip: ['string'],
     upperAfterPrefix: false,
-    exclude: ["map"],
+    exclude: ['map'],
     alias: [
-      ["camelCase", "stringToCamelCase"], 
-      ["kebabCase", "stringToKebab"], 
-      ["isDate", "isLodashDate"], 
+      ['camelCase', 'stringToCamelCase'],
+      ['kebabCase', 'stringToKebab'],
+      ['isDate', 'isLodashDate'],
     ],
   },
   piniaPersistedstate: {
