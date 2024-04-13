@@ -2,7 +2,7 @@ const path = require('path');
 export default defineNuxtConfig({
   app: {
     head: {
-      title: 'Chatty App 1',
+      title: 'Chatty App',
       htmlAttrs: {
         lang: 'en',
       },
